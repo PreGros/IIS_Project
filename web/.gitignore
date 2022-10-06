@@ -9,6 +9,10 @@
 /vendor/
 ###< symfony/framework-bundle ###
 
+###> symfony/doctrine ###
+/migrations/
+###< symfony/doctrine ###
+
 ###> symfony/webpack-encore-bundle ###
 /node_modules/
 /public/build/
