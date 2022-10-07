@@ -23,10 +23,10 @@ class Tournament
     #[ORM\Column(type: Types::SMALLINT)]
     private ?int $participantType = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable:true)]
     private ?int $maxTeamMemberCount = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable:true)]
     private ?int $minTeamMemberCount = null;
 
     #[ORM\Column]
@@ -96,7 +96,7 @@ class Tournament
         return $this->maxTeamMemberCount;
     }
 
-    public function setMaxTeamMemberCount(int $maxTeamMemberCount): self
+    public function setMaxTeamMemberCount(?int $maxTeamMemberCount): self
     {
         $this->maxTeamMemberCount = $maxTeamMemberCount;
 
@@ -108,7 +108,7 @@ class Tournament
         return $this->minTeamMemberCount;
     }
 
-    public function setMinTeamMemberCount(int $minTeamMemberCount): self
+    public function setMinTeamMemberCount(?int $minTeamMemberCount): self
     {
         $this->minTeamMemberCount = $minTeamMemberCount;
 
