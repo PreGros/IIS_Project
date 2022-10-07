@@ -20,6 +20,7 @@ class TournamentParticipant
     private ?Team $signedUpTeam = null;
 
     #[ORM\ManyToOne]
+    #[ORM\JoinColumn(referencedColumnName: 'email')]
     private ?User $signedUpUser = null;
 
     #[ORM\ManyToOne]

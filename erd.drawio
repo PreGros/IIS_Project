@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e">
     <diagram id="WnmoWi_7WGoH04XIYKTn" name="Page-1">
-        <mxGraphModel dx="1086" dy="539" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+        <mxGraphModel dx="1053" dy="528" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -289,6 +289,9 @@
                 </mxCell>
                 <mxCell id="143" value="Které hodnoty jsou unique? Zapsat do Entit (unique: true)" style="text;html=1;strokeColor=#A50040;fillColor=#d80073;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontColor=#ffffff;" vertex="1" parent="1">
                     <mxGeometry x="400" y="90" width="160" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="144" value="duration zadává při vytváření turnamentu? Jestli jo a bude všude stejná, tak to přesunout do Tournament" style="text;html=1;strokeColor=#6F0000;fillColor=#a20025;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontColor=#ffffff;" vertex="1" parent="1">
+                    <mxGeometry x="680" y="750" width="230" height="60" as="geometry"/>
                 </mxCell>
             </root>
         </mxGraphModel>

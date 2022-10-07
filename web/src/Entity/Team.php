@@ -14,14 +14,14 @@ class Team
     private ?int $id = null;
 
     // TODO: nema byt unique? - mozna i jako <<PK>>
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, unique: true)]
     private ?string $name = null;
 
     #[ORM\Column(length: 500, nullable: true)]
     private ?string $imagePath = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(referencedColumnName: 'email', nullable: false)]
     private ?User $leader = null;
 
     public function getId(): ?int
