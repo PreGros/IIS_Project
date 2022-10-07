@@ -20,6 +20,10 @@ class Team
     #[ORM\Column(length: 500, nullable: true)]
     private ?string $imagePath = null;
 
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $leader = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -45,6 +49,18 @@ class Team
     public function setImagePath(?string $imagePath): self
     {
         $this->imagePath = $imagePath;
+
+        return $this;
+    }
+
+    public function getLeader(): ?User
+    {
+        return $this->leader;
+    }
+
+    public function setLeader(?User $leader): self
+    {
+        $this->leader = $leader;
 
         return $this;
     }

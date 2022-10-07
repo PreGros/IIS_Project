@@ -50,6 +50,24 @@ class Tournament
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $registrationDateEnd = null;
 
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?WinCondition $winCondition = null;
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?MatchingType $matchingType = null;
+
+    #[ORM\ManyToOne]
+    private ?TournamentType $tournamentType = null;
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $createdBy = null;
+
+    #[ORM\ManyToOne]
+    private ?User $approvedBy = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -195,6 +213,66 @@ class Tournament
     public function setRegistrationDateEnd(\DateTimeInterface $registrationDateEnd): self
     {
         $this->registrationDateEnd = $registrationDateEnd;
+
+        return $this;
+    }
+
+    public function getWinCondition(): ?WinCondition
+    {
+        return $this->winCondition;
+    }
+
+    public function setWinCondition(?WinCondition $winCondition): self
+    {
+        $this->winCondition = $winCondition;
+
+        return $this;
+    }
+
+    public function getMatchingType(): ?MatchingType
+    {
+        return $this->matchingType;
+    }
+
+    public function setMatchingType(?MatchingType $matchingType): self
+    {
+        $this->matchingType = $matchingType;
+
+        return $this;
+    }
+
+    public function getTournamentType(): ?TournamentType
+    {
+        return $this->tournamentType;
+    }
+
+    public function setTournamentType(?TournamentType $tournamentType): self
+    {
+        $this->tournamentType = $tournamentType;
+
+        return $this;
+    }
+
+    public function getCreatedBy(): ?User
+    {
+        return $this->createdBy;
+    }
+
+    public function setCreatedBy(?User $createdBy): self
+    {
+        $this->createdBy = $createdBy;
+
+        return $this;
+    }
+
+    public function getApprovedBy(): ?User
+    {
+        return $this->approvedBy;
+    }
+
+    public function setApprovedBy(?User $approvedBy): self
+    {
+        $this->approvedBy = $approvedBy;
 
         return $this;
     }

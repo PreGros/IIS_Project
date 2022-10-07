@@ -20,6 +20,14 @@ class MatchParticipant
     #[ORM\Column(type: Types::TIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $completionTime = null;
 
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?TournamentMatch $tournamentMatch = null;
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?TournamentParticipant $tournamentParticipant = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -45,6 +53,30 @@ class MatchParticipant
     public function setCompletionTime(?\DateTimeInterface $completionTime): self
     {
         $this->completionTime = $completionTime;
+
+        return $this;
+    }
+
+    public function getTournamentMatch(): ?TournamentMatch
+    {
+        return $this->tournamentMatch;
+    }
+
+    public function setTournamentMatch(?TournamentMatch $tournamentMatch): self
+    {
+        $this->tournamentMatch = $tournamentMatch;
+
+        return $this;
+    }
+
+    public function getTournamentParticipant(): ?TournamentParticipant
+    {
+        return $this->tournamentParticipant;
+    }
+
+    public function setTournamentParticipant(?TournamentParticipant $tournamentParticipant): self
+    {
+        $this->tournamentParticipant = $tournamentParticipant;
 
         return $this;
     }

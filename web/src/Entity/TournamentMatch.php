@@ -20,6 +20,13 @@ class TournamentMatch
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $startTime = null;
 
+    #[ORM\ManyToOne(targetEntity: self::class)]
+    private ?self $childMatch = null;
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Tournament $tournament = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -45,6 +52,30 @@ class TournamentMatch
     public function setStartTime(\DateTimeInterface $startTime): self
     {
         $this->startTime = $startTime;
+
+        return $this;
+    }
+
+    public function getChildMatch(): ?self
+    {
+        return $this->childMatch;
+    }
+
+    public function setChildMatch(?self $childMatch): self
+    {
+        $this->childMatch = $childMatch;
+
+        return $this;
+    }
+
+    public function getTournament(): ?Tournament
+    {
+        return $this->tournament;
+    }
+
+    public function setTournament(?Tournament $tournament): self
+    {
+        $this->tournament = $tournament;
 
         return $this;
     }
