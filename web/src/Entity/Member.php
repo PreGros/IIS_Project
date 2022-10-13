@@ -23,7 +23,7 @@ class Member
 
     #[ORM\Id]
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(referencedColumnName: 'email', nullable: false)]
+    #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
 
     #[ORM\Id]

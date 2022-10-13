@@ -62,11 +62,10 @@ class Tournament
     private ?TournamentType $tournamentType = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(referencedColumnName: 'email', nullable: false)]
+    #[ORM\JoinColumn(nullable: false)]
     private ?User $createdBy = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(referencedColumnName: 'email')]
     private ?User $approvedBy = null;
 
     public function getId(): ?int

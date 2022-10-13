@@ -21,7 +21,7 @@ class Team
     private ?string $imagePath = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(referencedColumnName: 'email', nullable: false)]
+    #[ORM\JoinColumn(nullable: false)]
     private ?User $leader = null;
 
     public function getId(): ?int
