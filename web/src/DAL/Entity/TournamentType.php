@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Entity;
+namespace App\DAL\Entity;
 
-use App\Repository\RoleRepository;
+use App\DAL\Repository\TournamentTypeRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: RoleRepository::class)]
-class Role
+#[ORM\Entity(repositoryClass: TournamentTypeRepository::class)]
+class TournamentType
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -15,9 +15,6 @@ class Role
 
     #[ORM\Column(length: 255, unique: true)]
     private ?string $name = null;
-
-    #[ORM\Column(length: 2000, nullable: true)]
-    private ?string $description = null;
 
     public function getId(): ?int
     {
@@ -32,18 +29,6 @@ class Role
     public function setName(string $name): self
     {
         $this->name = $name;
-
-        return $this;
-    }
-
-    public function getDescription(): ?string
-    {
-        return $this->description;
-    }
-
-    public function setDescription(?string $description): self
-    {
-        $this->description = $description;
 
         return $this;
     }

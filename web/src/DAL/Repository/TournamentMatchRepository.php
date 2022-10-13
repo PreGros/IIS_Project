@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Repository;
+namespace App\DAL\Repository;
 
-use App\Entity\TournamentMatch;
+use App\DAL\Entity\TournamentMatch;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 

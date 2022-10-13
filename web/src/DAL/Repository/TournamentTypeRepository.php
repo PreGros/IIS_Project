@@ -1,27 +1,27 @@
 <?php
 
-namespace App\Repository;
+namespace App\DAL\Repository;
 
-use App\Entity\TournamentParticipant;
+use App\DAL\Entity\TournamentType;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<TournamentParticipant>
+ * @extends ServiceEntityRepository<TournamentType>
  *
- * @method TournamentParticipant|null find($id, $lockMode = null, $lockVersion = null)
- * @method TournamentParticipant|null findOneBy(array $criteria, array $orderBy = null)
- * @method TournamentParticipant[]    findAll()
- * @method TournamentParticipant[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method TournamentType|null find($id, $lockMode = null, $lockVersion = null)
+ * @method TournamentType|null findOneBy(array $criteria, array $orderBy = null)
+ * @method TournamentType[]    findAll()
+ * @method TournamentType[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class TournamentParticipantRepository extends ServiceEntityRepository
+class TournamentTypeRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, TournamentParticipant::class);
+        parent::__construct($registry, TournamentType::class);
     }
 
-    public function save(TournamentParticipant $entity, bool $flush = false): void
+    public function save(TournamentType $entity, bool $flush = false): void
     {
         $this->getEntityManager()->persist($entity);
 
@@ -30,7 +30,7 @@ class TournamentParticipantRepository extends ServiceEntityRepository
         }
     }
 
-    public function remove(TournamentParticipant $entity, bool $flush = false): void
+    public function remove(TournamentType $entity, bool $flush = false): void
     {
         $this->getEntityManager()->remove($entity);
 
@@ -40,7 +40,7 @@ class TournamentParticipantRepository extends ServiceEntityRepository
     }
 
 //    /**
-//     * @return TournamentParticipant[] Returns an array of TournamentParticipant objects
+//     * @return TournamentType[] Returns an array of TournamentType objects
 //     */
 //    public function findByExampleField($value): array
 //    {
@@ -54,7 +54,7 @@ class TournamentParticipantRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?TournamentParticipant
+//    public function findOneBySomeField($value): ?TournamentType
 //    {
 //        return $this->createQueryBuilder('t')
 //            ->andWhere('t.exampleField = :val')

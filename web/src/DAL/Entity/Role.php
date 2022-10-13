@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Entity;
+namespace App\DAL\Entity;
 
-use App\Repository\MatchingTypeRepository;
+use App\DAL\Repository\RoleRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: MatchingTypeRepository::class)]
-class MatchingType
+#[ORM\Entity(repositoryClass: RoleRepository::class)]
+class Role
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -15,6 +15,9 @@ class MatchingType
 
     #[ORM\Column(length: 255, unique: true)]
     private ?string $name = null;
+
+    #[ORM\Column(length: 2000, nullable: true)]
+    private ?string $description = null;
 
     public function getId(): ?int
     {
@@ -29,6 +32,18 @@ class MatchingType
     public function setName(string $name): self
     {
         $this->name = $name;
+
+        return $this;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): self
+    {
+        $this->description = $description;
 
         return $this;
     }

@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Entity;
+namespace App\DAL\Entity;
 
-use App\Repository\MatchParticipantRepository;
+use App\DAL\Repository\MatchParticipantRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 

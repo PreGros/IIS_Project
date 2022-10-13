@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Entity;
+namespace App\DAL\Entity;
 
-use App\Repository\TeamRepository;
+use App\DAL\Repository\TeamRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: TeamRepository::class)]

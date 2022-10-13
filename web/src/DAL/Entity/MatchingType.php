@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Entity;
+namespace App\DAL\Entity;
 
-use App\Repository\TournamentTypeRepository;
+use App\DAL\Repository\MatchingTypeRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: TournamentTypeRepository::class)]
-class TournamentType
+#[ORM\Entity(repositoryClass: MatchingTypeRepository::class)]
+class MatchingType
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
