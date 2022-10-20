@@ -1,7 +1,6 @@
 // loads the jquery package from node_modules
 import $ from 'jquery';
 
-
-$(document).ready(function() {
-    $('body').prepend('<h1> here </h1>');
+document.addEventListener('ready', () => {
+    document.querySelector('#myTable').insertAdjacentText('beforebegin', '<h1>here</h1>');
 });
