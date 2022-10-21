@@ -8,7 +8,7 @@
     {% endif %}
 
     {{ form_start(form) }}
-        {{ form_row(form.username) }}
+        {{ form_row(form.email) }}
         {{ form_row(form.password) }}
         <input type="hidden" name="_target_path" value="/datatable"/>
         {{ form_row(form.send, {

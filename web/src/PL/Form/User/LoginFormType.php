@@ -17,7 +17,7 @@ class LoginFormType extends AbstractType
         parent::buildForm($builder, $options);
 
         $builder
-            ->add('username', EmailType::class)
+            ->add('email', EmailType::class)
             ->add('password', PasswordType::class)
             ->add('send', SubmitType::class)
         ;
