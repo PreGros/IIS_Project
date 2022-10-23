@@ -1,6 +1,6 @@
 <?php
 
-use \ReflectionClass;
+namespace App\BL\Util;
 
 class AutoMapper{
 
@@ -22,17 +22,17 @@ class AutoMapper{
     {
         if (is_string($dst)){
             if (!class_exists($dst)){
-                throw new InvalidArgumentException("Invalid class name");
+                throw new \InvalidArgumentException("Invalid class name");
             }
-            $dst = (is_object($srcObject) ? self::$entities[spl_object_id($srcObject)] : null) ?? new $dst();
+            $dst = is_object($srcObject) ? self::$entities[spl_object_id($srcObject)] ?? new $dst() : new $dst();
         }
         
-        $dstRC = new ReflectionClass($dst);
+        $dstRC = new \ReflectionClass($dst);
         
         if (is_object($srcObject)){
-            $srcRC = new ReflectionClass($srcObject);
+            $srcRC = new \ReflectionClass($srcObject);
             $mapped = self::mapObjectFromGetters($srcRC, $dstRC, $srcObject, $dst, $map);
-            self::mapObjectFromProperties($srcRC, $dstRC, $srcObject, $dst, $map, $mapped);
+            self::mapObjectFromProperties($srcRC, $dstRC, $srcObject, $dst, $mapped, $map);
 
             if ($trackEntity){
                 self::$entities[spl_object_id($dst)] = $srcObject;
@@ -52,7 +52,7 @@ class AutoMapper{
         ?array $map = null): array
     {
         $mapped = [];
-        foreach ($srcRC->getMethods(ReflectionMethod::IS_PUBLIC) as $getter){
+        foreach ($srcRC->getMethods(\ReflectionMethod::IS_PUBLIC) as $getter){
             if ($getter->isAbstract() || $getter->isStatic() || !str_starts_with($getter->getShortName(), 'get')){
                 continue;
             }
@@ -81,8 +81,8 @@ class AutoMapper{
         \ReflectionClass $dstRC,
         object $srcObject,
         object $dstObject,
-        ?array $map = null,
-        array $mapped)
+        array $mapped,
+        ?array $map = null)
     {
         foreach ($srcRC->getProperties() as $property){
             $propName = $property->getName();

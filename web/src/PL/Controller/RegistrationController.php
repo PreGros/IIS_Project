@@ -24,6 +24,7 @@ class RegistrationController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $userManager->registerUser($user, $form->get('plainPassword')->getData());
 
+            $this->addFlash('success', 'Your email address has been verified.');
             return $this->redirectToRoute('datatable');
         }
 

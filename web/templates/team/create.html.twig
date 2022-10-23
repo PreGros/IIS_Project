@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Create team{% endblock %}
+
+{% block body %}
+    {% for flash_error in app.flashes() %}
+        <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
+    {% endfor %}
+
+    <h1>Create team</h1>
+
+    {{ form_start(teamForm) }}
+        {{ form_row(teamForm.name) }}
+        {{ form_row(teamForm.image) }}
+        {{ form_row(teamForm.submit, {
+            label: 'Submit'
+        }) }}
+    {{ form_end(teamForm) }}
+{% endblock %}

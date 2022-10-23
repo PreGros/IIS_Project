@@ -23,8 +23,8 @@ console.log('hello');
 window.$ = window.jQuery = require('jquery'); //changed
 require('bootstrap');
 require('datatables.net-bs5');
-require('datatables.net-bs5');
 require('datatables.net-autofill-bs5');
+require('datatables.net-buttons');
 require('datatables.net-buttons-bs5');
 require('datatables.net-buttons/js/buttons.colVis.js');
 require('datatables.net-colreorder-bs5');
@@ -115,7 +115,7 @@ $.fn.initDataTables = function(config, options) {
             }
 
             root.html(data.template);
-            dt = $('table', root).DataTable(dtOpts);
+            var dt = $('table', root).DataTable(dtOpts);
             if (config.state !== 'none') {
                 dt.on('draw.dt', function(e) {
                     var data = $.param(dt.state()).split('&');
@@ -292,6 +292,71 @@ function deparam(params, coerce) {
 }
 
 window.addEventListener('load', () => {
-    var settings = $('#myTable').data('settings');
-    $('#myTable').initDataTables(settings);
+    $('[name^="table"], [name$="table"]').each((index, element) => {
+            $(element).initDataTables($(element).data('settings'), {
+                searching: true,
+                ordering: true,
+                dom: 'Bfrtip',
+        buttons: [
+            {
+                text: 'Reinitialize',
+                action: function (e, dt, node, config) {
+                    location.reload();
+                }
+            },
+            {
+                extend: 'columnsToggle'
+            }
+        ],
+        initComplete: function(settings, json) {
+            var api = this.api();
+
+            // Get number of total records
+            // var recordsTotal = api.context[0].fnRecordsTotal();
+            // $('#events_list h5 span').text(recordsTotal);
+
+            // Hide some columns
+            //api.columns([4,9]).visible(false);
+
+            // Create tr filter
+            // var tr = $('<tr id="filter_search"></tr>');
+            // // Count number of cells in a row
+            // var nbCells = document.getElementById('dt').rows[0].cells.length;
+            // // Generate cells to #filter_search row
+            // for (var i = 0; i < nbCells; i++) {
+            //     // onclick="stopPropagation(event);"
+            //     tr.append('<th><input type="search" placeholder="Search"></th>');
+            // }
+
+            // var firstHeaderRow = $('tr', api.table().header());
+            // tr.insertAfter(firstHeaderRow);
+
+            // $("#filter_search th").eq(5).find('input').datepicker({
+            //     autoclose: true,
+            //     todayHighlight: true,
+            //     language: "fr",
+            //     dateFormat: "dd/mm/yy",
+            // });
+
+            $("#filter_search input").on('keyup change', function(e) {
+                if (e.keyCode == 13) {
+                    api
+                        .column($(this).parent().index()+':visible')
+                        .search(this.value)
+                        .draw();
+                }
+            });
+
+            $('.buttons-columnVisibility').each(function(index, element) {
+                $(element).click(function() {
+                    if (api.column(index).visible() === true) {
+                        $('#filter_search th').eq(index).show();
+                    } else {
+                        $('#filter_search th').eq(index).hide();
+                    }
+                });
+            });
+        }
+    });
+    });
 });

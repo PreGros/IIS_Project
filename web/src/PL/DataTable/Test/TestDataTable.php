@@ -6,6 +6,7 @@ use Omines\DataTablesBundle\DataTable;
 use Omines\DataTablesBundle\DataTableFactory;
 use Omines\DataTablesBundle\Adapter\ArrayAdapter;
 use Omines\DataTablesBundle\Column\TextColumn;
+use Omines\DataTablesBundle\Filter\TextFilter;
 
 class TestDataTable
 {
@@ -19,8 +20,8 @@ class TestDataTable
     public function create(): DataTable
     {
         return $this->factory->create()
-            ->add('firstName', TextColumn::class, ['label' => 'Jméno', 'searchable' => true])
-            ->add('lastName', TextColumn::class, ['label' => 'Příjmení', 'searchable' => true])
+            ->add('firstName', TextColumn::class, ['label' => 'Jméno', 'searchable' => true, 'orderable' => true])
+            ->add('lastName', TextColumn::class, ['label' => 'Příjmení', 'searchable' => true, 'orderable' => true])
             ->createAdapter(ArrayAdapter::class, [
                 ['firstName' => 'Test', 'lastName' => 'Data'],
                 ['firstName' => 'TestData', 'lastName' => 'DataTest'],

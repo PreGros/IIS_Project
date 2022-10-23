@@ -2,11 +2,12 @@
 
 namespace App\PL\Controller;
 
-use App\PL\DataTable\Test\TestDataTable;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+
+use App\PL\DataTable\Test\TestDataTable;
 
 class HomeController extends AbstractController
 {
@@ -21,7 +22,7 @@ class HomeController extends AbstractController
     }
     
     #[Route('/datatable', name: 'datatable')]
-    public function showAction(Request $request, TestDataTable $dataTable)
+    public function showAction(Request $request, TestDataTable $dataTable): Response
     {
         $table = $dataTable->create()->handleRequest($request);
 
