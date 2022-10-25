@@ -12,7 +12,7 @@ datatables:
         className: 'table table-striped table-bordered table-hover data-table'
 
         # If and where to enable the DataTables Filter module
-        columnFilter: 'both' # One of "thead"; "tfoot"; "both"; null
+        columnFilter: 'thead' # One of "thead"; "tfoot"; "both"; null
 
     # You can for example override this to "tables" to keep the translation domains separated nicely
     translation_domain: 'messages'

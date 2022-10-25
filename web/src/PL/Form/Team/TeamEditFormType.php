@@ -12,7 +12,7 @@ use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\File;
 
-class TeamCreateFormType extends AbstractType
+class TeamEditFormType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
@@ -21,8 +21,8 @@ class TeamCreateFormType extends AbstractType
             ->add('image', FileType::class, [
                 'label' => 'Image (PNG/JPG/JPEG picture)',
 
-                // // unmapped means that this field is not associated to any entity property
-                // 'mapped' => false,
+                // unmapped means that this field is not associated to any entity property
+                'mapped' => false,
 
                 // make it optional so you don't have to re-upload the PDF file
                 // every time you edit the Product details

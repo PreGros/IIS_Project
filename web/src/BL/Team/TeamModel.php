@@ -2,11 +2,15 @@
 
 namespace App\BL\Team;
 
+use Symfony\Component\HttpFoundation\File\File;
+
 class TeamModel
 {
     private string $name;
 
     private string $imagePath;
+
+    private ?File $image = null;
 
     public function getName(): string
     {
@@ -18,13 +22,23 @@ class TeamModel
         $this->name = $val;
     }
 
-    public function getImagePath(): string
+    public function getImagePath(): ?string
     {
-        return $this->imagePath;
+        return $this->imagePath ?? null;
     }
 
     public function setImagePath(string $val)
     {
         $this->imagePath = $val;
+    }
+
+    public function getImage(): ?File
+    {
+        return $this->image;
+    }
+
+    public function setImage(?File $val)
+    {
+        $this->image = $val;
     }
 }

@@ -6,7 +6,6 @@ use Omines\DataTablesBundle\DataTable;
 use Omines\DataTablesBundle\DataTableFactory;
 use Omines\DataTablesBundle\Adapter\ArrayAdapter;
 use Omines\DataTablesBundle\Column\TextColumn;
-use Omines\DataTablesBundle\Filter\TextFilter;
 
 class TestDataTable
 {

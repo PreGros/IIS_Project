@@ -27,7 +27,7 @@ class Member
     private ?User $user = null;
 
     #[ORM\Id]
-    #[ORM\ManyToOne]
+    #[ORM\ManyToOne(inversedBy: 'members')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Team $team = null;
 

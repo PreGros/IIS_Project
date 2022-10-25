@@ -1,0 +1,14 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Teams{% endblock %}
+
+{% block body %}
+    {# {% for flash_error in app.flashes() %}
+        <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
+    {% endfor %} #}
+
+    <h1>Teams</h1>
+
+    <div name="team-table" data-settings='{{ datatable_settings(datatable) }}'>Loading...</div>
+    
+{% endblock %}

@@ -3,6 +3,8 @@
 namespace App\DAL\Entity;
 
 use App\DAL\Repository\TeamRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: TeamRepository::class)]
@@ -23,6 +25,14 @@ class Team
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $leader = null;
+
+    #[ORM\OneToMany(targetEntity: Member::class, mappedBy: 'team', fetch: 'EXTRA_LAZY')]
+    private Collection $members;
+
+    public function __construct()
+    {
+        $this->members = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -61,6 +71,36 @@ class Team
     public function setLeader(?User $leader): self
     {
         $this->leader = $leader;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Member>
+     */
+    public function getMembers(): Collection
+    {
+        return $this->members;
+    }
+
+    public function addMember(Member $member): self
+    {
+        if (!$this->members->contains($member)) {
+            $this->members->add($member);
+            $member->setTeam($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMember(Member $member): self
+    {
+        if ($this->members->removeElement($member)) {
+            // set the owning side to null (unless already changed)
+            if ($member->getTeam() === $this) {
+                $member->setTeam(null);
+            }
+        }
 
         return $this;
     }

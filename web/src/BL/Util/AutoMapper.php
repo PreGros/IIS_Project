@@ -14,11 +14,11 @@ class AutoMapper{
      *  - try to retrieve object, that was used for $srcObject mapping
      *  - if fails new object for dst will be created
      * when object, this object will be modified
-     * @param ?array $map if set, only properties in this array will be set
+     * @param ?array $mapIgnore if set, those properties will be ignored
      * @param bool $trackEntity if true, srcObject will be saved for remapping
      * @return object mapped object
      */
-    public static function map(object|array $srcObject, string|object $dst, ?array $map = null, bool $trackEntity = true): object
+    public static function map(object|array $srcObject, string|object $dst, ?array $mapIgnore = null, bool $trackEntity = true): object
     {
         if (is_string($dst)){
             if (!class_exists($dst)){
@@ -31,8 +31,8 @@ class AutoMapper{
         
         if (is_object($srcObject)){
             $srcRC = new \ReflectionClass($srcObject);
-            $mapped = self::mapObjectFromGetters($srcRC, $dstRC, $srcObject, $dst, $map);
-            self::mapObjectFromProperties($srcRC, $dstRC, $srcObject, $dst, $mapped, $map);
+            $mapped = self::mapObjectFromGetters($srcRC, $dstRC, $srcObject, $dst, $mapIgnore);
+            self::mapObjectFromProperties($srcRC, $dstRC, $srcObject, $dst, $mapped, $mapIgnore);
 
             if ($trackEntity){
                 self::$entities[spl_object_id($dst)] = $srcObject;
@@ -40,7 +40,7 @@ class AutoMapper{
             return $dst;
         }
         
-        self::mapObjectFromArray($dstRC, $dst, $srcObject, $map);
+        self::mapObjectFromArray($dstRC, $dst, $srcObject, $mapIgnore);
         return $dst;
     }
 
@@ -49,7 +49,7 @@ class AutoMapper{
         \ReflectionClass $dstRC,
         object $srcObject,
         object $dstObject,
-        ?array $map = null): array
+        ?array $mapIgnore = null): array
     {
         $mapped = [];
         foreach ($srcRC->getMethods(\ReflectionMethod::IS_PUBLIC) as $getter){
@@ -57,7 +57,7 @@ class AutoMapper{
                 continue;
             }
             $property = lcfirst(substr($getter->getShortName(), strlen('get')));
-            if (!($map === null || in_array($property, $map))){
+            if ($mapIgnore !== null && in_array($property, $mapIgnore)){
                 continue;
             }
 
@@ -82,11 +82,11 @@ class AutoMapper{
         object $srcObject,
         object $dstObject,
         array $mapped,
-        ?array $map = null)
+        ?array $mapIgnore = null)
     {
         foreach ($srcRC->getProperties() as $property){
             $propName = $property->getName();
-            if (in_array($propName, $mapped) || !($map === null || in_array($propName, $map))){
+            if (in_array($propName, $mapped) || ($mapIgnore !== null && in_array($propName, $mapIgnore))){
                 continue;
             }
 
@@ -102,10 +102,10 @@ class AutoMapper{
         }
     }
 
-    private static function mapObjectFromArray(\ReflectionClass $dstRC, object $dst, array $src, ?array $map)
+    private static function mapObjectFromArray(\ReflectionClass $dstRC, object $dst, array $src, ?array $mapIgnore)
     {
         foreach ($src as $key => $value){
-            if ($map !== null && !in_array($key, $map)){
+            if ($mapIgnore !== null && in_array($key, $mapIgnore)){
                 continue;
             }
 

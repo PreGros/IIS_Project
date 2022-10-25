@@ -11,7 +11,6 @@ import './styles/globals.scss';
 
 // start the Stimulus application
 import './bootstrap';
-console.log('hello');
 
 // require('jquery');
 // require('bootstrap');
@@ -294,9 +293,15 @@ function deparam(params, coerce) {
 window.addEventListener('load', () => {
     $('[name^="table"], [name$="table"]').each((index, element) => {
             $(element).initDataTables($(element).data('settings'), {
-                searching: true,
+                search: {
+                    return: true,
+                },
                 ordering: true,
-                dom: 'Bfrtip',
+                dom: "B"
+                +"<'row'<'col-sm-12 col-md-6'i><'col-sm-12 col-md-6'f>>" +
+                "<'row'<'col-sm-12'tr>>" +
+                "<'row'<'col-sm-12 col-md-5'l><'col-sm-12 col-md-7'p>>",
+                //dom: 'Bfrtipl',
         buttons: [
             {
                 text: 'Reinitialize',
@@ -309,14 +314,26 @@ window.addEventListener('load', () => {
             }
         ],
         initComplete: function(settings, json) {
-            var api = this.api();
+            // Setup - add a text input to each footer cell
+        
+            // // Apply the search
+            // this.api()
+            // .columns()
+            // .every(function () {
+            //     var that = this;
 
-            // Get number of total records
-            // var recordsTotal = api.context[0].fnRecordsTotal();
-            // $('#events_list h5 span').text(recordsTotal);
+            //     $('input', this.footer()).on('keyup change clear', function () {
+            //         if (that.search() !== this.value) {
+            //             that.search(this.value).draw();
+            //         }
+            //     });
+            // });
+            // // Get number of total records
+            // // var recordsTotal = api.context[0].fnRecordsTotal();
+            // // $('#events_list h5 span').text(recordsTotal);
 
-            // Hide some columns
-            //api.columns([4,9]).visible(false);
+            // // Hide some columns
+            // //api.columns([4,9]).visible(false);
 
             // Create tr filter
             // var tr = $('<tr id="filter_search"></tr>');
@@ -329,33 +346,33 @@ window.addEventListener('load', () => {
             // }
 
             // var firstHeaderRow = $('tr', api.table().header());
-            // tr.insertAfter(firstHeaderRow);
+            // // tr.insertAfter(firstHeaderRow);
 
-            // $("#filter_search th").eq(5).find('input').datepicker({
-            //     autoclose: true,
-            //     todayHighlight: true,
-            //     language: "fr",
-            //     dateFormat: "dd/mm/yy",
+            // // $("#filter_search th").eq(5).find('input').datepicker({
+            // //     autoclose: true,
+            // //     todayHighlight: true,
+            // //     language: "fr",
+            // //     dateFormat: "dd/mm/yy",
+            // // });
+
+            // $("#filter_search input").on('keyup change', function(e) {
+            //     if (e.keyCode == 13) {
+            //         api
+            //             .column($(this).parent().index()+':visible')
+            //             .search(this.value)
+            //             .draw();
+            //     }
             // });
 
-            $("#filter_search input").on('keyup change', function(e) {
-                if (e.keyCode == 13) {
-                    api
-                        .column($(this).parent().index()+':visible')
-                        .search(this.value)
-                        .draw();
-                }
-            });
-
-            $('.buttons-columnVisibility').each(function(index, element) {
-                $(element).click(function() {
-                    if (api.column(index).visible() === true) {
-                        $('#filter_search th').eq(index).show();
-                    } else {
-                        $('#filter_search th').eq(index).hide();
-                    }
-                });
-            });
+            // $('.buttons-columnVisibility').each(function(index, element) {
+            //     $(element).click(function() {
+            //         if (api.column(index).visible() === true) {
+            //             $('#filter_search th').eq(index).show();
+            //         } else {
+            //             $('#filter_search th').eq(index).hide();
+            //         }
+            //     });
+            // });
         }
     });
     });
