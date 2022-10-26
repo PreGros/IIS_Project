@@ -4,7 +4,7 @@ namespace App\PL\DataTable\Team;
 
 use App\BL\Team\TeamManager;
 use App\BL\Util\DataTableAdapter;
-use Doctrine\ORM\QueryBuilder;
+use Symfony\Component\HttpFoundation\Request;
 use Omines\DataTablesBundle\DataTable;
 use Omines\DataTablesBundle\DataTableFactory;
 use Omines\DataTablesBundle\Column\NumberColumn;

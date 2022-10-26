@@ -38,7 +38,6 @@ class TeamManager
 
     public function createTeam(TeamModel $teamModel){
         $this->saveTeamImage($teamModel);
-
         $user = $this->security->getUser();
         /** @var Team */
         $team = AutoMapper::map($teamModel, Team::class, trackEntity: false);
