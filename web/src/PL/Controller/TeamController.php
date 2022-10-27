@@ -11,6 +11,7 @@ use App\PL\Form\Team\TeamCreateFormType;
 use App\BL\Team\TeamManager;
 use App\BL\Team\TeamModel;
 use App\PL\DataTable\Team\TeamDataTable;
+use App\PL\Form\Team\TeamEditFormType;
 
 class TeamController extends AbstractController
 {
@@ -27,7 +28,7 @@ class TeamController extends AbstractController
     }
 
     #[Route('/teams/create', name: 'team_create')]
-    public function createAction(Request $request, TeamCreateFormType $form, TeamManager $teamManager): Response
+    public function createAction(Request $request, TeamManager $teamManager): Response
     {
         $team = new TeamModel();
         $form = $this->createForm(TeamCreateFormType::class, $team);
@@ -43,10 +44,10 @@ class TeamController extends AbstractController
     }
 
     #[Route('/teams/edit/{id<\d+>}', name: 'team_edit')]
-    public function editAction(int $id, Request $request, TeamCreateFormType $form, TeamManager $teamManager): Response
+    public function editAction(int $id, Request $request, TeamManager $teamManager): Response
     {
         $team = $teamManager->getTeam($id);
-        $form = $this->createForm(TeamCreateFormType::class, $team);
+        $form = $this->createForm(TeamEditFormType::class, $team);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()){
@@ -56,5 +57,16 @@ class TeamController extends AbstractController
         }
 
         return $this->renderForm('team/edit.html.twig', ['teamForm' => $form]);
+    }
+
+    #[Route('/teams/people', name: 'get_people')]
+    public function getPeopleAjaxAction(Request $request): Response
+    {
+        $query = $request->get('query');
+        dump($this->json(['results' => [['value' => '1', 'text' => 'admin'], ['value' => '2', 'text' => 'alsoAdmin']]]));
+        if ($query === "admin"){ 
+            return $this->json(['results' => [['value' => '1', 'text' => 'admin'], ['value' => '2', 'text' => 'alsoAdmin']]]);
+        }
+        return $this->json(['results' => []]);
     }
 }
