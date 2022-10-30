@@ -2,7 +2,7 @@
 
 namespace App\PL\Form\User;
 
-use App\DAL\Entity\User;
+use App\BL\User\UserModel;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
@@ -54,7 +54,7 @@ class RegistrationFormType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => User::class,
+            'data_class' => UserModel::class,
         ]);
     }
 }

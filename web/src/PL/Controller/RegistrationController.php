@@ -2,7 +2,7 @@
 
 namespace App\PL\Controller;
 
-use App\DAL\Entity\User;
+use App\BL\User\UserModel;
 use App\PL\Form\User\RegistrationFormType;
 use App\BL\Security\EmailVerifier;
 use App\BL\User\UserManager;
@@ -18,24 +18,31 @@ use SymfonyCasts\Bundle\VerifyEmail\Exception\VerifyEmailExceptionInterface;
 class RegistrationController extends AbstractController
 {
     private FormLoginAuthenticator $authenticator;
+    private UserManager $userManager;
 
-    public function __construct(FormLoginAuthenticator $authenticator)
+    public function __construct(FormLoginAuthenticator $authenticator, UserManager $userManager)
     {
         $this->authenticator = $authenticator;
+        $this->userManager = $userManager;
     }
 
     #[Route('/register', name: 'app_register')]
-    public function register(Request $request, UserManager $userManager, UserAuthenticatorInterface $authenticatorManager): Response
+    public function register(Request $request, UserAuthenticatorInterface $authenticatorManager): Response
     {
-        $user = new User();
+        $user = new UserModel();
         $form = $this->createForm(RegistrationFormType::class, $user);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $userManager->registerUser($user, $form->get('plainPassword')->getData());
+            $this->userManager->registerUser($user, $form->get('plainPassword')->getData());
 
+            $authenticatorManager->authenticateUser(
+                $user,
+                $this->authenticator, $request,
+                [(new RememberMeBadge())->enable()]
+            );
+            
             $this->addFlash('success', 'Your email address has been verified.');
-            $authenticatorManager->authenticateUser($user, $this->authenticator, $request, [(new RememberMeBadge())->enable()]);
             return $this->redirectToRoute('datatable');
         }
 
@@ -45,13 +52,13 @@ class RegistrationController extends AbstractController
     }
 
     #[Route('/verify/email', name: 'app_verify_email')]
-    public function verifyUserEmail(Request $request, EmailVerifier $emailVerifier): Response
+    public function verifyUserEmail(Request $request): Response
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
 
         // validate email confirmation link, sets User::isVerified=true and persists
         try {
-            $emailVerifier->handleEmailConfirmation($request, $this->getUser());
+            $this->userManager->handleEmailConfirmation($request->getUri(), $this->getUser());
         } catch (VerifyEmailExceptionInterface $exception) {
             $this->addFlash('verify_email_error', $exception->getReason());
 

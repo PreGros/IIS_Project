@@ -47,7 +47,7 @@ class TeamController extends AbstractController
     public function editAction(int $id, Request $request, TeamManager $teamManager): Response
     {
         $team = $teamManager->getTeam($id);
-        $form = $this->createForm(TeamEditFormType::class, $team);
+        $form = $this->createForm(TeamEditFormType::class, $team, ['find_url' => ['id' => $id]]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()){
@@ -59,11 +59,11 @@ class TeamController extends AbstractController
         return $this->renderForm('team/edit.html.twig', ['teamForm' => $form]);
     }
 
-    #[Route('/teams/people', name: 'get_people')]
-    public function getPeopleAjaxAction(Request $request): Response
+    #[Route('/teams/people/{id<\d+>}', name: 'get_people')]
+    public function getPeopleAjaxAction(int $id, Request $request, TeamManager $teamManager): Response
     {
         $query = $request->get('query');
-        dump($this->json(['results' => [['value' => '1', 'text' => 'admin'], ['value' => '2', 'text' => 'alsoAdmin']]]));
+        $teamManager->getPeople($id, $query);
         if ($query === "admin"){ 
             return $this->json(['results' => [['value' => '1', 'text' => 'admin'], ['value' => '2', 'text' => 'alsoAdmin']]]);
         }

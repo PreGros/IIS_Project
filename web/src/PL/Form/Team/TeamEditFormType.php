@@ -53,7 +53,7 @@ class TeamEditFormType extends AbstractType
             ->add('person', ChoiceType::class, [
                 'placeholder' => 'Search person',
                 'autocomplete' => true,
-                'autocomplete_url' => $this->router->generate('get_people'),
+                'autocomplete_url' => $this->router->generate('get_people', $options['find_url']),
                 'required' => false,
                 'mapped' => false
             ])
@@ -65,6 +65,7 @@ class TeamEditFormType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => TeamModel::class,
+            'find_url' => []
         ]);
     }
 }

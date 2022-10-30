@@ -2,13 +2,14 @@
 
 namespace App\BL\User;
 
-use App\BL\Security\EmailVerifier;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
-
-use App\DAL\Entity\User;
 use Symfony\Component\Mime\Address;
+
+use App\BL\Util\AutoMapper;
+use App\BL\Security\EmailVerifier;
+use App\DAL\Entity\User;
 
 class UserManager
 {
@@ -29,21 +30,26 @@ class UserManager
         $this->entityManager = $entityManager;
     }
 
-    public function registerUser(User $user, string $plainPassword)
-    {
-        $user->setPassword(
+    public function registerUser(UserModel $userModel, string $plainPassword)
+    {   
+        $userModel->setPassword(
             $this->userPasswordHasher->hashPassword(
-                $user,
+                $userModel,
                 $plainPassword
             )
         );
 
+        /** @var User */
+        $user = AutoMapper::map($userModel, User::class, trackEntity: false);
+
         $this->entityManager->persist($user);
         $this->entityManager->flush();
-        $this->sendVerificationEmail($user);
+
+        $userModel = AutoMapper::map($user, $userModel);
+        $this->sendVerificationEmail($userModel);
     }
 
-    private function sendVerificationEmail(User $user)
+    private function sendVerificationEmail(UserModel $user)
     {
         $this->emailVerifier->sendEmailConfirmation('app_verify_email', $user,
             (new TemplatedEmail())
@@ -52,5 +58,17 @@ class UserManager
                 ->subject('Please Confirm your Email')
                 ->htmlTemplate('registration/confirmation_email.html.twig')
         );
+    }
+
+    public function handleEmailConfirmation(string $signedUrl, UserModel $userModel)
+    {
+        $this->emailVerifier->handleEmailConfirmation($signedUrl, $userModel);
+        
+        $userModel->setIsVerified(true);
+        /** @var User */
+        $user = AutoMapper::map($userModel, User::class, trackEntity: false);
+
+        $this->entityManager->persist($user);
+        $this->entityManager->flush();
     }
 }

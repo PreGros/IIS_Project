@@ -4,6 +4,9 @@ namespace App\PL\DataTable\Team;
 
 use App\BL\Team\TeamManager;
 use App\BL\Util\DataTableAdapter;
+use Doctrine\ORM\Query\Expr;
+use Doctrine\ORM\QueryBuilder;
+use Omines\DataTablesBundle\Adapter\Doctrine\ORMAdapter;
 use Symfony\Component\HttpFoundation\Request;
 use Omines\DataTablesBundle\DataTable;
 use Omines\DataTablesBundle\DataTableFactory;
@@ -28,24 +31,7 @@ class TeamDataTable
     }
 
     public function create(): DataTable
-    {   
-        // return $this->factory->create()
-        //     ->add('name', TextColumn::class, ['label' => 'Jméno', 'searchable' => true, 'orderable' => true])
-        //     ->add('nickname', TextColumn::class, ['field' => 'u.nickname', 'label' => 'NickName vedoucí', 'searchable' => true, 'orderable' => true])
-        //     ->add('memberCount', NumberColumn::class, ['label' => 'Počet členů', 'searchable' => true, 'orderable' => true, 'data' => function (\App\DAL\Entity\Team $data) {
-        //         return $data->getMembers()->count() + 1;
-        //     }])
-        //     ->add('action', TwigStringColumn::class, ['label' => 'Akce', 'searchable' => false, 'orderable' => false, 'template' => '<button class="btn btn-secondary">Detail</button>'])
-        //     ->createAdapter(ORMAdapter::class, [
-        //         'entity' => \App\DAL\Entity\Team::class,
-        //         'query' => function (QueryBuilder $builder) {
-        //             $builder
-        //                 ->select('t')
-        //                 ->addSelect('u')
-        //                 ->from(\App\DAL\Entity\Team::class, 't')
-        //                 ->innerJoin('t.leader', 'u');
-        //         }
-        //     ]);
+    {
         return $this->factory->create()
             ->add('name', TextColumn::class, ['label' => 'Jméno', 'searchable' => true, 'orderable' => true])
             ->add('leaderNickName', TextColumn::class, ['label' => 'NickName vedoucí', 'searchable' => true, 'orderable' => true])

@@ -6,7 +6,6 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
-use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 
@@ -101,6 +100,28 @@ class TeamManager
         $this->entityManager->flush();
     }
     
+    public function getPeople(int $teamId, string $query, int $limit = 50)
+    {
+        $queryBuilder = $this->entityManager->createQueryBuilder();
+
+        $queryBuilder
+            ->select('u')
+            ->from(\App\DAL\Entity\User::class, 'u')
+            ->leftJoin(\App\DAL\Entity\Member::class, 'm', Expr\Join::WITH, 'm.user = u')
+            ->where('IDENTITY(m.team) != :teamId')
+            ->andWhere('u.id != ' . '(' . $this->entityManager->createQueryBuilder()
+                ->select('IDENTITY(t.leader)')
+                ->from(\App\DAL\Entity\Team::class, 't')
+                ->where('t.id = :teamId')
+                ->setParameter('teamId', $teamId)
+                ->getDQL() . ')')
+            ->andWhere('u.nickname like :query')
+            ->setParameter('teamId', $teamId)
+            ->setParameter('query', "%{$query}%");
+
+        $query = $queryBuilder->getQuery()->setMaxResults($limit);
+    }
+
     /**
      * @return array<TeamTableModel>
      */
@@ -109,20 +130,24 @@ class TeamManager
         $queryBuilder = $this->entityManager->createQueryBuilder();
 
         $queryBuilder
-            ->select('t', 'u')
+            ->select('count(m.user) memberCount, t team')
             ->from(Team::class, 't')
-            ->innerJoin(\App\DAL\Entity\User::class, 'u', Expr\Join::WITH, 't.leader = u');
+            ->innerJoin(\App\DAL\Entity\User::class, 'l', Expr\Join::WITH, 't.leader = l')
+            ->leftJoin(\App\DAL\Entity\Member::class, 'm', Expr\Join::WITH, 'm.team = t')
+            ->groupBy('t')
+            ->addGroupBy('l');
 
         $query = $queryBuilder->getQuery()->setMaxResults($limit);
         $teamModels = [];
         foreach ($query->getResult() as $entity){
-            if (!$entity instanceof Team){
+            if (!$entity['team'] instanceof Team){
                 continue;
             }
             /** @var TeamTableModel */
-            $teamModel = AutoMapper::map($entity, TeamTableModel::class, trackEntity: false);
-            $teamModel->setLeaderNickName($entity->getLeader()->getNickname());
-            $teamModel->setMemberCount($entity->getMembers()->count() + 1);
+            $teamModel = AutoMapper::map($entity['team'], TeamTableModel::class, trackEntity: false);
+            $teamModel->setLeaderNickName($entity['team']->getLeader()->getNickname());
+            /** memberCount == members + leader (1) */
+            $teamModel->setMemberCount($entity['memberCount'] + 1);
             $teamModels[] = $teamModel;
         }
 
