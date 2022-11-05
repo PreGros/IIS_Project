@@ -3,8 +3,14 @@
 {% block title %}Edit team{% endblock %}
 
 {% block body %}
-    {% for flash_error in app.flashes() %}
+    {% for flash_error in app.flashes('error') %}
         <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
+    {% endfor %}
+    {% for flash_success in app.flashes('success') %}
+        <div class="alert alert-success" role="alert">{{ flash_success }}</div>
+    {% endfor %}
+    {% for flash_info in app.flashes('info') %}
+        <div class="alert alert-info" role="alert">{{ flash_info }}</div>
     {% endfor %}
 
     <h1>Edit team</h1>
@@ -12,7 +18,6 @@
     {{ form_start(teamForm) }}
         {{ form_row(teamForm.name) }}
         {{ form_row(teamForm.image) }}
-        {{ form_row(teamForm.person) }}
         {{ form_row(teamForm.submit, {
             label: 'Submit'
         }) }}

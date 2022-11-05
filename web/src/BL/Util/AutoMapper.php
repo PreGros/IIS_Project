@@ -9,7 +9,7 @@ class AutoMapper{
     
     /**
      * @param object|array $srcObject object or array to be mapped to object
-     * @param string|object $dst 
+     * @param string|object $dst
      * when string, class of dst object
      *  - try to retrieve object, that was used for $srcObject mapping
      *  - if fails new object for dst will be created

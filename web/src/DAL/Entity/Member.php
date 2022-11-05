@@ -28,7 +28,7 @@ class Member
 
     #[ORM\Id]
     #[ORM\ManyToOne(inversedBy: 'members')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Team $team = null;
 
     public function getUser(): ?User

@@ -9,6 +9,10 @@
 
     <h1>Teams</h1>
 
+    <div class="d-flex flex-row-reverse">
+        <a class="btn btn-success" href="{{ path('team_create') }}">Create new team</a>
+    </div>
+
     <div name="team-table" data-settings='{{ datatable_settings(datatable) }}'>Loading...</div>
     
 {% endblock %}
