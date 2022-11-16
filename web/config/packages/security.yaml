@@ -39,7 +39,8 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
-        - { path: '^/teams/(edit|create|delete)', roles: IS_AUTHENTICATED_FULLY }
+        - { path: '^/teams/create', roles: IS_AUTHENTICATED_FULLY }
+        - { path: '^/teams/\d+/(edit|delete)', roles: IS_AUTHENTICATED_FULLY }
 
 when@test:
     security:

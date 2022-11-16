@@ -132,4 +132,9 @@ class UserModel implements UserInterface, PasswordAuthenticatedUserInterface
         // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
     }
+
+    public function haveRole(string $roleName): bool
+    {
+        return in_array($roleName, $this->roles);
+    }
 }

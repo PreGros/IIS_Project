@@ -71,4 +71,71 @@ class UserManager
         $this->entityManager->persist($user);
         $this->entityManager->flush();
     }
+
+    /**
+     * @return \Traversable<UserModel>
+     */
+    public function getUsers(int $limit): \Traversable
+    {
+        $queryBuilder = $this->entityManager->createQueryBuilder();
+
+        $queryBuilder
+            ->select('u')
+            ->from(\App\Dal\Entity\User::class, 'u');
+
+        $query = $queryBuilder->getQuery()->setMaxResults($limit);
+        
+        foreach ($query->getResult() as $user){
+            /** @var \App\BL\User\UserModel */
+            $userModel = AutoMapper::map($user, \App\BL\User\UserModel::class, trackEntity: false);
+            yield $userModel;
+        }
+    }
+
+    public function deleteUser(int $userId)
+    {
+        /** @var \App\DAL\Repository\UserRepository */
+        $repo = $this->entityManager->getRepository(User::class);
+        $user = $this->entityManager->getReference(User::class, $userId);
+
+        $repo->remove($user, true);
+    }
+
+    public function addRole(string $roleName, int $userId)
+    {
+        /** @var \App\DAL\Repository\UserRepository */
+        $repo = $this->entityManager->getRepository(User::class);
+        /** @var UserModel */
+        $userModel = AutoMapper::map($repo->find($userId), UserModel::class);
+        $roles = $userModel->getRoles();
+
+        if (in_array($roleName, $roles)){
+            return;
+        }
+
+        $roles[] = $roleName;
+        $userModel->setRoles($roles);
+
+        $user = AutoMapper::map($userModel, User::class, trackEntity: false);
+        $repo->save($user, true);
+    }
+
+    public function removeRole(string $roleName, int $userId)
+    {
+        /** @var \App\DAL\Repository\UserRepository */
+        $repo = $this->entityManager->getRepository(User::class);
+        /** @var UserModel */
+        $userModel = AutoMapper::map($repo->find($userId), UserModel::class);
+        $roles = $userModel->getRoles();
+
+        if (!in_array($roleName, $roles)){
+            return;
+        }
+
+        unset($roles[array_search($roleName, $roles)]);
+        $userModel->setRoles($roles);
+
+        $user = AutoMapper::map($userModel, User::class, trackEntity: false);
+        $repo->save($user, true);
+    }
 }
