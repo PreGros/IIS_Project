@@ -29,6 +29,11 @@ class RegistrationController extends AbstractController
     #[Route('/register', name: 'app_register')]
     public function register(Request $request, UserAuthenticatorInterface $authenticatorManager): Response
     {
+        if ($this->isGranted('IS_AUTHENTICATED_FULLY')){
+            $this->addFlash('warning', 'Please, logout first (U DUMB)');
+            return $this->redirectToRoute('teams');
+        }
+
         $user = new UserModel();
         $form = $this->createForm(RegistrationFormType::class, $user);
         $form->handleRequest($request);
@@ -60,7 +65,7 @@ class RegistrationController extends AbstractController
         try {
             $this->userManager->handleEmailConfirmation($request->getUri(), $this->getUser());
         } catch (VerifyEmailExceptionInterface $exception) {
-            $this->addFlash('verify_email_error', $exception->getReason());
+            $this->addFlash('danger', $exception->getReason());
 
             return $this->redirectToRoute('app_register');
         }

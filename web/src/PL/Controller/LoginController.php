@@ -15,6 +15,11 @@ class LoginController extends AbstractController
     #[Route('/login', name: 'app_login')]
     public function index(AuthenticationUtils $authenticationUtils, FormFactoryInterface $formFactory): Response
     {
+        if ($this->isGranted('IS_AUTHENTICATED_FULLY')){
+            $this->addFlash('warning', 'Pathetic, forgetful human (u are logged in)');
+            return $this->redirectToRoute('teams');
+        }
+
         $error = $authenticationUtils->getLastAuthenticationError();
         $lastUsername = $authenticationUtils->getLastUsername();
 

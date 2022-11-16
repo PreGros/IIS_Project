@@ -92,6 +92,17 @@ class UserManager
         }
     }
 
+    public function getUser(int $id): UserModel
+    {
+        /** @var \App\DAL\Repository\UserRepository */
+        $repo = $this->entityManager->getRepository(User::class);
+        
+        $user = $repo->find($id);
+
+        /** @var \App\BL\User\UserModel */
+        return AutoMapper::map($user, \App\BL\User\UserModel::class, trackEntity: true);
+    }
+
     public function deleteUser(int $userId)
     {
         /** @var \App\DAL\Repository\UserRepository */

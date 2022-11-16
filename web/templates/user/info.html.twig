@@ -1,0 +1,33 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}User info{% endblock %}
+
+{% block body %}
+    {# {% for flash_error in app.flashes() %}
+        <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
+    {% endfor %} #}
+
+    <h1>{{ user.nickname }}</h1>
+
+    <dl class="row">
+        <dt class="col-sm-3 h5">Name</dt>
+        <dd class="col-sm-9">{{ user.firstname }}</dd>
+
+        <dt class="col-sm-3 h5">Surname</dt>
+        <dd class="col-sm-9">{{ user.surname }}</dd>
+    </dl>
+
+
+    <hr>
+    <h3>Contacts</h3>
+    <dl class="row">
+        <dt class="col-sm-3 h5">E-mail</dt>
+        <dd class="col-sm-9">{{ user.email }}</dd>
+
+        <dt class="col-sm-3 h5">Telephone number</dt>
+        <dd class="col-sm-9">{{ user.phoneNumber }}</dd>
+    </dl>
+
+{# <div name="user-table" data-settings='{{ datatable_settings(datatable) }}'>Loading...</div> #}
+    
+{% endblock %}

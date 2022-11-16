@@ -3,6 +3,7 @@
 {% block title %}Teams{% endblock %}
 
 {% block body %}
+    {{ render_flash_messages() }}
     {# {% for flash_error in app.flashes() %}
         <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
     {% endfor %} #}

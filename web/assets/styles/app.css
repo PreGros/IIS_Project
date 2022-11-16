@@ -1,3 +1,10 @@
 body {
     background-color: lightgray;
 }
+
+
+label.required::after{
+    content: '*';
+    padding-left: 0.3rem;
+    color: red;
+}

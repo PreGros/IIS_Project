@@ -42,4 +42,11 @@ class UserController extends AbstractController
     {
         return $this->redirectToRoute('users');
     }
+
+    #[Route('/users/{id<\d+>}', name: 'user_info')]
+    public function getUserInfo(int $id, UserManager $userManager): Response
+    {
+        $userModel = $userManager->getUser($id);
+        return $this->render('user/info.html.twig', ['user' => $userModel]);
+    }
 }
