@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Tournaments{% endblock %}
+
+{% block body %}
+    {{ render_flash_messages() }}
+    {# {% for flash_error in app.flashes() %}
+        <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
+    {% endfor %} #}
+
+    <h1>Tournaments</h1>
+
+    <div class="d-flex flex-row-reverse">
+        <a class="btn btn-success" href="{{ path('tournament_create') }}">Create new tournament</a>
+    </div>
+
+    <div name="tournament-table" data-settings='{{ datatable_settings(datatable) }}'>Loading...</div>
+    
+{% endblock %}

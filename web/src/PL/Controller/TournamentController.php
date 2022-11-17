@@ -1,0 +1,44 @@
+<?php
+
+namespace App\PL\Controller;
+
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+
+use App\PL\Form\Tournament\TournamentCreateFormType;
+use App\BL\Tournament\TournamentManager;
+use App\BL\Tournament\TournamentModel;
+use App\PL\DataTable\Tournament\TournamentDataTable;
+
+class TournamentController extends AbstractController
+{
+    #[Route('/tournaments', name: 'tournaments')]
+    public function tournamentsAction(Request $request, TournamentDataTable $dataTable): Response
+    {
+        $table = $dataTable->create()->handleRequest($request);
+
+        if ($table->isCallback()){
+            return $table->getResponse();
+        }
+
+        return $this->render('tournament/index.html.twig', ['datatable' => $table]);
+    }
+
+    #[Route('/tournaments/create', name: 'tournament_create')]
+    public function createAction(Request $request, TournamentManager $tournamentManager): Response
+    {
+        $tournament = new TournamentModel();
+        $form = $this->createForm(TournamentCreateFormType::class, $tournament);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()){
+            $tournamentManager->createTournament($tournament);
+
+            return $this->redirectToRoute('tournaments');
+        }
+
+        return $this->renderForm('tournament/create.html.twig', ['tournamentForm' => $form]);
+    }
+}

@@ -3,7 +3,7 @@ body {
 }
 
 
-label.required::after{
+label.required::after, legend.required::after{
     content: '*';
     padding-left: 0.3rem;
     color: red;

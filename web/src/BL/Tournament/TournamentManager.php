@@ -1,0 +1,61 @@
+<?php
+
+namespace App\BL\Tournament;
+
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Security\Core\Security;
+
+use App\BL\Util\AutoMapper;
+use App\BL\Util\StringUtil;
+use App\BL\Tournament\TournamentModel;
+use App\DAL\Entity\Tournament;
+
+class TournamentManager
+{
+    private EntityManagerInterface $entityManager;
+    private Security $security;
+
+    public function __construct(
+        EntityManagerInterface $entityManager,
+        Security $security
+    )
+    {
+        $this->entityManager = $entityManager;
+        $this->security = $security;
+    }
+
+    public function createTournament(TournamentModel $tournamentModel)
+    {
+        /** @var Tournament */
+        $tournament = AutoMapper::map($tournamentModel, Tournament::class, trackEntity: false);
+        $tournament->setCreatedBy(
+            AutoMapper::map(
+                $this->security->getUser(),
+                \App\DAL\Entity\User::class,
+                trackEntity: false
+            )
+        );
+
+        //TODO: setTournamentType
+
+        $this->entityManager->persist($tournament);
+        $this->entityManager->flush();
+    }
+
+     /**
+     * @return \Traversable<TournamentModel>
+     */
+    public function getTournaments(int $limit): \Traversable
+    {
+        $queryBuilder = $this->entityManager->createQueryBuilder();
+
+        $queryBuilder
+            ->select('t')
+            ->from(Tournament::class, 't');
+
+        $query = $queryBuilder->getQuery()->setMaxResults($limit);
+        foreach ($query->getResult() as $entity){
+            yield AutoMapper::map($entity, TournamentModel::class, trackEntity: false);
+        }
+    }
+}

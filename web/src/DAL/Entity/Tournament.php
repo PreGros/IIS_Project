@@ -50,13 +50,11 @@ class Tournament
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $registrationDateEnd = null;
 
-    #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?WinCondition $winCondition = null;
+    #[ORM\Column(type: Types::SMALLINT)]
+    private ?int $winCondition = null;
 
-    #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?MatchingType $matchingType = null;
+    #[ORM\Column(type: Types::SMALLINT)]
+    private ?int $matchingType = null;
 
     #[ORM\ManyToOne]
     private ?TournamentType $tournamentType = null;
@@ -217,24 +215,24 @@ class Tournament
         return $this;
     }
 
-    public function getWinCondition(): ?WinCondition
+    public function getWinCondition(): ?int
     {
         return $this->winCondition;
     }
 
-    public function setWinCondition(?WinCondition $winCondition): self
+    public function setWinCondition(?int $winCondition): self
     {
         $this->winCondition = $winCondition;
 
         return $this;
     }
 
-    public function getMatchingType(): ?MatchingType
+    public function getMatchingType(): ?int
     {
         return $this->matchingType;
     }
 
-    public function setMatchingType(?MatchingType $matchingType): self
+    public function setMatchingType(?int $matchingType): self
     {
         $this->matchingType = $matchingType;
 

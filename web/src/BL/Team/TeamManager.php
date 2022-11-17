@@ -36,7 +36,8 @@ class TeamManager
         $this->slugger = $slugger;
     }
 
-    public function createTeam(TeamModel $teamModel){
+    public function createTeam(TeamModel $teamModel)
+    {
         $this->saveTeamImage($teamModel);
 
         /** @var Team */
