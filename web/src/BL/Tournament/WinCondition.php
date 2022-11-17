@@ -24,11 +24,10 @@ enum WinCondition: int
 
     public static function getTypes(): array
     {
-        return [
-            'Maximum points' => static::MaxPoints,
-            'Minimum points' => static::MinPoints,
-            'Maximum duration' => static::MaxTime,
-            'Minimum duration' => static::MinTime
-        ];
+        $ret = [];
+        foreach (self::cases() as $case){
+            $ret[$case->label()] = $case;
+        }
+        return $ret;
     }
 }

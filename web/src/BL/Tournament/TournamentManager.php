@@ -47,14 +47,10 @@ class TournamentManager
      */
     public function getTournaments(int $limit): \Traversable
     {
-        $queryBuilder = $this->entityManager->createQueryBuilder();
-
-        $queryBuilder
-            ->select('t')
-            ->from(Tournament::class, 't');
-
-        $query = $queryBuilder->getQuery()->setMaxResults($limit);
-        foreach ($query->getResult() as $entity){
+        /** @var \App\DAL\Repository\TournamentRepository */
+        $repo = $this->entityManager->getRepository(Tournament::class);
+        
+        foreach ($repo->findBy([], limit: $limit) as $entity){
             yield AutoMapper::map($entity, TournamentModel::class, trackEntity: false);
         }
     }

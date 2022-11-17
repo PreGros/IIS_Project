@@ -18,9 +18,10 @@ enum MatchingType: int
 
     public static function getTypes(): array
     {
-        return [
-            'Elimination' => static::Elimination,
-            'Everyone vs everyone' => static::AllVsAll
-        ];
+        $ret = [];
+        foreach (self::cases() as $case){
+            $ret[$case->label()] = $case;
+        }
+        return $ret;
     }
 }

@@ -110,30 +110,11 @@ class TeamManager
     
     public function getPeople(int $teamId, string $query, int $limit = 50): \Traversable
     {
-        $queryBuilder = $this->entityManager->createQueryBuilder();
-
-        $queryBuilder
-            ->select('u')
-            ->from(\App\DAL\Entity\User::class, 'u')
-            ->andWhere('u.id != ' . '(' . $this->entityManager->createQueryBuilder()
-                ->select('IDENTITY(t.leader)')
-                ->from(\App\DAL\Entity\Team::class, 't')
-                ->where('t.id = :teamId')
-                ->getDQL() . ')')
-            ->andWhere('NOT EXISTS '. '(' . $this->entityManager->createQueryBuilder()
-                ->select('m')
-                ->from(\App\DAL\Entity\Member::class, 'm')
-                ->where('IDENTITY(m.team) = :teamId')
-                ->andWhere('IDENTITY(m.user) = u.id')
-                ->getDQL() . ')')
-            ->andWhere('u.nickname like :query')
-            ->setParameter('teamId', $teamId)
-            ->setParameter('query', '%' . StringUtil::shave($query) . '%');
-
-        $query = $queryBuilder->getQuery()->setMaxResults($limit);
+        /** @var \App\DAL\Repository\TeamRepository */
+        $repo = $this->entityManager->getRepository(Team::class);
 
         /** @var \App\DAL\Entity\User */
-        foreach ($query->getResult() as $user){
+        foreach ($repo->findNewMembers($teamId, StringUtil::shave($query), $limit) as $user){
             yield ['value' => $user->getId(), 'text' => $user->getNickname()];
         }
     }
@@ -143,18 +124,10 @@ class TeamManager
      */
     public function getTeams(int $limit): \Traversable
     {
-        $queryBuilder = $this->entityManager->createQueryBuilder();
+        /** @var \App\DAL\Repository\TeamRepository */
+        $repo = $this->entityManager->getRepository(Team::class);
 
-        $queryBuilder
-            ->select('count(m.user) memberCount, t team')
-            ->from(Team::class, 't')
-            ->innerJoin(\App\DAL\Entity\User::class, 'l', Expr\Join::WITH, 't.leader = l')
-            ->leftJoin(\App\DAL\Entity\Member::class, 'm', Expr\Join::WITH, 'm.team = t')
-            ->groupBy('t')
-            ->addGroupBy('l');
-
-        $query = $queryBuilder->getQuery()->setMaxResults($limit);
-        foreach ($query->getResult() as $entity){
+        foreach ($repo->findTableData($limit) as $entity){
             if (!$entity['team'] instanceof Team){
                 continue;
             }
@@ -211,27 +184,10 @@ class TeamManager
      */
     public function getTeamMembers(int $id, int $limit = 100): \Traversable
     {
-        $queryBuilder = $this->entityManager->createQueryBuilder();
-
-        $queryBuilder
-            ->select('u as user')
-            ->addSelect('CASE WHEN t.id IS NOT NULL THEN 1 ELSE 0 END as isLeader')
-            ->from(\App\DAL\Entity\User::class, 'u')
-            ->leftJoin(\App\DAL\Entity\Team::class, 't', Expr\Join::WITH, $queryBuilder->expr()->andX(
-                't.id = :teamId',
-                'IDENTITY(t.leader) = u.id'
-            ))
-            ->leftJoin(\App\DAL\Entity\Member::class, 'm', Expr\Join::WITH, $queryBuilder->expr()->andX(
-                'IDENTITY(m.team) = :teamId',
-                'IDENTITY(m.user) = u.id'
-            ))
-            ->where('t.id IS NOT NULL')
-            ->orWhere('IDENTITY(m) IS NOT NULL')
-            ->setParameter('teamId', $id);
-
-        $query = $queryBuilder->getQuery()->setMaxResults($limit);
+        /** @var \App\DAL\Repository\TeamRepository */
+        $repo = $this->entityManager->getRepository(Team::class);
         
-        foreach ($query->getResult() as $res){
+        foreach ($repo->findTeamMembers($id, $limit) as $res){
             /** @var \App\BL\User\UserMemberModel */
             $userModel = AutoMapper::map($res['user'], \App\BL\User\UserMemberModel::class, trackEntity: false);
             $userModel->setIsLeader((bool)$res['isLeader']);

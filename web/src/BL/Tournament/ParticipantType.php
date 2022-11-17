@@ -17,9 +17,10 @@ enum ParticipantType: int
 
     public static function getTypes(): array
     {
-        return [
-            'Users' => static::Users,
-            'Teams' => static::Teams
-        ];
+        $ret = [];
+        foreach (self::cases() as $case){
+            $ret[$case->label()] = $case;
+        }
+        return $ret;
     }
 }
