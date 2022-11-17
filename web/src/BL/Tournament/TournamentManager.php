@@ -58,4 +58,15 @@ class TournamentManager
             yield AutoMapper::map($entity, TournamentModel::class, trackEntity: false);
         }
     }
+
+    public function getTournament(int $id): TournamentModel
+    {
+        /** @var \App\DAL\Repository\TournamentRepository */
+        $repo = $this->entityManager->getRepository(Tournament::class);
+        
+        $tournament = $repo->find($id);
+
+        /** @var \App\BL\Tournament\TournamentModel */
+        return AutoMapper::map($tournament, \App\BL\Tournament\TournamentModel::class, trackEntity: true);
+    }
 }

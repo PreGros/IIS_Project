@@ -10,22 +10,24 @@
     <h1>{{ user.nickname }}</h1>
 
     <dl class="row">
-        <dt class="col-sm-3 h5">Name</dt>
-        <dd class="col-sm-9">{{ user.firstname }}</dd>
+        <dt class="col-sm-3 h5 vert-center">Name</dt>
+        <dd class="col-sm-9 vert-center">{{ user.firstname }}</dd>
 
-        <dt class="col-sm-3 h5">Surname</dt>
-        <dd class="col-sm-9">{{ user.surname }}</dd>
+        <div class="padding"></div>
+        <dt class="col-sm-3 h5 vert-center">Surname</dt>
+        <dd class="col-sm-9 vert-center">{{ user.surname }}</dd>
     </dl>
 
 
     <hr>
     <h3>Contacts</h3>
     <dl class="row">
-        <dt class="col-sm-3 h5">E-mail</dt>
-        <dd class="col-sm-9">{{ user.email }}</dd>
+        <dt class="col-sm-3 h5 vert-center">E-mail</dt>
+        <dd class="col-sm-9 vert-center">{{ user.email }}</dd>
 
-        <dt class="col-sm-3 h5">Telephone number</dt>
-        <dd class="col-sm-9">{{ user.phoneNumber }}</dd>
+        <div class="padding"></div>
+        <dt class="col-sm-3 h5 vert-center">Telephone number</dt>
+        <dd class="col-sm-9 vert-center">{{ user.phoneNumber }}</dd>
     </dl>
 
 {# <div name="user-table" data-settings='{{ datatable_settings(datatable) }}'>Loading...</div> #}

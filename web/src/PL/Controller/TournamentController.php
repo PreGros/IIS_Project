@@ -41,4 +41,19 @@ class TournamentController extends AbstractController
 
         return $this->renderForm('tournament/create.html.twig', ['tournamentForm' => $form]);
     }
+
+    #[Route('/tournaments/{id<\d+>}', name: 'tournament_info')]
+    public function getTournamentInfo(int $id, TournamentManager $tournamentManager): Response
+    {
+        $tournamentModel = $tournamentManager->getTournament($id);
+        return $this->render('tournament/info.html.twig', [
+            'tournament' => $tournamentModel,
+            'participantType' => $tournamentModel->getParticipantType(false)->label(),
+            'date' => $tournamentModel->getDate()->format('j. n. Y G:i'),
+            'registrationDateStart' => $tournamentModel->getRegistrationDateStart()->format('j. n. Y G:i'),
+            'registrationDateEnd' => $tournamentModel->getRegistrationDateEnd()->format('j. n. Y G:i'),
+            'winCondition' => $tournamentModel->getWinCondition(false)->label(),
+            'matchingType' => $tournamentModel->getMatchingType(false)->label()
+        ]);
+    }
 }
