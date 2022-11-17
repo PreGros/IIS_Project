@@ -194,4 +194,14 @@ class TeamManager
             yield $userModel;
         }
     }
+
+    public function getTeamDetail(int $id): TeamModel
+    {
+        /** @var \App\DAL\Repository\TeamRepository */
+        $repo = $this->entityManager->getRepository(Team::class);
+
+        $team = $repo->find($id);
+
+        return AutoMapper::map($team, TeamModel::class, trackEntity:false);
+    }
 }

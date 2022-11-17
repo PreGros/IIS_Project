@@ -101,4 +101,12 @@ class TeamController extends AbstractController
         $this->addFlash('success', 'Member was deleted');
         return $this->redirectToRoute('team_members', ['id' => $teamId]);
     }
+
+    #[Route('/teams/{id<\d+>}/detail', name: 'team_detail')]
+    public function teamDetailAction(int $id, TeamManager $teamManager): Response
+    {
+        $teamModel = $teamManager->getTeamDetail($id);
+
+        return $this->render('team/detail.html.twig', ['team' => $teamModel]);
+    }
 }

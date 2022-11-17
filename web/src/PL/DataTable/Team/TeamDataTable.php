@@ -41,7 +41,9 @@ class TeamDataTable
                     ' ' .
                     '<a href="{{ row.delete }}" class="btn btn-danger" onclick="return confirm(\'U sure?\')">Delete</a>' .
                     ' ' .
-                    '<a href="{{ row.members }}" class="btn btn-primary">Members</a>'
+                    '<a href="{{ row.members }}" class="btn btn-primary">Members</a>' .
+                    ' ' .
+                    '<a href="{{ row.detail }}" class="btn btn-primary">Detail</a>'
                 ])
             ->createAdapter(DataTableAdapter::class, [
                 'callback' => fn(int $limit) => $this->parseTableData($limit),
@@ -54,6 +56,7 @@ class TeamDataTable
         $tableData = [];
         foreach ($this->teamManager->getTeams($limit) as $data){
             $tableData[] = [
+                'detail' => $this->router->generate('team_detail', ['id' => $data->getId()]),
                 'delete' => $this->router->generate('team_delete', ['id' => $data->getId()]),
                 'edit' => $this->router->generate('team_edit', ['id' => $data->getId()]),
                 'members' => $this->router->generate('team_members', ['id' => $data->getId()]),
