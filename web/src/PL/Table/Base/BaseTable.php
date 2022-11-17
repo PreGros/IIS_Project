@@ -87,7 +87,7 @@ abstract class BaseTable
     {
         return $this->twig->render('/_base/twig_string.html.twig', [
             'template' => $template,
-            'values' => $values
+            'row' => $values
         ]);
     }
 
