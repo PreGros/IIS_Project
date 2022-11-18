@@ -4,6 +4,7 @@ namespace App\DAL\Repository;
 
 use App\DAL\Entity\Tournament;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -37,6 +38,43 @@ class TournamentRepository extends ServiceEntityRepository
         if ($flush) {
             $this->getEntityManager()->flush();
         }
+    }
+
+    /**
+     * @return Paginator<Tournament>
+     */
+    public function findTableData(int $limit, int $start, string $order, bool $ascending, string $search, array $participantTypes): Paginator
+    {
+        $queryBuilder = $this->getEntityManager()->createQueryBuilder();
+
+        $queryBuilder
+            ->select('t')
+            ->from(Tournament::class, 't')
+            ->where('t.name LIKE :p_search')
+            ->orWhere('t.participantType IN (:p_types)');
+
+        if ($order !== ''){
+            $queryBuilder
+                ->orderBy(
+                match($order){
+                    'name' => 't.name',
+                    'date' => 't.date',
+                    'participantType' => 't.participantType'
+                },
+                $ascending ?
+                    'ASC' :
+                    'DESC'
+                );
+        }
+        
+        $query = $queryBuilder
+            ->setParameter('p_search', "%{$search}%")
+            ->setParameter('p_types', $participantTypes)
+            ->setFirstResult($start)
+            ->setMaxResults($limit)
+            ->getQuery();
+
+        return new Paginator($query, false);
     }
 
 //    /**

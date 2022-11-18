@@ -4,6 +4,7 @@ namespace App\PL\DataTable\Team;
 
 use App\BL\Team\TeamManager;
 use App\BL\Util\DataTableAdapter;
+use App\BL\Util\DataTableState;
 use Omines\DataTablesBundle\DataTable;
 use Omines\DataTablesBundle\DataTableFactory;
 use Omines\DataTablesBundle\Column\NumberColumn;
@@ -30,13 +31,13 @@ class TeamDataTable
     {
         return $this->factory->create()
             ->add('name', TwigStringColumn::class, [
-                'label' => 'Jméno',
+                'label' => 'Name',
                 'searchable' => true,
                 'orderable' => true,
                 'template' => '<a href="{{ row.info }}">{{ row.name }}</a>'
             ])
             ->add('leaderNickName', TwigStringColumn::class, [
-                'label' => 'NickName vedoucí',
+                'label' => 'Leader NickName',
                 'searchable' => true,
                 'orderable' => true,
                 'template' => '<a href="{{ row.leaderInfo }}">{{ row.leaderNickName }}</a>'
@@ -54,15 +55,15 @@ class TeamDataTable
                     '<a href="{{ row.members }}" class="btn btn-primary">Members</a>'
                 ])
             ->createAdapter(DataTableAdapter::class, [
-                'callback' => fn(int $limit) => $this->parseTableData($limit),
+                'callback' => fn(DataTableState $state) => $this->parseTableData($state),
                 'objectForCallback' => $this
             ]);
     }
 
-    private function parseTableData(int $limit): array
+    private function parseTableData(DataTableState $state): array
     {
         $tableData = [];
-        foreach ($this->teamManager->getTeams($limit) as $data){
+        foreach ($this->teamManager->getTeams($state) as $data){
             $tableData[] = [
                 'delete' => $this->router->generate('team_delete', ['id' => $data->getId()]),
                 'edit' => $this->router->generate('team_edit', ['id' => $data->getId()]),

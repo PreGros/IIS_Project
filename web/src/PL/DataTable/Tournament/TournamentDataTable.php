@@ -4,6 +4,7 @@ namespace App\PL\DataTable\Tournament;
 
 use App\BL\Tournament\TournamentManager;
 use App\BL\Util\DataTableAdapter;
+use App\BL\Util\DataTableState;
 use Omines\DataTablesBundle\Column\DateTimeColumn;
 use Omines\DataTablesBundle\DataTable;
 use Omines\DataTablesBundle\DataTableFactory;
@@ -59,15 +60,15 @@ class TournamentDataTable
                     '<a href="{{ row.delete }}" class="btn btn-danger" onclick="return confirm(\'U sure?\')">Delete</a>'
                 ])
             ->createAdapter(DataTableAdapter::class, [
-                'callback' => fn(int $limit) => $this->parseTableData($limit),
+                'callback' => fn(DataTableState $state) => $this->parseTableData($state),
                 'objectForCallback' => $this
             ]);
     }
 
-    private function parseTableData(int $limit): array
+    private function parseTableData(DataTableState $state): array
     {
         $tableData = [];
-        foreach ($this->tournamentManager->getTournaments($limit) as $data){
+        foreach ($this->tournamentManager->getTournaments($state) as $data){
             $tableData[] = [
                 'info' => $this->router->generate('tournament_info', ['id' => $data->getId()]),
                 'delete' => $this->router->generate('tournament_delete', ['id' => $data->getId()]),

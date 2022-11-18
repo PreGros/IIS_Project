@@ -4,6 +4,7 @@ namespace App\DAL\Repository;
 
 use App\DAL\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -46,6 +47,41 @@ class UserRepository extends ServiceEntityRepository
         if ($flush) {
             $this->getEntityManager()->flush();
         }
+    }
+
+    /**
+     * @return Paginator<User>
+     */
+    public function findTableData(int $limit, int $start, string $order, bool $ascending, string $search): Paginator
+    {
+        $queryBuilder = $this->getEntityManager()->createQueryBuilder();
+
+        $queryBuilder
+            ->select('u')
+            ->from(User::class, 'u')
+            ->where('u.email LIKE :p_search')
+            ->orWhere('u.nickname LIKE :p_search');
+
+        if ($order !== ''){
+            $queryBuilder
+                ->orderBy(
+                match($order){
+                    'email' => 'u.email',
+                    'nickname' => 'u.nickname'
+                },
+                $ascending ?
+                    'ASC' :
+                    'DESC'
+                );
+        }
+        
+        $query = $queryBuilder
+            ->setParameter('p_search', "%{$search}%")
+            ->setFirstResult($start)
+            ->setMaxResults($limit)
+            ->getQuery();
+
+        return new Paginator($query, false);
     }
 
 //    /**
