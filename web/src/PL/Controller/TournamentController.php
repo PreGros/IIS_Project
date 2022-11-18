@@ -10,7 +10,9 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use App\PL\Form\Tournament\TournamentCreateFormType;
 use App\BL\Tournament\TournamentManager;
 use App\BL\Tournament\TournamentModel;
+use App\DAL\Entity\Tournament;
 use App\PL\DataTable\Tournament\TournamentDataTable;
+use App\PL\Form\Tournament\TournamentEditFormType;
 
 class TournamentController extends AbstractController
 {
@@ -55,5 +57,28 @@ class TournamentController extends AbstractController
             'winCondition' => $tournamentModel->getWinCondition(false)->label(),
             'matchingType' => $tournamentModel->getMatchingType(false)->label()
         ]);
+    }
+
+    #[Route('/tournaments/{id<\d+>}/delete', name: 'tournament_delete')]
+    public function deleteAction(int $id, TournamentManager $tournamentManager): Response
+    {
+        $tournamentManager->deleteTournament($id);
+        return $this->redirectToRoute('tournaments');
+    }
+
+    #[Route('/tournaments/{id<\d+>}/edit', name: 'tournament_edit')]
+    public function editAction(int $id, Request $request, TournamentManager $tournamentManager): Response
+    {
+        $tournament = $tournamentManager->getTournament($id);
+        $form = $this->createForm(TournamentEditFormType::class, $tournament);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()){
+            $tournamentManager->updateTournament($tournament);
+
+            return $this->redirectToRoute('tournaments');
+        }
+
+        return $this->renderForm('tournament/edit.html.twig', ['tournamentForm' => $form]);
     }
 }

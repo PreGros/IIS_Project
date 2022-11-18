@@ -28,7 +28,7 @@ class TournamentManager
     public function createTournament(TournamentModel $tournamentModel)
     {
         /** @var Tournament */
-        $tournament = AutoMapper::map($tournamentModel, Tournament::class, trackEntity: false);
+        $tournament = AutoMapper::map($tournamentModel, Tournament::class, ['id'], false);
         $tournament->setCreatedBy(
             AutoMapper::map(
                 $this->security->getUser(),
@@ -75,5 +75,22 @@ class TournamentManager
 
         /** @var \App\BL\Tournament\TournamentModel */
         return AutoMapper::map($tournament, \App\BL\Tournament\TournamentModel::class, trackEntity: true);
+    }
+
+    public function deleteTournament(int $id)
+    {
+        /** @var \App\DAL\Repository\TournamentRepository */
+        $repo = $this->entityManager->getRepository(Tournament::class);
+        $tournament = $this->entityManager->getReference(\App\DAL\Entity\Tournament::class, $id);
+        $repo->remove($tournament, true);
+    }
+
+    public function updateTournament(TournamentModel $tournamentModel)
+    {
+        /** @var Tournament */
+        $tournament = AutoMapper::map($tournamentModel, Tournament::class, trackEntity: false);
+
+        $this->entityManager->persist($tournament);
+        $this->entityManager->flush();
     }
 }

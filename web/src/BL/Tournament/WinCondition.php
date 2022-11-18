@@ -26,7 +26,7 @@ enum WinCondition: int
     {
         $ret = [];
         foreach (self::cases() as $case){
-            $ret[$case->label()] = $case;
+            $ret[$case->label()] = $case->value;
         }
         return $ret;
     }

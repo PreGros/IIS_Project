@@ -31,10 +31,11 @@ class TournamentDataTable
     public function create(): DataTable
     {
         return $this->factory->create()
-            ->add('name', TextColumn::class, [
+            ->add('name', TwigStringColumn::class, [
                 'label' => 'Name',
                 'searchable' => true,
-                'orderable' => true
+                'orderable' => true,
+                'template' => '<a href="{{ row.info }}">{{ row.displayName }}</a>'
             ])
             ->add('participantType', TextColumn::class, [
                 'label' => 'Participant type',
@@ -47,17 +48,17 @@ class TournamentDataTable
                 'searchable' => true,
                 'orderable' => true
             ])
-            // ->add('action', TwigStringColumn::class, [
-            //     'label' => 'Akce',
-            //     'searchable' => false,
-            //     'orderable' => false,
-            //     'template' => 
-            //         '<a href="{{ row.edit }}" class="btn btn-secondary">Edit</a>' .
-            //         ' ' .
-            //         '<a href="{{ row.delete }}" class="btn btn-danger" onclick="return confirm(\'U sure?\')">Delete</a>' .
-            //         ' ' .
-            //         '<a href="{{ row.members }}" class="btn btn-primary">Members</a>'
-            //     ])
+            ->add('action', TwigStringColumn::class, [
+                'label' => 'Action',
+                'searchable' => false,
+                'orderable' => false,
+                'template' => 
+                    //'<a href="{{ row.info }}" class="btn btn-secondary">Info</a>' . 
+                    //' ' .
+                    '<a href="{{ row.edit }}" class="btn btn-secondary">Edit</a>' .
+                    ' ' .
+                    '<a href="{{ row.delete }}" class="btn btn-danger" onclick="return confirm(\'U sure?\')">Delete</a>'
+                ])
             ->createAdapter(DataTableAdapter::class, [
                 'callback' => fn(DataTableState $state) => $this->parseTableData($state),
                 'objectForCallback' => $this
@@ -69,10 +70,10 @@ class TournamentDataTable
         $tableData = [];
         foreach ($this->tournamentManager->getTournaments($state) as $data){
             $tableData[] = [
-                // 'delete' => $this->router->generate('team_delete', ['id' => $data->getId()]),
-                // 'edit' => $this->router->generate('team_edit', ['id' => $data->getId()]),
-                // 'members' => $this->router->generate('team_members', ['id' => $data->getId()]),
-                'name' => $data->getName(),
+                'info' => $this->router->generate('tournament_info', ['id' => $data->getId()]),
+                'delete' => $this->router->generate('tournament_delete', ['id' => $data->getId()]),
+                'edit' => $this->router->generate('tournament_edit', ['id' => $data->getId()]),
+                'displayName' => $data->getName(),
                 'participantType' => $data->getParticipantType(false)->label(),
                 'date' => $data->getDate()
             ];

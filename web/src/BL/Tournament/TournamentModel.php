@@ -5,6 +5,8 @@ namespace App\BL\Tournament;
 
 class TournamentModel
 {
+    private int $id;
+
     private string $name;
 
     private ?string $description;
@@ -31,12 +33,17 @@ class TournamentModel
 
     private WinCondition $winCondition;
 
-    private MatchingType $matchingType;
+    public MatchingType $matchingType;
 
     // public function __construct()
     // {
     //     $this->date = new \DateTime();
     // }
+
+    public function getId(): int
+    {
+        return $this->id;
+    }
 
     public function getName(): string
     {
