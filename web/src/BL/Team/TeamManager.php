@@ -134,6 +134,7 @@ class TeamManager
             /** @var TeamTableModel */
             $teamModel = AutoMapper::map($entity['team'], TeamTableModel::class, trackEntity: false);
             $teamModel->setLeaderNickName($entity['team']->getLeader()->getNickname());
+            $teamModel->setLeaderId($entity['team']->getLeader()->getId());
             /** memberCount == members + leader (1) */
             $teamModel->setMemberCount($entity['memberCount'] + 1);
             yield $teamModel;

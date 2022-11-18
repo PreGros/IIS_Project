@@ -29,8 +29,18 @@ class TeamDataTable
     public function create(): DataTable
     {
         return $this->factory->create()
-            ->add('name', TextColumn::class, ['label' => 'Jméno', 'searchable' => true, 'orderable' => true])
-            ->add('leaderNickName', TextColumn::class, ['label' => 'NickName vedoucí', 'searchable' => true, 'orderable' => true])
+            ->add('name', TwigStringColumn::class, [
+                'label' => 'Jméno',
+                'searchable' => true,
+                'orderable' => true,
+                'template' => '<a href="{{ row.info }}">{{ row.name }}</a>'
+            ])
+            ->add('leaderNickName', TwigStringColumn::class, [
+                'label' => 'NickName vedoucí',
+                'searchable' => true,
+                'orderable' => true,
+                'template' => '<a href="{{ row.leaderInfo }}">{{ row.leaderNickName }}</a>'
+            ])
             ->add('memberCount', NumberColumn::class, ['label' => 'Počet členů', 'searchable' => true, 'orderable' => true])
             ->add('action', TwigStringColumn::class, [
                 'label' => 'Akce',
@@ -58,7 +68,10 @@ class TeamDataTable
                 'edit' => $this->router->generate('team_edit', ['id' => $data->getId()]),
                 'members' => $this->router->generate('team_members', ['id' => $data->getId()]),
                 'name' => $data->getName(),
+                // 'info' => $this->router->generate('team_info', ['id' => $data->getId()]),
+                'info' => $this->router->generate('teams'),
                 'leaderNickName' => $data->getLeaderNickName(),
+                'leaderInfo' => $this->router->generate('user_info', ['id' => $data->getLeaderId()]),
                 'memberCount' => $data->getMemberCount()
             ];
         }

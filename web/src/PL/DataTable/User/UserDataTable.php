@@ -28,8 +28,17 @@ class UserDataTable
     public function create(): DataTable
     {
         return $this->factory->create()
-            ->add('email', TextColumn::class, ['label' => 'email', 'searchable' => true, 'orderable' => true])
-            ->add('nickname', TextColumn::class, ['label' => 'NickName', 'searchable' => true, 'orderable' => true])
+            ->add('nickname', TwigStringColumn::class, [
+                'label' => 'NickName',
+                'searchable' => true,
+                'orderable' => true,
+                'template' => '<a href="{{ row.info }}">{{ row.nickname }}</a>'
+            ])
+            ->add('email', TextColumn::class, [
+                'label' => 'email',
+                'searchable' => true,
+                'orderable' => true
+            ])
             ->add('action', TwigStringColumn::class, [
                 'label' => 'Akce',
                 'searchable' => false,
@@ -52,6 +61,7 @@ class UserDataTable
             $tableData[] = [
                 'email' => $user->getEmail(),
                 'nickname' => $user->getNickname(),
+                'info' => $this->router->generate('user_info', ['id' => $user->getId()]),
                 'isAdmin' => $user->haveRole('ROLE_ADMIN'),
                 'demoteURL' => $this->router->generate('user_demote', ['id' => $user->getId()]),
                 'promoteURL' => $this->router->generate('user_promote', ['id' => $user->getId()]),

@@ -10,6 +10,8 @@ class TeamTableModel
 
     private string $leaderNickName;
 
+    private string $leaderId;
+
     private int $memberCount;
 
     public function getId(): int
@@ -40,6 +42,16 @@ class TeamTableModel
     public function setLeaderNickName(string $val)
     {
         $this->leaderNickName = $val;
+    }
+
+    public function getLeaderId(): string
+    {
+        return $this->leaderId;
+    }
+
+    public function setLeaderId(int $val)
+    {
+        $this->leaderId = $val;
     }
 
     public function getMemberCount(): int

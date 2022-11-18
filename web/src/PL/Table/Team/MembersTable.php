@@ -26,8 +26,8 @@ class MembersTable extends BaseTable
         parent::init($options);
 
         $this
+            ->addColumn('nickname', 'Nickname', true)
             ->addColumn('email', 'Email')
-            ->addColumn('nickname', 'Nickname')
             ->addColumn('isLeader', 'Is leader?')
             ->addColumn('action', 'Action', true);
 
@@ -46,13 +46,14 @@ class MembersTable extends BaseTable
         foreach ($this->teamManager->getTeamMembers($this->options['teamId']) as $member){
             yield [
                 'email' => $member->getEmail(),
-                'nickname' => $member->getNickname(),
+                //'nickname' => $member->getNickname(),
+                'nickname' => 
+                    $this->renderTwigStringColumn('<a href="{{ row.url }}">{{ row.nickname }}</a>', [
+                        'url' => $this->router->generate('user_info', ['id' => $member->getId()]),
+                        'nickname' => $member->getNickname()
+                    ]),
                 'isLeader' => $member->isLeader() ? 'Yes' : 'No',
                 'action' =>
-                    $this->renderTwigStringColumn('<a href="{{ row.url }}" class="btn btn-primary">Detail</a>', [
-                        'url' => $this->router->generate('user_info', ['id' => $member->getId()])
-                    ]) .
-                    ' ' .
                     ($member->isLeader() ?
                     'Cannot delete leader' :
                     $this->renderTwigStringColumn('<a href="{{ row.url }}" class="btn btn-danger">Delete</a>', [
