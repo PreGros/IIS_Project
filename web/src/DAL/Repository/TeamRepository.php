@@ -6,6 +6,7 @@ use App\DAL\Entity\Team;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\ORM\Query\Expr;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 
 /**
  * @extends ServiceEntityRepository<Team>
@@ -95,20 +96,45 @@ class TeamRepository extends ServiceEntityRepository
     }
 
     /**
-     * @return array<array<int|Team>>
+     * @return Paginator<array<Team|int>>
      */
-    public function findTableData(int $limit): array
+    public function findTableData(int $limit, int $start, string $order, bool $ascending, string $search, int $searchMemberCount): Paginator
     {
-        return $this->getEntityManager()->createQueryBuilder()
+        $queryBuilder = $this->getEntityManager()->createQueryBuilder();
+
+        $queryBuilder
             ->select('count(m.user) memberCount, t team')
             ->from(Team::class, 't')
             ->innerJoin(\App\DAL\Entity\User::class, 'l', Expr\Join::WITH, 't.leader = l')
             ->leftJoin(\App\DAL\Entity\Member::class, 'm', Expr\Join::WITH, 'm.team = t')
             ->groupBy('t')
             ->addGroupBy('l')
+            ->having('t.name LIKE :p_search')
+            ->orHaving('l.nickname LIKE :p_search')
+            ->orHaving('memberCount = :p_search_count');
+
+        if ($order !== ''){
+            $queryBuilder
+                ->orderBy(
+                match($order){
+                    'name' => 't.name',
+                    'leaderNickName' => 'l.nickname',
+                    'memberCount' => 'memberCount'
+                },
+                $ascending ?
+                    'ASC' :
+                    'DESC'
+                );
+        }
+        
+        $query = $queryBuilder
+            ->setParameter('p_search', "%{$search}%")
+            ->setParameter('p_search_count', $searchMemberCount)
+            ->setFirstResult($start)
             ->setMaxResults($limit)
-            ->getQuery()
-            ->getResult();
+            ->getQuery();
+
+        return new Paginator($query, false);
     }
 
 //    /**

@@ -8,6 +8,7 @@ use Symfony\Component\Security\Core\Security;
 use App\BL\Util\AutoMapper;
 use App\BL\Util\StringUtil;
 use App\BL\Tournament\TournamentModel;
+use App\BL\Util\DataTableState;
 use App\DAL\Entity\Tournament;
 
 class TournamentManager
@@ -45,12 +46,22 @@ class TournamentManager
      /**
      * @return \Traversable<TournamentModel>
      */
-    public function getTournaments(int $limit): \Traversable
+    public function getTournaments(DataTableState $state): \Traversable
     {
         /** @var \App\DAL\Repository\TournamentRepository */
         $repo = $this->entityManager->getRepository(Tournament::class);
         
-        foreach ($repo->findBy([], limit: $limit) as $entity){
+        $paginator = $repo->findTableData(
+            $state->getLimit(),
+            $state->getStart(),
+            $state->getOrderColumn(),
+            $state->isAsceding(),
+            $state->getSearch(),
+            ParticipantType::getByName($state->getSearch())
+        );
+        $state->setCount($paginator->count());
+
+        foreach ($paginator as $entity){
             yield AutoMapper::map($entity, TournamentModel::class, trackEntity: false);
         }
     }

@@ -4,6 +4,7 @@ namespace App\PL\DataTable\Tournament;
 
 use App\BL\Tournament\TournamentManager;
 use App\BL\Util\DataTableAdapter;
+use App\BL\Util\DataTableState;
 use Omines\DataTablesBundle\Column\DateTimeColumn;
 use Omines\DataTablesBundle\DataTable;
 use Omines\DataTablesBundle\DataTableFactory;
@@ -58,15 +59,15 @@ class TournamentDataTable
             //         '<a href="{{ row.members }}" class="btn btn-primary">Members</a>'
             //     ])
             ->createAdapter(DataTableAdapter::class, [
-                'callback' => fn(int $limit) => $this->parseTableData($limit),
+                'callback' => fn(DataTableState $state) => $this->parseTableData($state),
                 'objectForCallback' => $this
             ]);
     }
 
-    private function parseTableData(int $limit): array
+    private function parseTableData(DataTableState $state): array
     {
         $tableData = [];
-        foreach ($this->tournamentManager->getTournaments($limit) as $data){
+        foreach ($this->tournamentManager->getTournaments($state) as $data){
             $tableData[] = [
                 // 'delete' => $this->router->generate('team_delete', ['id' => $data->getId()]),
                 // 'edit' => $this->router->generate('team_edit', ['id' => $data->getId()]),

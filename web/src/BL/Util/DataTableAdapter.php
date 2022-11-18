@@ -7,7 +7,7 @@ namespace App\BL\Util;
 use Omines\DataTablesBundle\Adapter\AdapterInterface;
 use Omines\DataTablesBundle\Adapter\ResultSetInterface;
 use Omines\DataTablesBundle\Adapter\ArrayResultSet;
-use Omines\DataTablesBundle\DataTableState;
+use Omines\DataTablesBundle\DataTableState as State;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyAccessor;
 
@@ -37,25 +37,20 @@ class DataTableAdapter implements AdapterInterface
     /**
      * {@inheritdoc}
      */
-    public function getData(DataTableState $state): ResultSetInterface
+    public function getData(State $state): ResultSetInterface
     {
-        $length = $state->getLength() ?? 0;
-        $this->data = $this->dataCallback->call($this->objectForCallback, $length > 0 ? $length : self::MAX_FETCH);
-        // very basic implementation of sorting
-        try {
-            $oc = $state->getOrderBy()[0][0]->getName();
-            $oo = \mb_strtolower($state->getOrderBy()[0][1]);
+        $dataState = new DataTableState(
+            $state->getLength() ?? 0,
+            $state->getStart(),
+            (($state->getOrderBy()[0] ?? [])[0] ?? null)?->getName() ?? '',
+            (($state->getOrderBy()[0] ?? [])[1] ?? null) ?? '',
+            $state->getGlobalSearch()
+        );
 
-            \usort($this->data, function ($a, $b) use ($oc, $oo) {
-                if ('desc' === $oo) {
-                    return $b[$oc] <=> $a[$oc];
-                }
-
-                return $a[$oc] <=> $b[$oc];
-            });
-        } catch (\Throwable $exception) {
-            // ignore exception
-        }
+        $this->data = $this->dataCallback->call(
+            $this->objectForCallback,
+            $dataState
+        );
 
         $map = [];
         foreach ($state->getDataTable()->getColumns() as $column) {
@@ -69,44 +64,38 @@ class DataTableAdapter implements AdapterInterface
         }
 
         $data = iterator_to_array($this->processData($state, $this->data, $map));
-        $page = $length > 0 ? array_slice($data, $state->getStart(), $state->getLength()) : $data;
+        //$page = $length > 0 ? array_slice($data, $state->getStart(), $state->getLength()) : $data;
 
-        return new ArrayResultSet($page, count($this->data), count($data));
+        return new ArrayResultSet($data, totalFilteredRows: $dataState->getCount());
     }
 
     /**
      * @return \Generator
      */
-    protected function processData(DataTableState $state, array $data, array $map)
+    protected function processData(State $state, array $data, array $map)
     {
         $transformer = $state->getDataTable()->getTransformer();
-        $search = $state->getGlobalSearch() ?: '';
         foreach ($data as $result) {
-            if ($row = $this->processRow($state, $result, $map, $search)) {
-                if (null !== $transformer) {
-                    $row = call_user_func($transformer, $row, $result);
-                }
-                yield $row;
+            $row = $this->processRow($state, $result, $map);
+            if (null !== $transformer) {
+                $row = call_user_func($transformer, $row, $result);
             }
+            yield $row;
         }
     }
 
     /**
-     * @return array|null
+     * @return array
      */
-    protected function processRow(DataTableState $state, array $result, array $map, string $search)
+    protected function processRow(State $state, array $result, array $map)
     {
         $row = [];
-        $match = empty($search);
         foreach ($state->getDataTable()->getColumns() as $column) {
             $value = (!empty($propertyPath = $map[$column->getName()]) && $this->accessor->isReadable($result, $propertyPath)) ? $this->accessor->getValue($result, $propertyPath) : null;
             $value = $column->transform($value, $result);
-            if (!$match) {
-                $match = (false !== mb_stripos($value, $search));
-            }
             $row[$column->getName()] = $value;
         }
 
-        return $match ? $row : null;
+        return $row;
     }
 }

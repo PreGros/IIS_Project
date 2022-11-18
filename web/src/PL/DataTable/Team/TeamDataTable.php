@@ -4,6 +4,7 @@ namespace App\PL\DataTable\Team;
 
 use App\BL\Team\TeamManager;
 use App\BL\Util\DataTableAdapter;
+use App\BL\Util\DataTableState;
 use Omines\DataTablesBundle\DataTable;
 use Omines\DataTablesBundle\DataTableFactory;
 use Omines\DataTablesBundle\Column\NumberColumn;
@@ -29,9 +30,9 @@ class TeamDataTable
     public function create(): DataTable
     {
         return $this->factory->create()
-            ->add('name', TextColumn::class, ['label' => 'Jméno', 'searchable' => true, 'orderable' => true])
-            ->add('leaderNickName', TextColumn::class, ['label' => 'NickName vedoucí', 'searchable' => true, 'orderable' => true])
-            ->add('memberCount', NumberColumn::class, ['label' => 'Počet členů', 'searchable' => true, 'orderable' => true])
+            ->add('name', TextColumn::class, ['label' => 'Name', 'searchable' => true, 'orderable' => true])
+            ->add('leaderNickName', TextColumn::class, ['label' => 'Leader NickName', 'searchable' => true, 'orderable' => true])
+            ->add('memberCount', NumberColumn::class, ['label' => 'Count of members', 'searchable' => true, 'orderable' => true])
             ->add('action', TwigStringColumn::class, [
                 'label' => 'Akce',
                 'searchable' => false,
@@ -44,15 +45,15 @@ class TeamDataTable
                     '<a href="{{ row.members }}" class="btn btn-primary">Members</a>'
                 ])
             ->createAdapter(DataTableAdapter::class, [
-                'callback' => fn(int $limit) => $this->parseTableData($limit),
+                'callback' => fn(DataTableState $state) => $this->parseTableData($state),
                 'objectForCallback' => $this
             ]);
     }
 
-    private function parseTableData(int $limit): array
+    private function parseTableData(DataTableState $state): array
     {
         $tableData = [];
-        foreach ($this->teamManager->getTeams($limit) as $data){
+        foreach ($this->teamManager->getTeams($state) as $data){
             $tableData[] = [
                 'delete' => $this->router->generate('team_delete', ['id' => $data->getId()]),
                 'edit' => $this->router->generate('team_edit', ['id' => $data->getId()]),
