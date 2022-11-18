@@ -194,4 +194,18 @@ class TeamManager
             yield $userModel;
         }
     }
+
+    public function isCurrentUserLeader(int $teadId): bool
+    {
+        /** @var \App\DAL\Repository\TeamRepository */
+        $repo = $this->entityManager->getRepository(Team::class);
+
+        $team = $repo->find($teadId);
+        /** @var \App\BL\User\UserModel */
+        $leader = AutoMapper::map($team->getLeader(), \App\BL\User\UserModel::class, trackEntity: false);
+
+        /** @var \App\BL\User\UserModel */
+        $user = $this->security->getUser();
+        return $user->getId() === $leader->getId();
+    }
 }

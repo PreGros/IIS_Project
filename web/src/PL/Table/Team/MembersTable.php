@@ -29,7 +29,6 @@ class MembersTable extends BaseTable
             ->addColumn('email', 'Email')
             ->addColumn('nickname', 'Nickname')
             ->addColumn('isLeader', 'Is leader?')
-            ->addColumn('detail', 'Profile')
             ->addColumn('action', 'Action', true);
 
         return $this;
@@ -49,13 +48,16 @@ class MembersTable extends BaseTable
                 'email' => $member->getEmail(),
                 'nickname' => $member->getNickname(),
                 'isLeader' => $member->isLeader() ? 'Yes' : 'No',
-                'detail' => 'TODO: url',
-                'action' => 
-                    $member->isLeader() ?
+                'action' =>
+                    $this->renderTwigStringColumn('<a href="{{ row.url }}" class="btn btn-primary">Detail</a>', [
+                        'url' => $this->router->generate('user_info', ['id' => $member->getId()])
+                    ]) .
+                    ' ' .
+                    ($member->isLeader() ?
                     'Cannot delete leader' :
-                    $this->renderTwigStringColumn('<a href="{{ values.url }}" class="btn btn-danger">Delete</a>', [
-                        'url' => $this->router->generate('delete_member', ['teamId' => $this->options['teamId'], 'memberId' => $member->getId()
-                    ])])
+                    $this->renderTwigStringColumn('<a href="{{ row.url }}" class="btn btn-danger">Delete</a>', [
+                        'url' => $this->router->generate('delete_member', ['teamId' => $this->options['teamId'], 'memberId' => $member->getId()])
+                    ]))
             ];
         }
     }

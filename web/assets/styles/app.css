@@ -18,6 +18,10 @@ dd.vert-center {
     margin-bottom: auto;
 }
 
+td {
+    vertical-align: middle;
+}
+
 dt.vert-center {
     margin-top: 8px;
     margin-bottom: 8px;

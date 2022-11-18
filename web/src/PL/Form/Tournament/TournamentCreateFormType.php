@@ -31,13 +31,27 @@ class TournamentCreateFormType extends AbstractType
                 'choices' => ParticipantType::getTypes()
             ])
             ->add('maxTeamMemberCount', IntegerType::class, [
-                'required' => false
+                'required' => false,
+                'attr' => [
+                    'min' => 1
+                ]
             ])
             ->add('minTeamMemberCount', IntegerType::class, [
-                'required' => false
+                'required' => false,
+                'attr' => [
+                    'min' => 0
+                ]
             ])
-            ->add('maxParticipantCount', IntegerType::class)
-            ->add('minParticipantCount', IntegerType::class)
+            ->add('maxParticipantCount', IntegerType::class, [
+                'attr' => [
+                    'min' => 1
+                ]
+            ])
+            ->add('minParticipantCount', IntegerType::class, [
+                'attr' => [
+                    'min' => 0
+                ]
+            ])
             ->add('date', DateTimeType::class)
             ->add('prize', TextType::class, [
                 'required' => false
