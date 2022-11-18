@@ -63,7 +63,7 @@ class TeamController extends AbstractController
             return $this->redirectToRoute('teams');
         }
 
-        return $this->renderForm('team/edit.html.twig', ['teamForm' => $form]);
+        return $this->renderForm('team/edit.html.twig', ['teamForm' => $form, 'team' => $team]);
     }
 
     #[Route('/teams/{id<\d+>}/people', name: 'get_people')]

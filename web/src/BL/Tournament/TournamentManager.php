@@ -10,6 +10,7 @@ use App\BL\Util\StringUtil;
 use App\BL\Tournament\TournamentModel;
 use App\BL\Util\DataTableState;
 use App\DAL\Entity\Tournament;
+use App\DAL\Entity\TournamentType;
 
 class TournamentManager
 {
@@ -89,8 +90,39 @@ class TournamentManager
     {
         /** @var Tournament */
         $tournament = AutoMapper::map($tournamentModel, Tournament::class, trackEntity: false);
-
+        
         $this->entityManager->persist($tournament);
         $this->entityManager->flush();
+    }
+
+    /**
+     * @return \Traversable<TournamentType>
+     */
+    public function getTournamentTypes(): \Traversable
+    {
+        /** @var \App\DAL\Repository\TournamentTypeRepository */
+        $repo = $this->entityManager->getRepository(TournamentType::class);
+
+        foreach ($repo->findAll() as $type){
+            yield AutoMapper::map($type, TournamentTypeModel::class, trackEntity: false);
+        }
+    }
+
+    public function deleteTournamentType(int $id)
+    {
+        /** @var \App\DAL\Repository\TournamentTypeRepository */
+        $repo = $this->entityManager->getRepository(TournamentType::class);
+
+        $type = $this->entityManager->getReference(TournamentType::class, $id);
+        $repo->remove($type, true);
+    }
+
+    public function createTournamentType(TournamentTypeModel $typeModel)
+    {
+        /** @var \App\DAL\Repository\TournamentTypeRepository */
+        $repo = $this->entityManager->getRepository(TournamentType::class);
+
+        $type = AutoMapper::map($typeModel, TournamentType::class, trackEntity: false);
+        $repo->save($type, true);
     }
 }

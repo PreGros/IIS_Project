@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Tournament types{% endblock %}
+
+{% block body %}
+    {{ render_flash_messages() }}
+
+    <h1>Tournament types</h1>
+
+    <h3>Add tournament type</h3>
+
+    {{ form_start(tournamentTypeForm) }}
+        {{ form_row(tournamentTypeForm.name) }}
+        {{ form_row(tournamentTypeForm.submit) }}
+    {{ form_end(tournamentTypeForm) }}
+
+    {{ table_render(table) }}
+    
+{% endblock %}

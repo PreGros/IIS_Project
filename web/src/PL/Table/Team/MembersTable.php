@@ -56,7 +56,7 @@ class MembersTable extends BaseTable
                 'action' =>
                     ($member->isLeader() ?
                     'Cannot delete leader' :
-                    $this->renderTwigStringColumn('<a href="{{ row.url }}" class="btn btn-danger">Delete</a>', [
+                    $this->renderTwigStringColumn('<a href="{{ row.url }}" class="btn btn-danger" onclick="return confirm(\'Are you sure?\')">Delete</a>', [
                         'url' => $this->router->generate('delete_member', ['teamId' => $this->options['teamId'], 'memberId' => $member->getId()])
                     ]))
             ];

@@ -33,7 +33,7 @@ class TournamentModel
 
     private WinCondition $winCondition;
 
-    public MatchingType $matchingType;
+    private MatchingType $matchingType;
 
     // public function __construct()
     // {
