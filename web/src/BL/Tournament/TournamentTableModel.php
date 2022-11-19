@@ -21,6 +21,7 @@ class TournamentTableModel
 
     private bool $approved;
 
+    private bool $createdByCurrentUser;
     // private ?string $approvedByNickName;
 
     // private ?int $approvedById;
@@ -108,6 +109,16 @@ class TournamentTableModel
     public function setApproved(bool $val)
     {
         $this->approved = $val;
+    }
+
+    public function getCreatedByCurrentUser(): bool
+    {
+        return $this->createdByCurrentUser;
+    }
+
+    public function setCreatedByCurrentUser(bool $val)
+    {
+        $this->createdByCurrentUser = $val;
     }
 
     // public function getApprovedById(): ?int

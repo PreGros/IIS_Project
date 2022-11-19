@@ -22,7 +22,7 @@ class TournamentController extends AbstractController
     #[Route('/tournaments', name: 'tournaments')]
     public function tournamentsAction(Request $request, TournamentDataTable $dataTable): Response
     {
-        $table = $dataTable->create()->handleRequest($request);
+        $table = $dataTable->create($this->isGranted('ROLE_ADMIN'))->handleRequest($request);
 
         if ($table->isCallback()){
             return $table->getResponse();
@@ -113,5 +113,19 @@ class TournamentController extends AbstractController
         $tournamentManager->deleteTournamentType($id);   
         $this->addFlash('success', 'Tournament type was deleted');
         return $this->redirectToRoute('tournament_types');
+    }
+
+    #[Route('/tournaments/{id<\d+>}/approve', name: 'user_approve')]
+    public function approveTournament(int $id, TournamentManager $tournamentManager): Response
+    {
+        $tournamentManager->approveTournament($id);
+        return $this->redirectToRoute('tournaments');
+    }
+
+    #[Route('/tournaments/{id<\d+>}/disapprove', name: 'user_disapprove')]
+    public function disapproveTournament(int $id, TournamentManager $tournamentManager): Response
+    {
+        $tournamentManager->disapproveTournament($id);
+        return $this->redirectToRoute('tournaments');
     }
 }
