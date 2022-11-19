@@ -88,9 +88,10 @@ class TournamentManager
 
         foreach ($paginator as $entity){
             /** @var TournamentTableModel */
-            $tournamentModel = AutoMapper::map($entity, TournamentTableModel::class, trackEntity: false);
-            $tournamentModel->setCreatedById($entity->getCreatedBy()->getId());
-            $tournamentModel->setCreatedByNickName($entity->getCreatedBy()->getNickname());
+            $tournamentModel = AutoMapper::map($entity['tournament'], TournamentTableModel::class, trackEntity: false);
+            $tournamentModel->setCreatedById($entity['tournament']->getCreatedBy()->getId());
+            $tournamentModel->setCreatedByNickName($entity['tournament']->getCreatedBy()->getNickname());
+            $tournamentModel->setApproved((bool)$entity['approved']);
             yield $tournamentModel;
         }
     }

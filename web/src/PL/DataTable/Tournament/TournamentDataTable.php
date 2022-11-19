@@ -48,10 +48,16 @@ class TournamentDataTable
                 'searchable' => true,
                 'orderable' => true
             ])
+            ->add('approved', TwigStringColumn::class, [
+                'label' => 'Is Approved?',
+                'searchable' => true,
+                'orderable' => true,
+                'template' => '<i class="bi {{ row.approvedClass }}"/>'
+            ])
             ->add('date', DateTimeColumn::class, [
                 'label' => 'Date',
                 'format' => 'j. n. Y G:i',
-                'searchable' => true,
+                'searchable' => false,
                 'orderable' => true
             ])
             ->add('action', TwigStringColumn::class, [
@@ -83,7 +89,8 @@ class TournamentDataTable
                 'participantType' => $data->getParticipantType(false)->label(),
                 'date' => $data->getDate(),
                 'createdByNickName' => $data->getCreatedByNickName(),
-                'createdByInfo' => $this->router->generate('user_info', ['id' => $data->getCreatedById()])
+                'createdByInfo' => $this->router->generate('user_info', ['id' => $data->getCreatedById()]),
+                'approvedClass' => $data->getApproved() ? 'bi-check-lg' : 'bi-x-lg'
             ];
         }
         return $tableData;

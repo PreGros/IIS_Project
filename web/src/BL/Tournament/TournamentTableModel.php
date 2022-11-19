@@ -19,6 +19,12 @@ class TournamentTableModel
 
     private string $createdByNickName;
 
+    private bool $approved;
+
+    // private ?string $approvedByNickName;
+
+    // private ?int $approvedById;
+
     // public function __construct()
     // {
     //     $this->date = new \DateTime();
@@ -93,4 +99,34 @@ class TournamentTableModel
     {
         $this->createdByNickName = $val;
     }
+
+    public function getApproved(): bool
+    {
+        return $this->approved;
+    }
+
+    public function setApproved(bool $val)
+    {
+        $this->approved = $val;
+    }
+
+    // public function getApprovedById(): ?int
+    // {
+    //     return $this->approvedById;
+    // }
+
+    // public function setApprovedById(?int $val)
+    // {
+    //     $this->approvedById = $val;
+    // }
+
+    // public function getApprovedByNickName(): ?string
+    // {
+    //     return $this->approvedByNickName;
+    // }
+
+    // public function setApprovedByNickName(?string $val)
+    // {
+    //     $this->approvedByNickName = $val;
+    // }
 }

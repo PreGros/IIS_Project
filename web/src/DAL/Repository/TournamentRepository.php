@@ -3,7 +3,9 @@
 namespace App\DAL\Repository;
 
 use App\DAL\Entity\Tournament;
+use App\DAL\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -41,14 +43,15 @@ class TournamentRepository extends ServiceEntityRepository
     }
 
     /**
-     * @return Paginator<Tournament>
+     * @return Paginator<array<<Tournament|int>>
      */
     public function findTableData(int $limit, int $start, string $order, bool $ascending, string $search, array $participantTypes): Paginator
     {
         $queryBuilder = $this->getEntityManager()->createQueryBuilder();
 
         $queryBuilder
-            ->select('t')
+            ->select('t tournament')
+            ->addSelect('CASE WHEN (t.approvedBy IS NOT NULL) THEN 1 ELSE 0 END as approved')
             ->from(Tournament::class, 't')
             ->where('t.name LIKE :p_search')
             ->orWhere('t.participantType IN (:p_types)');
