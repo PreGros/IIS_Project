@@ -89,6 +89,11 @@
               <li class="nav-item">
                 <a class="nav-link active" aria-current="page" href="{% if is_granted("IS_AUTHENTICATED_FULLY") %}{{ path('app_logout') }}{% else %}{{ path('app_login') }}{% endif %}">{% if is_granted("IS_AUTHENTICATED_FULLY") %}Logout{% else %}Login{% endif %}</a>
               </li>
+              {% if not is_granted("IS_AUTHENTICATED_FULLY") %}
+                <li class="nav-item">
+                  <a class="nav-link active" aria-current="page" href="{{ path('app_register') }}">Register</a>
+                </li>
+              {% endif %}
             </ul>
 
             {# <form class="d-flex ms-auto">
