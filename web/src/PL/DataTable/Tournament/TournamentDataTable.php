@@ -52,7 +52,7 @@ class TournamentDataTable
                 'searchable' => true,
                 'orderable' => true
             ])
-            ->add('approved', TwigStringColumn::class, [
+            ->add('isApproved', TwigStringColumn::class, [
                 'label' => 'Is Approved?',
                 'searchable' => true,
                 'orderable' => true,
