@@ -28,8 +28,11 @@ class MembersTable extends BaseTable
         $this
             ->addColumn('nickname', 'Nickname', true)
             ->addColumn('email', 'Email')
-            ->addColumn('isLeader', 'Is leader?')
-            ->addColumn('action', 'Action', true);
+            ->addColumn('isLeader', 'Is leader?', true);
+        
+        if ($this->options['canModify']){
+            $this->addColumn('action', 'Action', true);
+        }
 
         return $this;
     }
@@ -38,13 +41,15 @@ class MembersTable extends BaseTable
     {
         $resolver
             ->setDefault('teamId', null)
-            ->setAllowedTypes('teamId', 'int');
+            ->setDefault('canModify', false)
+            ->setAllowedTypes('teamId', 'int')
+            ->setAllowedTypes('canModify', 'bool');
     }
 
     protected function setData(): \Traversable
     {
         foreach ($this->teamManager->getTeamMembers($this->options['teamId']) as $member){
-            yield [
+            $data = [
                 'email' => $member->getEmail(),
                 //'nickname' => $member->getNickname(),
                 'nickname' => 
@@ -52,14 +57,22 @@ class MembersTable extends BaseTable
                         'url' => $this->router->generate('user_info', ['id' => $member->getId()]),
                         'nickname' => $member->getNickname()
                     ]),
-                'isLeader' => $member->isLeader() ? 'Yes' : 'No',
-                'action' =>
-                    ($member->isLeader() ?
-                    'Cannot delete leader' :
-                    $this->renderTwigStringColumn('<a href="{{ row.url }}" class="btn btn-danger" onclick="return confirm(\'Are you sure?\')">Delete</a>', [
-                        'url' => $this->router->generate('delete_member', ['teamId' => $this->options['teamId'], 'memberId' => $member->getId()])
-                    ]))
+                'isLeader' => $member->isLeader() ? '<i class="bi bi-check-lg"/>' : '<i class="bi bi-x-lg"/>'
             ];
+
+            if ($this->options['canModify']){
+                $data['action'] =
+                    ($member->isLeader() ?
+                        'Cannot delete leader' :
+                        $this->renderTwigStringColumn(
+                            '<a href="{{ row.url }}" class="btn btn-danger" onclick="return confirm(\'Are you sure?\')">Delete</a>', [
+                                'url' => $this->router->generate('delete_member', ['teamId' => $this->options['teamId'], 'memberId' => $member->getId()])
+                            ]
+                        )
+                    );
+            }
+
+            yield $data;
         }
     }
 

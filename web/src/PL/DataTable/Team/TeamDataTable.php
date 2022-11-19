@@ -20,6 +20,8 @@ class TeamDataTable
 
     private TeamManager $teamManager;
 
+    private bool $allModifiable;
+
     public function __construct(DataTableFactory $dataTableFactory, UrlGeneratorInterface $router, TeamManager $teamManager)
     {
         $this->factory = $dataTableFactory;
@@ -27,8 +29,10 @@ class TeamDataTable
         $this->teamManager = $teamManager;
     }
 
-    public function create(): DataTable
+    public function create(bool $allModifiable = false): DataTable
     {
+        $this->allModifiable = $allModifiable;
+
         return $this->factory->create()
             ->add('name', TwigStringColumn::class, [
                 'label' => 'Name',
@@ -47,14 +51,16 @@ class TeamDataTable
                 'label' => 'Akce',
                 'searchable' => false,
                 'orderable' => false,
-                'template' => 
+                'template' =>
+                    '{% if row.modifiable %}' .
                     '<a href="{{ row.edit }}" class="btn btn-secondary">Edit</a>' .
                     ' ' .
                     '<a href="{{ row.delete }}" class="btn btn-danger" onclick="return confirm(\'U sure?\')">Delete</a>' .
                     ' ' .
+                    '{% endif %}'.
                     '<a href="{{ row.members }}" class="btn btn-primary">Members</a>' .
                     ' ' .
-                    '<a href="{{ row.detail }}" class="btn btn-primary">Detail</a>'
+                    '<a href="{{ row.info }}" class="btn btn-primary">Info</a>'
                 ])
             ->createAdapter(DataTableAdapter::class, [
                 'callback' => fn(DataTableState $state) => $this->parseTableData($state),
@@ -67,16 +73,15 @@ class TeamDataTable
         $tableData = [];
         foreach ($this->teamManager->getTeams($state) as $data){
             $tableData[] = [
-                'detail' => $this->router->generate('team_detail', ['id' => $data->getId()]),
                 'delete' => $this->router->generate('team_delete', ['id' => $data->getId()]),
                 'edit' => $this->router->generate('team_edit', ['id' => $data->getId()]),
                 'members' => $this->router->generate('team_members', ['id' => $data->getId()]),
                 'name' => $data->getName(),
-                // 'info' => $this->router->generate('team_info', ['id' => $data->getId()]),
-                'info' => $this->router->generate('teams'),
+                'info' => $this->router->generate('team_info', ['id' => $data->getId()]),
                 'leaderNickName' => $data->getLeaderNickName(),
                 'leaderInfo' => $this->router->generate('user_info', ['id' => $data->getLeaderId()]),
-                'memberCount' => $data->getMemberCount()
+                'memberCount' => $data->getMemberCount(),
+                'modifiable' => ($this->allModifiable || $data->isCurrentUserLeader())
             ];
         }
         return $tableData;

@@ -20,7 +20,7 @@ class TeamController extends AbstractController
     #[Route('/teams', name: 'teams')]
     public function teamsAction(Request $request, TeamDataTable $dataTable): Response
     {
-        $table = $dataTable->create()->handleRequest($request);
+        $table = $dataTable->create($this->isGranted('ROLE_ADMIN'))->handleRequest($request);
 
         if ($table->isCallback()){
             return $table->getResponse();
@@ -88,8 +88,9 @@ class TeamController extends AbstractController
     #[Route('/teams/{id<\d+>}/members', name: 'team_members')]
     public function showMembersAction(int $id, Request $request, TeamManager $teamManager, MembersTable $table): Response
     {
-        $form = $this->createForm(TeamAddMemberType::class, options: ['find_url' => ['id' => $id]]);
+        $canModify = $this->isGranted('ROLE_ADMIN') || $teamManager->isCurrentUserLeader($id);
 
+        $form = $this->createForm(TeamAddMemberType::class, options: ['find_url' => ['id' => $id]]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()){
@@ -100,7 +101,8 @@ class TeamController extends AbstractController
 
         return $this->renderForm('team/members.html.twig', [
             'membersForm' => $form,
-            'table' => $table->init(['teamId' => $id])
+            'canModify' => $canModify,
+            'table' => $table->init(['teamId' => $id, 'canModify' => $canModify])
         ]);
     }
 
@@ -117,11 +119,11 @@ class TeamController extends AbstractController
         return $this->redirectToRoute('team_members', ['id' => $teamId]);
     }
 
-    #[Route('/teams/{id<\d+>}/detail', name: 'team_detail')]
-    public function teamDetailAction(int $id, TeamManager $teamManager): Response
+    #[Route('/teams/{id<\d+>}/info', name: 'team_info')]
+    public function teamInfoAction(int $id, TeamManager $teamManager): Response
     {
-        $teamModel = $teamManager->getTeamDetail($id);
+        $teamModel = $teamManager->getTeam($id);
 
-        return $this->render('team/detail.html.twig', ['team' => $teamModel]);
+        return $this->render('team/info.html.twig', ['team' => $teamModel]);
     }
 }
