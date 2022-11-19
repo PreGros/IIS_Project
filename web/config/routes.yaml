@@ -5,3 +5,10 @@ controllers:
 app_logout:
     path: /logout
     methods: GET
+
+homepage:
+    path: /
+    controller: Symfony\Bundle\FrameworkBundle\Controller\RedirectController::urlRedirectAction
+    defaults:
+        path: /tournaments
+        permanent: false
