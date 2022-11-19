@@ -19,6 +19,7 @@ use App\PL\Table\Tournament\TypesTable;
 
 class TournamentController extends AbstractController
 {
+    #[Route('/', name: 'homepage')]
     #[Route('/tournaments', name: 'tournaments')]
     public function tournamentsAction(Request $request, TournamentDataTable $dataTable): Response
     {
