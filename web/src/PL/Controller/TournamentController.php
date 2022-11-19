@@ -60,7 +60,8 @@ class TournamentController extends AbstractController
             'registrationDateEnd' => $tournamentModel->getRegistrationDateEnd()->format('j. n. Y G:i'),
             'winCondition' => $tournamentModel->getWinCondition(false)->label(),
             'matchingType' => $tournamentModel->getMatchingType(false)->label(),
-            'createdByInfo' =>  '/web/public/users/'. $tournamentModel->getCreatedById()
+            'routName' => 'user_info',
+            'params' => ['id' => $tournamentModel->getCreatedById()]
         ]);
     }
 
