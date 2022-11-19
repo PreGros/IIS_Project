@@ -14,7 +14,7 @@ class UserController extends AbstractController
     #[Route('/users', name: 'users')]
     public function getUsers(Request $request, UserDataTable $dataTable): Response
     {
-        $table = $dataTable->create()->handleRequest($request);
+        $table = $dataTable->create($this->isGranted('ROLE_ADMIN'))->handleRequest($request);
 
         if ($table->isCallback()){
             return $table->getResponse();

@@ -140,6 +140,9 @@ class TeamManager
         );
         $state->setCount($paginator->count());
 
+        /** @var ?\App\BL\User\UserModel */
+        $user = $this->security->getUser();
+
         foreach ($paginator as $entity){
             if (!$entity['team'] instanceof Team){
                 continue;
@@ -150,6 +153,7 @@ class TeamManager
             $teamModel->setLeaderId($entity['team']->getLeader()->getId());
             /** memberCount == members + leader (1) */
             $teamModel->setMemberCount($entity['memberCount'] + 1);
+            $teamModel->setIsCurrentUserLeader($teamModel->getLeaderId() === $user?->getId());
             yield $teamModel;
         }
     }
@@ -218,18 +222,8 @@ class TeamManager
         /** @var \App\BL\User\UserModel */
         $leader = AutoMapper::map($team->getLeader(), \App\BL\User\UserModel::class, trackEntity: false);
 
-        /** @var \App\BL\User\UserModel */
+        /** @var ?\App\BL\User\UserModel */
         $user = $this->security->getUser();
-        return $user->getId() === $leader->getId();
-    }
-
-    public function getTeamDetail(int $id): TeamModel
-    {
-        /** @var \App\DAL\Repository\TeamRepository */
-        $repo = $this->entityManager->getRepository(Team::class);
-
-        $team = $repo->find($id);
-
-        return AutoMapper::map($team, TeamModel::class, trackEntity:false);
+        return $user?->getId() === $leader->getId();
     }
 }

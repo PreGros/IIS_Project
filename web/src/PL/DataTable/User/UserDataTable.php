@@ -26,9 +26,9 @@ class UserDataTable
         $this->userManager = $userManager;
     }
 
-    public function create(): DataTable
+    public function create(bool $allModifiable = false): DataTable
     {
-        return $this->factory->create()
+        $dataTable = $this->factory->create()
             ->add('nickname', TwigStringColumn::class, [
                 'label' => 'NickName',
                 'searchable' => true,
@@ -39,17 +39,21 @@ class UserDataTable
                 'label' => 'Email',
                 'searchable' => true,
                 'orderable' => true
-            ])
-            ->add('action', TwigStringColumn::class, [
+            ]);
+        
+        if ($allModifiable){
+            $dataTable->add('action', TwigStringColumn::class, [
                 'label' => 'Akce',
                 'searchable' => false,
                 'orderable' => false,
                 'template' => 
                     '<a href="{% if row.isAdmin %} {{ row.demoteURL }} {% else %} {{ row.promoteURL }} {% endif %}" class="btn btn-secondary">{% if row.isAdmin %} Demote {% else %} Promote {% endif %}</a>' .
                     ' ' .
-                    '<a href="{{ row.deleteURL }}" class="btn btn-danger" onclick="return confirm(\'U sure?\')">Delete</a>'
-                ])
-            ->createAdapter(DataTableAdapter::class, [
+                    '<a href="{{ row.deleteURL }}" class="btn btn-danger" onclick="return confirm(\'Are you sure?\')">Delete</a>'
+            ]);
+        }
+            
+        return $dataTable->createAdapter(DataTableAdapter::class, [
                 'callback' => fn(DataTableState $state) => $this->parseTableData($state),
                 'objectForCallback' => $this
             ]);

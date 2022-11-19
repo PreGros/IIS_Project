@@ -12,6 +12,8 @@ class TeamTableModel
 
     private string $leaderId;
 
+    private bool $isCurrentUserLeader;
+
     private int $memberCount;
 
     public function getId(): int
@@ -44,7 +46,7 @@ class TeamTableModel
         $this->leaderNickName = $val;
     }
 
-    public function getLeaderId(): string
+    public function getLeaderId(): int
     {
         return $this->leaderId;
     }
@@ -52,6 +54,16 @@ class TeamTableModel
     public function setLeaderId(int $val)
     {
         $this->leaderId = $val;
+    }
+
+    public function isCurrentUserLeader(): bool
+    {
+        return $this->isCurrentUserLeader;
+    }
+
+    public function setIsCurrentUserLeader(bool $val)
+    {
+        $this->isCurrentUserLeader = $val;
     }
 
     public function getMemberCount(): int
