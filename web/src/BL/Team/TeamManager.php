@@ -3,7 +3,7 @@
 namespace App\BL\Team;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Query\Expr;
+use App\BL\Util\DataTableState;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -122,18 +122,32 @@ class TeamManager
     /**
      * @return \Traversable<TeamTableModel>
      */
-    public function getTeams(int $limit): \Traversable
+    public function getTeams(DataTableState $state): \Traversable
     {
         /** @var \App\DAL\Repository\TeamRepository */
         $repo = $this->entityManager->getRepository(Team::class);
+        $searchMemberCount = intval($state->getSearch());
+        /** members == memberCount - leader (1) */
+        $searchMemberCount--;
 
-        foreach ($repo->findTableData($limit) as $entity){
+        $paginator = $repo->findTableData(
+            $state->getLimit(),
+            $state->getStart(),
+            $state->getOrderColumn(),
+            $state->isAsceding(),
+            $state->getSearch(),
+            $searchMemberCount
+        );
+        $state->setCount($paginator->count());
+
+        foreach ($paginator as $entity){
             if (!$entity['team'] instanceof Team){
                 continue;
             }
             /** @var TeamTableModel */
             $teamModel = AutoMapper::map($entity['team'], TeamTableModel::class, trackEntity: false);
             $teamModel->setLeaderNickName($entity['team']->getLeader()->getNickname());
+            $teamModel->setLeaderId($entity['team']->getLeader()->getId());
             /** memberCount == members + leader (1) */
             $teamModel->setMemberCount($entity['memberCount'] + 1);
             yield $teamModel;
@@ -193,6 +207,20 @@ class TeamManager
             $userModel->setIsLeader((bool)$res['isLeader']);
             yield $userModel;
         }
+    }
+
+    public function isCurrentUserLeader(int $teadId): bool
+    {
+        /** @var \App\DAL\Repository\TeamRepository */
+        $repo = $this->entityManager->getRepository(Team::class);
+
+        $team = $repo->find($teadId);
+        /** @var \App\BL\User\UserModel */
+        $leader = AutoMapper::map($team->getLeader(), \App\BL\User\UserModel::class, trackEntity: false);
+
+        /** @var \App\BL\User\UserModel */
+        $user = $this->security->getUser();
+        return $user->getId() === $leader->getId();
     }
 
     public function getTeamDetail(int $id): TeamModel

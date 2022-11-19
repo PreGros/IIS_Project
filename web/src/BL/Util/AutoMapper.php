@@ -8,7 +8,7 @@ class AutoMapper{
     private static array $entities = [];
     
     /**
-     * @param object|array $srcObject object or array to be mapped to object
+     * @param object|array $srcObject object or array to be mapped to destination object
      * @param string|object $dst
      * when string, class of dst object
      *  - try to retrieve object, that was used for $srcObject mapping

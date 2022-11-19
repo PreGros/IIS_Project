@@ -9,6 +9,7 @@ use Symfony\Component\Mime\Address;
 
 use App\BL\Util\AutoMapper;
 use App\BL\Security\EmailVerifier;
+use App\BL\Util\DataTableState;
 use App\DAL\Entity\User;
 
 class UserManager
@@ -75,12 +76,21 @@ class UserManager
     /**
      * @return \Traversable<UserModel>
      */
-    public function getUsers(int $limit): \Traversable
+    public function getUsers(DataTableState $state): \Traversable
     {   
         /** @var \App\DAL\Repository\UserRepository */
         $repo = $this->entityManager->getRepository(User::class);
         
-        foreach ($repo->findBy([], limit: $limit) as $user){
+        $paginator = $repo->findTableData(
+            $state->getLimit(),
+            $state->getStart(),
+            $state->getOrderColumn(),
+            $state->isAsceding(),
+            $state->getSearch()
+        );
+        $state->setCount($paginator->count());
+
+        foreach ($paginator as $user){
             /** @var \App\BL\User\UserModel */
             $userModel = AutoMapper::map($user, \App\BL\User\UserModel::class, trackEntity: false);
             yield $userModel;

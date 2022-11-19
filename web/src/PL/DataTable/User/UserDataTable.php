@@ -4,6 +4,7 @@ namespace App\PL\DataTable\User;
 
 use App\BL\User\UserManager;
 use App\BL\Util\DataTableAdapter;
+use App\BL\Util\DataTableState;
 use Omines\DataTablesBundle\DataTable;
 use Omines\DataTablesBundle\DataTableFactory;
 use Omines\DataTablesBundle\Column\TextColumn;
@@ -28,8 +29,17 @@ class UserDataTable
     public function create(): DataTable
     {
         return $this->factory->create()
-            ->add('email', TextColumn::class, ['label' => 'email', 'searchable' => true, 'orderable' => true])
-            ->add('nickname', TextColumn::class, ['label' => 'NickName', 'searchable' => true, 'orderable' => true])
+            ->add('nickname', TwigStringColumn::class, [
+                'label' => 'NickName',
+                'searchable' => true,
+                'orderable' => true,
+                'template' => '<a href="{{ row.info }}">{{ row.nickname }}</a>'
+            ])
+            ->add('email', TextColumn::class, [
+                'label' => 'Email',
+                'searchable' => true,
+                'orderable' => true
+            ])
             ->add('action', TwigStringColumn::class, [
                 'label' => 'Akce',
                 'searchable' => false,
@@ -40,18 +50,19 @@ class UserDataTable
                     '<a href="{{ row.deleteURL }}" class="btn btn-danger" onclick="return confirm(\'U sure?\')">Delete</a>'
                 ])
             ->createAdapter(DataTableAdapter::class, [
-                'callback' => fn(int $limit) => $this->parseTableData($limit),
+                'callback' => fn(DataTableState $state) => $this->parseTableData($state),
                 'objectForCallback' => $this
             ]);
     }
 
-    private function parseTableData(int $limit): array
+    private function parseTableData(DataTableState $state): array
     {
         $tableData = [];
-        foreach ($this->userManager->getUsers($limit) as $user){
+        foreach ($this->userManager->getUsers($state) as $user){
             $tableData[] = [
                 'email' => $user->getEmail(),
                 'nickname' => $user->getNickname(),
+                'info' => $this->router->generate('user_info', ['id' => $user->getId()]),
                 'isAdmin' => $user->haveRole('ROLE_ADMIN'),
                 'demoteURL' => $this->router->generate('user_demote', ['id' => $user->getId()]),
                 'promoteURL' => $this->router->generate('user_promote', ['id' => $user->getId()]),

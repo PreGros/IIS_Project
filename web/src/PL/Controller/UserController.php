@@ -40,6 +40,7 @@ class UserController extends AbstractController
     #[Route('/users/{id<\d+>}/delete', name: 'user_delete')]
     public function deleteUser(int $id, UserManager $userManager): Response
     {
+        $userManager->deleteUser($id);
         return $this->redirectToRoute('users');
     }
 

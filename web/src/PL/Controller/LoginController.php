@@ -20,7 +20,9 @@ class LoginController extends AbstractController
             return $this->redirectToRoute('teams');
         }
 
-        $error = $authenticationUtils->getLastAuthenticationError();
+        if (($error = $authenticationUtils->getLastAuthenticationError()) !== null){
+            $this->addFlash('danger', $error->getMessage());
+        };
         $lastUsername = $authenticationUtils->getLastUsername();
 
         $defaultData = [
@@ -29,7 +31,6 @@ class LoginController extends AbstractController
         $form = $formFactory->createNamed('login', LoginFormType::class, $defaultData);
 
         return $this->renderForm('login/index.html.twig', [
-            'error' => $error,
             'form' => $form
         ]);
     }

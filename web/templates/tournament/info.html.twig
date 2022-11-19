@@ -1,0 +1,80 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Tournament info{% endblock %}
+
+{% block body %}
+    {# {% for flash_error in app.flashes() %}
+        <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
+    {% endfor %} #}
+
+    <h1>{{ tournament.name }}</h1>
+
+    <dl class="row">
+        <dt class="col-sm-3 h5 vert-center">Created By</dt>
+        <dd class="col-sm-9 vert-center"><a href="{{ createdByInfo }}">{{ tournament.createdByNickName }}</a></dd>
+    </dl>
+
+    <hr>
+
+    <h3>Description</h3>
+    
+    <pre>{{ tournament.description }}</pre>
+    
+
+    <hr>
+    <h3>Informations</h3>
+
+    <dl class="row">
+
+        <dt class="col-sm-3 h5 vert-center">Participant type</dt>
+        <dd class="col-sm-9 vert-center">{{ participantType }}</dd>
+
+        <div class="padding"></div>
+        <dt class="col-sm-3 h5 vert-center">Maximum members in a team</dt>
+        <dd class="col-sm-9 info vert-center">{{ tournament.maxTeamMemberCount }}</dd>
+
+        <div class="padding"></div>
+        <dt class="col-sm-3 h5 vert-center">Minimum members in a team</dt>
+        <dd class="col-sm-9 vert-center">{{ tournament.minTeamMemberCount }}</dd>
+
+        <div class="padding"></div>
+        <dt class="col-sm-3 h5 vert-center">Maximum of participants in this tournament</dt>
+        <dd class="col-sm-9 vert-center">{{ tournament.maxParticipantCount }}</dd>
+
+        <div class="padding"></div>
+        <dt class="col-sm-3 h5 vert-center">Minimum of participants in this tournament</dt>
+        <dd class="col-sm-9 vert-center">{{ tournament.minParticipantCount }}</dd>
+
+        <div class="padding"></div>
+        <dt class="col-sm-3 h5 vert-center">Date</dt>
+        <dd class="col-sm-9 vert-center">{{ date }}</dd>
+
+
+        <div class="padding"></div>
+        <dt class="col-sm-3 h5 vert-center">Prize</dt>
+        <dd class="col-sm-9 vert-center">{{ tournament.prize }}</dd>
+
+
+        <div class="padding"></div>
+        <dt class="col-sm-3 h5 vert-center">Venue</dt>
+        <dd class="col-sm-9 vert-center">{{ tournament.venue }}</dd>
+
+
+        <div class="padding"></div>
+        <dt class="col-sm-3 h5 vert-center">Registration date start</dt>
+        <dd class="col-sm-9 vert-center">{{ registrationDateStart }}</dd>
+
+
+        <div class="padding"></div>
+        <dt class="col-sm-3 h5 vert-center">Win Condition</dt>
+        <dd class="col-sm-9 vert-center">{{ winCondition }}</dd>
+
+
+        <div class="padding"></div>
+        <dt class="col-sm-3 h5 vert-center">Matching type</dt>
+        <dd class="col-sm-9 vert-center">{{ matchingType }}</dd>
+    </dl>
+
+{# <div name="user-table" data-settings='{{ datatable_settings(datatable) }}'>Loading...</div> #}
+    
+{% endblock %}

@@ -48,6 +48,11 @@ class TeamController extends AbstractController
     #[Route('/teams/{id<\d+>}/edit', name: 'team_edit')]
     public function editAction(int $id, Request $request, TeamManager $teamManager): Response
     {
+        if (!$this->isGranted('ROLE_ADMIN') && !$teamManager->isCurrentUserLeader($id)){
+            $this->addFlash('danger', 'Insufficient rights to edit team');
+            return $this->redirectToRoute('teams');
+        }
+
         $team = $teamManager->getTeam($id);
         $form = $this->createForm(TeamEditFormType::class, $team);
         $form->handleRequest($request);
@@ -58,7 +63,7 @@ class TeamController extends AbstractController
             return $this->redirectToRoute('teams');
         }
 
-        return $this->renderForm('team/edit.html.twig', ['teamForm' => $form]);
+        return $this->renderForm('team/edit.html.twig', ['teamForm' => $form, 'team' => $team]);
     }
 
     #[Route('/teams/{id<\d+>}/people', name: 'get_people')]
@@ -71,6 +76,11 @@ class TeamController extends AbstractController
     #[Route('/teams/{id<\d+>}/delete', name: 'team_delete')]
     public function deleteAction(int $id, TeamManager $teamManager): Response
     {
+        if (!$this->isGranted('ROLE_ADMIN') && !$teamManager->isCurrentUserLeader($id)){
+            $this->addFlash('danger', 'Insufficient rights to delete team');
+            return $this->redirectToRoute('teams');
+        }
+
         $teamManager->deleteTeam($id);
         return $this->redirectToRoute('teams');
     }
@@ -94,9 +104,14 @@ class TeamController extends AbstractController
         ]);
     }
 
-    #[Route('/teams/{teamId<\d+>}/members/{memberId<\d+>}', name: 'delete_member')]
+    #[Route('/teams/{teamId<\d+>}/members/{memberId<\d+>}/delete', name: 'delete_member')]
     public function deleteMemberAction(int $teamId, int $memberId, TeamManager $teamManager): Response
     {
+        if (!$this->isGranted('ROLE_ADMIN') && !$teamManager->isCurrentUserLeader($teamId)){
+            $this->addFlash('danger', 'Insufficient rights to delete team member');
+            return $this->redirectToRoute('teams');
+        }
+
         $teamManager->deleteMember($teamId, $memberId);
         $this->addFlash('success', 'Member was deleted');
         return $this->redirectToRoute('team_members', ['id' => $teamId]);

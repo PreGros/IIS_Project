@@ -16,7 +16,7 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class TournamentCreateFormType extends AbstractType
+class TournamentEditFormType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
@@ -31,27 +31,13 @@ class TournamentCreateFormType extends AbstractType
                 'choices' => ParticipantType::getTypes()
             ])
             ->add('maxTeamMemberCount', IntegerType::class, [
-                'required' => false,
-                'attr' => [
-                    'min' => 1
-                ]
+                'required' => false
             ])
             ->add('minTeamMemberCount', IntegerType::class, [
-                'required' => false,
-                'attr' => [
-                    'min' => 0
-                ]
+                'required' => false
             ])
-            ->add('maxParticipantCount', IntegerType::class, [
-                'attr' => [
-                    'min' => 1
-                ]
-            ])
-            ->add('minParticipantCount', IntegerType::class, [
-                'attr' => [
-                    'min' => 0
-                ]
-            ])
+            ->add('maxParticipantCount', IntegerType::class)
+            ->add('minParticipantCount', IntegerType::class)
             ->add('date', DateTimeType::class)
             ->add('prize', TextType::class, [
                 'required' => false
@@ -72,7 +58,7 @@ class TournamentCreateFormType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'data_class' => TournamentModel::class,
+            'data_class' => TournamentModel::class
         ]);
     }
 }

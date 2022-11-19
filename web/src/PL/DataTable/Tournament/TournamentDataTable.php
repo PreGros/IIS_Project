@@ -4,6 +4,7 @@ namespace App\PL\DataTable\Tournament;
 
 use App\BL\Tournament\TournamentManager;
 use App\BL\Util\DataTableAdapter;
+use App\BL\Util\DataTableState;
 use Omines\DataTablesBundle\Column\DateTimeColumn;
 use Omines\DataTablesBundle\DataTable;
 use Omines\DataTablesBundle\DataTableFactory;
@@ -30,13 +31,20 @@ class TournamentDataTable
     public function create(): DataTable
     {
         return $this->factory->create()
-            ->add('name', TextColumn::class, [
+            ->add('name', TwigStringColumn::class, [
                 'label' => 'Name',
                 'searchable' => true,
-                'orderable' => true
+                'orderable' => true,
+                'template' => '<a href="{{ row.info }}">{{ row.displayName }}</a>'
+            ])
+            ->add('createdByNickName', TwigStringColumn::class, [
+                'label' => 'Created By',
+                'searchable' => true,
+                'orderable' => true,
+                'template' => '<a href="{{ row.createdByInfo }}">{{ row.createdByNickName }}</a>'
             ])
             ->add('participantType', TextColumn::class, [
-                'label' => 'Participant type',
+                'label' => 'Participant Type',
                 'searchable' => true,
                 'orderable' => true
             ])
@@ -46,34 +54,36 @@ class TournamentDataTable
                 'searchable' => true,
                 'orderable' => true
             ])
-            // ->add('action', TwigStringColumn::class, [
-            //     'label' => 'Akce',
-            //     'searchable' => false,
-            //     'orderable' => false,
-            //     'template' => 
-            //         '<a href="{{ row.edit }}" class="btn btn-secondary">Edit</a>' .
-            //         ' ' .
-            //         '<a href="{{ row.delete }}" class="btn btn-danger" onclick="return confirm(\'U sure?\')">Delete</a>' .
-            //         ' ' .
-            //         '<a href="{{ row.members }}" class="btn btn-primary">Members</a>'
-            //     ])
+            ->add('action', TwigStringColumn::class, [
+                'label' => 'Action',
+                'searchable' => false,
+                'orderable' => false,
+                'template' => 
+                    //'<a href="{{ row.info }}" class="btn btn-secondary">Info</a>' . 
+                    //' ' .
+                    '<a href="{{ row.edit }}" class="btn btn-secondary">Edit</a>' .
+                    ' ' .
+                    '<a href="{{ row.delete }}" class="btn btn-danger" onclick="return confirm(\'U sure?\')">Delete</a>'
+                ])
             ->createAdapter(DataTableAdapter::class, [
-                'callback' => fn(int $limit) => $this->parseTableData($limit),
+                'callback' => fn(DataTableState $state) => $this->parseTableData($state),
                 'objectForCallback' => $this
             ]);
     }
 
-    private function parseTableData(int $limit): array
+    private function parseTableData(DataTableState $state): array
     {
         $tableData = [];
-        foreach ($this->tournamentManager->getTournaments($limit) as $data){
+        foreach ($this->tournamentManager->getTournaments($state) as $data){
             $tableData[] = [
-                // 'delete' => $this->router->generate('team_delete', ['id' => $data->getId()]),
-                // 'edit' => $this->router->generate('team_edit', ['id' => $data->getId()]),
-                // 'members' => $this->router->generate('team_members', ['id' => $data->getId()]),
-                'name' => $data->getName(),
+                'info' => $this->router->generate('tournament_info', ['id' => $data->getId()]),
+                'delete' => $this->router->generate('tournament_delete', ['id' => $data->getId()]),
+                'edit' => $this->router->generate('tournament_edit', ['id' => $data->getId()]),
+                'displayName' => $data->getName(),
                 'participantType' => $data->getParticipantType(false)->label(),
-                'date' => $data->getDate()
+                'date' => $data->getDate(),
+                'createdByNickName' => $data->getCreatedByNickName(),
+                'createdByInfo' => $this->router->generate('user_info', ['id' => $data->getCreatedById()])
             ];
         }
         return $tableData;
