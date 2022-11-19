@@ -9,6 +9,13 @@
 
     <h1>{{ tournament.name }}</h1>
 
+    <dl class="row">
+        <dt class="col-sm-3 h5 vert-center">Created By</dt>
+        <dd class="col-sm-9 vert-center"><a href="{{ createdByInfo }}">{{ tournament.createdByNickName }}</a></dd>
+    </dl>
+
+    <hr>
+
     <h3>Description</h3>
     
     <pre>{{ tournament.description }}</pre>

@@ -8,6 +8,7 @@ use Symfony\Component\Security\Core\Security;
 use App\BL\Util\AutoMapper;
 use App\BL\Util\StringUtil;
 use App\BL\Tournament\TournamentModel;
+use App\BL\Tournament\TournamentTableModel;
 use App\BL\Util\DataTableState;
 use App\DAL\Entity\Tournament;
 use App\DAL\Entity\TournamentType;
@@ -44,8 +45,31 @@ class TournamentManager
         $this->entityManager->flush();
     }
 
-     /**
-     * @return \Traversable<TournamentModel>
+    //  /**
+    //  * @return \Traversable<TournamentModel>
+    //  */
+    // public function getTournaments(DataTableState $state): \Traversable
+    // {
+    //     /** @var \App\DAL\Repository\TournamentRepository */
+    //     $repo = $this->entityManager->getRepository(Tournament::class);
+        
+    //     $paginator = $repo->findTableData(
+    //         $state->getLimit(),
+    //         $state->getStart(),
+    //         $state->getOrderColumn(),
+    //         $state->isAsceding(),
+    //         $state->getSearch(),
+    //         ParticipantType::getByName($state->getSearch())
+    //     );
+    //     $state->setCount($paginator->count());
+
+    //     foreach ($paginator as $entity){
+    //         yield AutoMapper::map($entity, TournamentModel::class, trackEntity: false);
+    //     }
+    // }
+
+    /**
+     * @return \Traversable<TournamentTableModel>
      */
     public function getTournaments(DataTableState $state): \Traversable
     {
@@ -63,7 +87,11 @@ class TournamentManager
         $state->setCount($paginator->count());
 
         foreach ($paginator as $entity){
-            yield AutoMapper::map($entity, TournamentModel::class, trackEntity: false);
+            /** @var TournamentTableModel */
+            $tournamentModel = AutoMapper::map($entity, TournamentTableModel::class, trackEntity: false);
+            $tournamentModel->setCreatedById($entity->getCreatedBy()->getId());
+            $tournamentModel->setCreatedByNickName($entity->getCreatedBy()->getNickname());
+            yield $tournamentModel;
         }
     }
 
@@ -75,7 +103,10 @@ class TournamentManager
         $tournament = $repo->find($id);
 
         /** @var \App\BL\Tournament\TournamentModel */
-        return AutoMapper::map($tournament, \App\BL\Tournament\TournamentModel::class, trackEntity: true);
+        $tournamentModel = AutoMapper::map($tournament, \App\BL\Tournament\TournamentModel::class, trackEntity: true);
+        $tournamentModel->setCreatedByNickName($tournament->getCreatedBy()->getNickname());
+        $tournamentModel->setCreatedById($tournament->getCreatedBy()->getId());
+        return $tournamentModel;
     }
 
     public function deleteTournament(int $id)

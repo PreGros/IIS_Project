@@ -5,8 +5,6 @@ namespace App\BL\Tournament;
 
 class TournamentModel
 {
-    private int $id;
-
     private string $name;
 
     private ?string $description;
@@ -34,16 +32,15 @@ class TournamentModel
     private WinCondition $winCondition;
 
     private MatchingType $matchingType;
+    
+    private int $createdById;
+
+    private string $createdByNickName;
 
     // public function __construct()
     // {
     //     $this->date = new \DateTime();
     // }
-
-    public function getId(): int
-    {
-        return $this->id;
-    }
 
     public function getName(): string
     {
@@ -183,5 +180,25 @@ class TournamentModel
     public function setMatchingType(MatchingType|int $val)
     {
         $this->matchingType = is_int($val) ? MatchingType::tryFrom($val) : $val;
+    }
+    
+    public function getCreatedById(): int
+    {
+        return $this->createdById;
+    }
+
+    public function setCreatedById(int $val)
+    {
+        $this->createdById = $val;
+    }
+
+    public function getCreatedByNickName(): string
+    {
+        return $this->createdByNickName;
+    }
+
+    public function setCreatedByNickName(string $val)
+    {
+        $this->createdByNickName = $val;
     }
 }

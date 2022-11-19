@@ -37,8 +37,14 @@ class TournamentDataTable
                 'orderable' => true,
                 'template' => '<a href="{{ row.info }}">{{ row.displayName }}</a>'
             ])
+            ->add('createdByNickName', TwigStringColumn::class, [
+                'label' => 'Created By',
+                'searchable' => true,
+                'orderable' => true,
+                'template' => '<a href="{{ row.createdByInfo }}">{{ row.createdByNickName }}</a>'
+            ])
             ->add('participantType', TextColumn::class, [
-                'label' => 'Participant type',
+                'label' => 'Participant Type',
                 'searchable' => true,
                 'orderable' => true
             ])
@@ -75,7 +81,9 @@ class TournamentDataTable
                 'edit' => $this->router->generate('tournament_edit', ['id' => $data->getId()]),
                 'displayName' => $data->getName(),
                 'participantType' => $data->getParticipantType(false)->label(),
-                'date' => $data->getDate()
+                'date' => $data->getDate(),
+                'createdByNickName' => $data->getCreatedByNickName(),
+                'createdByInfo' => $this->router->generate('user_info', ['id' => $data->getCreatedById()])
             ];
         }
         return $tableData;
