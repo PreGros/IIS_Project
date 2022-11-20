@@ -22,6 +22,7 @@ class TeamAddMemberType extends AbstractType
     {
         $builder
             ->add('members', TextType::class, [
+                'label' => false,
                 'autocomplete' => true,
                 'autocomplete_url' => $this->router->generate('get_people', $options['find_url']),
                 'required' => false,

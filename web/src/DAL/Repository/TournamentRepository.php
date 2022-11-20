@@ -53,8 +53,10 @@ class TournamentRepository extends ServiceEntityRepository
             ->select('t tournament')
             ->addSelect('CASE WHEN (t.approvedBy IS NOT NULL) THEN 1 ELSE 0 END as approved')
             ->from(Tournament::class, 't')
+            ->leftJoin(User::class, 'c', Join::WITH, 't.createdBy = c')
             ->where('t.name LIKE :p_search')
-            ->orWhere('t.participantType IN (:p_types)');
+            ->orWhere('t.participantType IN (:p_types)')
+            ->orWhere('c.nickname LIKE :p_search');
 
         if ($order !== ''){
             $queryBuilder
@@ -62,7 +64,9 @@ class TournamentRepository extends ServiceEntityRepository
                 match($order){
                     'name' => 't.name',
                     'date' => 't.date',
-                    'participantType' => 't.participantType'
+                    'participantType' => 't.participantType',
+                    'createdByNickName' => 'c.nickname',
+                    'isApproved' => 'approved'
                 },
                 $ascending ?
                     'ASC' :
