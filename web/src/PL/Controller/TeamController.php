@@ -93,10 +93,13 @@ class TeamController extends AbstractController
         $form = $this->createForm(TeamAddMemberType::class, options: ['find_url' => ['id' => $id]]);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid() && $canModify){
-            $teamManager->addMembers(explode(' ', $form->get('members')->getData()), $id);
-            $this->addFlash('success', 'New members were added');
-            return $this->redirectToRoute('team_members', ['id' => $id]);
+        if ($form->isSubmitted() && $form->isValid()){
+            if ($canModify){
+                $teamManager->addMembers(explode(' ', $form->get('members')->getData()), $id);
+                $this->addFlash('success', 'New members were added');
+                return $this->redirectToRoute('team_members', ['id' => $id]);
+            }
+            $this->addFlash('danger', 'Insufficient rights to add member');
         }
 
         return $this->renderForm('team/members.html.twig', [
