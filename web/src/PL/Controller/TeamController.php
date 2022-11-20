@@ -93,7 +93,7 @@ class TeamController extends AbstractController
         $form = $this->createForm(TeamAddMemberType::class, options: ['find_url' => ['id' => $id]]);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()){
+        if ($form->isSubmitted() && $form->isValid() && $canModify){
             $teamManager->addMembers(explode(' ', $form->get('members')->getData()), $id);
             $this->addFlash('success', 'New members were added');
             return $this->redirectToRoute('team_members', ['id' => $id]);

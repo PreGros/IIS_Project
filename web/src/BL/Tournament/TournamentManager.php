@@ -45,29 +45,6 @@ class TournamentManager
         $this->entityManager->flush();
     }
 
-    //  /**
-    //  * @return \Traversable<TournamentModel>
-    //  */
-    // public function getTournaments(DataTableState $state): \Traversable
-    // {
-    //     /** @var \App\DAL\Repository\TournamentRepository */
-    //     $repo = $this->entityManager->getRepository(Tournament::class);
-        
-    //     $paginator = $repo->findTableData(
-    //         $state->getLimit(),
-    //         $state->getStart(),
-    //         $state->getOrderColumn(),
-    //         $state->isAsceding(),
-    //         $state->getSearch(),
-    //         ParticipantType::getByName($state->getSearch())
-    //     );
-    //     $state->setCount($paginator->count());
-
-    //     foreach ($paginator as $entity){
-    //         yield AutoMapper::map($entity, TournamentModel::class, trackEntity: false);
-    //     }
-    // }
-
     /**
      * @return \Traversable<TournamentTableModel>
      */
