@@ -9,6 +9,9 @@ framework:
     session:
         cookie_lifetime: 86400
         gc_maxlifetime: 1800
+        # for testing purposes
+        # gc_probability: 1
+        # gc_divisor: 1
         handler_id: null
         cookie_secure: auto
         cookie_samesite: lax

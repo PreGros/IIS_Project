@@ -314,8 +314,13 @@ window.addEventListener('load', () => {
             }
         ],
         initComplete: function(settings, json) {
+            $(".buttons-columnVisibility").each((index, el) => {
+                var span = $(el, "span");
+                var value = $(span).text();
+                $(span).text(value.substring(0, 1));
+                $(el).attr('title', value);
+            });
             // Setup - add a text input to each footer cell
-        
             // // Apply the search
             // this.api()
             // .columns()

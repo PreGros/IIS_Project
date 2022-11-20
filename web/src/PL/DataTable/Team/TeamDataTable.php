@@ -41,14 +41,14 @@ class TeamDataTable
                 'template' => '<a href="{{ row.info }}">{{ row.name }}</a>'
             ])
             ->add('leaderNickName', TwigStringColumn::class, [
-                'label' => 'Leader NickName',
+                'label' => 'Leader Nickname',
                 'searchable' => true,
                 'orderable' => true,
                 'template' => '<a href="{{ row.leaderInfo }}">{{ row.leaderNickName }}</a>'
             ])
-            ->add('memberCount', NumberColumn::class, ['label' => 'Počet členů', 'searchable' => true, 'orderable' => true])
+            ->add('memberCount', NumberColumn::class, ['label' => 'Count of Members', 'searchable' => true, 'orderable' => true])
             ->add('action', TwigStringColumn::class, [
-                'label' => 'Akce',
+                'label' => 'Action',
                 'searchable' => false,
                 'orderable' => false,
                 'template' =>

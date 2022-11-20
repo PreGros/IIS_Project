@@ -45,29 +45,6 @@ class TournamentManager
         $this->entityManager->flush();
     }
 
-    //  /**
-    //  * @return \Traversable<TournamentModel>
-    //  */
-    // public function getTournaments(DataTableState $state): \Traversable
-    // {
-    //     /** @var \App\DAL\Repository\TournamentRepository */
-    //     $repo = $this->entityManager->getRepository(Tournament::class);
-        
-    //     $paginator = $repo->findTableData(
-    //         $state->getLimit(),
-    //         $state->getStart(),
-    //         $state->getOrderColumn(),
-    //         $state->isAsceding(),
-    //         $state->getSearch(),
-    //         ParticipantType::getByName($state->getSearch())
-    //     );
-    //     $state->setCount($paginator->count());
-
-    //     foreach ($paginator as $entity){
-    //         yield AutoMapper::map($entity, TournamentModel::class, trackEntity: false);
-    //     }
-    // }
-
     /**
      * @return \Traversable<TournamentTableModel>
      */
@@ -86,12 +63,16 @@ class TournamentManager
         );
         $state->setCount($paginator->count());
 
+        /** @var ?\App\BL\User\UserModel */
+        $user = $this->security->getUser();
+
         foreach ($paginator as $entity){
             /** @var TournamentTableModel */
             $tournamentModel = AutoMapper::map($entity['tournament'], TournamentTableModel::class, trackEntity: false);
             $tournamentModel->setCreatedById($entity['tournament']->getCreatedBy()->getId());
             $tournamentModel->setCreatedByNickName($entity['tournament']->getCreatedBy()->getNickname());
             $tournamentModel->setApproved((bool)$entity['approved']);
+            $tournamentModel->setCreatedByCurrentUser($tournamentModel->getCreatedById()  === $user?->getId());
             yield $tournamentModel;
         }
     }
@@ -156,5 +137,31 @@ class TournamentManager
 
         $type = AutoMapper::map($typeModel, TournamentType::class, trackEntity: false);
         $repo->save($type, true);
+    }
+
+    public function approveTournament(int $id){
+        /** @var \App\DAL\Repository\TournamentRepository */
+        $repo = $this->entityManager->getRepository(Tournament::class);
+        
+        $tournament = $repo->find($id);
+        $tournament->setApprovedBy(
+            AutoMapper::map(
+                $this->security->getUser(),
+                \App\DAL\Entity\User::class,
+                trackEntity: false
+            )
+        );
+
+        $repo->save($tournament, true);
+    }
+
+    public function disapproveTournament(int $id){
+        /** @var \App\DAL\Repository\TournamentRepository */
+        $repo = $this->entityManager->getRepository(Tournament::class);
+        
+        $tournament = $repo->find($id);
+        $tournament->setApprovedBy(null);
+
+        $repo->save($tournament, true);
     }
 }

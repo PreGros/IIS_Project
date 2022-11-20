@@ -21,6 +21,8 @@ class TournamentDataTable
 
     private TournamentManager $tournamentManager;
 
+    private bool $isAdmin;
+
     public function __construct(DataTableFactory $dataTableFactory, UrlGeneratorInterface $router, TournamentManager $tournamentManager)
     {
         $this->factory = $dataTableFactory;
@@ -28,9 +30,11 @@ class TournamentDataTable
         $this->tournamentManager = $tournamentManager;
     }
 
-    public function create(): DataTable
+    public function create(bool $isAdmin): DataTable
     {
-        return $this->factory->create()
+        $this->isAdmin = $isAdmin;
+
+        $dataTable = $this->factory->create()
             ->add('name', TwigStringColumn::class, [
                 'label' => 'Name',
                 'searchable' => true,
@@ -48,11 +52,14 @@ class TournamentDataTable
                 'searchable' => true,
                 'orderable' => true
             ])
-            ->add('approved', TwigStringColumn::class, [
+            ->add('isApproved', TwigStringColumn::class, [
                 'label' => 'Is Approved?',
                 'searchable' => true,
                 'orderable' => true,
-                'template' => '<i class="bi {{ row.approvedClass }}"/>'
+                'template' =>
+                    '<i class="bi {% if row.isApproved %} bi-check-lg {% else %} bi-x-lg {% endif %}"></i>'.
+                    ' ' .
+                    ($isAdmin ? '<a href="{% if row.isApproved %}{{ row.disapproveURL }}{% else %}{{ row.approveURL }}{% endif %}" class="btn btn-secondary">{% if row.isApproved %}Disapprove{% else %}Approve{% endif %}</a>' : '')
             ])
             ->add('date', DateTimeColumn::class, [
                 'label' => 'Date',
@@ -65,13 +72,15 @@ class TournamentDataTable
                 'searchable' => false,
                 'orderable' => false,
                 'template' => 
-                    //'<a href="{{ row.info }}" class="btn btn-secondary">Info</a>' . 
-                    //' ' .
-                    '<a href="{{ row.edit }}" class="btn btn-secondary">Edit</a>' .
-                    ' ' .
-                    '<a href="{{ row.delete }}" class="btn btn-danger" onclick="return confirm(\'U sure?\')">Delete</a>'
-                ])
-            ->createAdapter(DataTableAdapter::class, [
+                    '{% if row.modifiable %}' .
+                        '<a href="{{ row.edit }}" class="btn btn-secondary">Edit</a>' .
+                        ' ' .
+                        '<a href="{{ row.delete }}" class="btn btn-danger" onclick="return confirm(\'U sure?\')">Delete</a>'.
+                    '{% endif %}'
+            ]);
+
+
+        return $dataTable->createAdapter(DataTableAdapter::class, [
                 'callback' => fn(DataTableState $state) => $this->parseTableData($state),
                 'objectForCallback' => $this
             ]);
@@ -90,7 +99,10 @@ class TournamentDataTable
                 'date' => $data->getDate(),
                 'createdByNickName' => $data->getCreatedByNickName(),
                 'createdByInfo' => $this->router->generate('user_info', ['id' => $data->getCreatedById()]),
-                'approvedClass' => $data->getApproved() ? 'bi-check-lg' : 'bi-x-lg'
+                'isApproved' => $data->getApproved(),
+                'approveURL' => $this->router->generate('user_approve', ['id' => $data->getId()]),
+                'disapproveURL' => $this->router->generate('user_disapprove', ['id' => $data->getId()]),
+                'modifiable' => ($this->isAdmin || $data->getCreatedByCurrentUser())
             ];
         }
         return $tableData;

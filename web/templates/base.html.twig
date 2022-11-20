@@ -20,53 +20,37 @@
         {% endblock %}
     </head>
     <body>
-        <nav class="navbar navbar-expand-lg navbar-light bg-dark navbar-dark shadow">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="#">🤌 Petcalc reborn 🤌</a>
-      <button class="navbar-toggler collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-content">
-        <div class="hamburger-toggle">
-          <div class="hamburger">
-            <span></span>
-            <span></span>
-            <span></span>
-          </div>
-        </div>
-      </button>
-      <div class="collapse navbar-collapse" id="navbar-content">
-        <ul class="navbar-nav mr-auto mb-2 mb-lg-0">
-          <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="{{ path('tournaments') }}">Tournaments</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="{{ path('teams') }}">Teams</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="{{ path('tournaments') }}">Turnaje</a>
-          </li>
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" data-bs-auto-close="outside">Multilevel</a>
-            <ul class="dropdown-menu shadow">
-              <li><a class="dropdown-item" href="#">Gallery</a></li>
-              <li><a class="dropdown-item" href="blog.html">Blog</a></li>
-              <li class="dropstart">
-                <a href="#" class="dropdown-item dropdown-toggle" data-bs-toggle="dropdown">Submenu Left</a>
-                <ul class="dropdown-menu shadow">
-                  <li><a class="dropdown-item" href=""> Third level 1</a></li>
-                  <li><a class="dropdown-item" href=""> Third level 2</a></li>
-                  <li><a class="dropdown-item" href=""> Third level 3</a></li>
-                  <li><a class="dropdown-item" href=""> Third level 4</a></li>
-                  <li><a class="dropdown-item" href=""> Third level 5</a></li>
-                </ul>
+      <nav class="navbar navbar-expand-lg navbar-light bg-dark navbar-dark shadow">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="{{ path('homepage') }}">🤌 Petcalc reborn 🤌</a>
+          <button class="navbar-toggler collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-content">
+            <div class="hamburger-toggle">
+              <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+          </button>
+          <div class="collapse navbar-collapse" id="navbar-content">
+            <ul class="navbar-nav mr-auto mb-2 mb-lg-0">
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="{{ path('tournaments') }}">Tournaments</a>
               </li>
-              <li class="dropend">
-                <a href="#" class="dropdown-item dropdown-toggle" data-bs-toggle="dropdown" data-bs-auto-close="outside">Submenu Right</a>
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="{{ path('teams') }}">Teams</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="{{ path('users') }}">Users</a>
+              </li>
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" data-bs-auto-close="outside">Multilevel</a>
                 <ul class="dropdown-menu shadow">
-                  <li><a class="dropdown-item" href=""> Second level 1</a></li>
-                  <li><a class="dropdown-item" href=""> Second level 2</a></li>
-                  <li><a class="dropdown-item" href=""> Second level 3</a></li>
-                  <li class="dropend">
-                    <a href="#" class="dropdown-item dropdown-toggle" data-bs-toggle="dropdown">Let's go deeper!</a>
-                    <ul class="dropdown-menu dropdown-submenu shadow">
+                  <li><a class="dropdown-item" href="#">Gallery</a></li>
+                  <li><a class="dropdown-item" href="blog.html">Blog</a></li>
+                  <li class="dropstart">
+                    <a href="#" class="dropdown-item dropdown-toggle" data-bs-toggle="dropdown">Submenu Left</a>
+                    <ul class="dropdown-menu shadow">
                       <li><a class="dropdown-item" href=""> Third level 1</a></li>
                       <li><a class="dropdown-item" href=""> Third level 2</a></li>
                       <li><a class="dropdown-item" href=""> Third level 3</a></li>
@@ -74,36 +58,63 @@
                       <li><a class="dropdown-item" href=""> Third level 5</a></li>
                     </ul>
                   </li>
-                  <li><a class="dropdown-item" href=""> Third level 5</a></li>
+                  <li class="dropend">
+                    <a href="#" class="dropdown-item dropdown-toggle" data-bs-toggle="dropdown" data-bs-auto-close="outside">Submenu Right</a>
+                    <ul class="dropdown-menu shadow">
+                      <li><a class="dropdown-item" href=""> Second level 1</a></li>
+                      <li><a class="dropdown-item" href=""> Second level 2</a></li>
+                      <li><a class="dropdown-item" href=""> Second level 3</a></li>
+                      <li class="dropend">
+                        <a href="#" class="dropdown-item dropdown-toggle" data-bs-toggle="dropdown">Let's go deeper!</a>
+                        <ul class="dropdown-menu dropdown-submenu shadow">
+                          <li><a class="dropdown-item" href=""> Third level 1</a></li>
+                          <li><a class="dropdown-item" href=""> Third level 2</a></li>
+                          <li><a class="dropdown-item" href=""> Third level 3</a></li>
+                          <li><a class="dropdown-item" href=""> Third level 4</a></li>
+                          <li><a class="dropdown-item" href=""> Third level 5</a></li>
+                        </ul>
+                      </li>
+                      <li><a class="dropdown-item" href=""> Third level 5</a></li>
+                    </ul>
+                  </li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li><a class="dropdown-item" href="#">Something else here</a></li>
                 </ul>
               </li>
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="#">Something else here</a></li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">Link</a>
+              </li>
             </ul>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">Link</a>
-          </li>
-        </ul>
-        <form class="d-flex ms-auto">
-            <div class="input-group">
-                <input class="form-control border-0 mr-2" type="search" placeholder="Search" aria-label="Search">
-                <button class="btn btn-primary border-0" type="submit">Search</button>
-            </div>
-        </form>
-      </div>
-    </div>
-  </nav>
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="{% if is_granted("IS_AUTHENTICATED_FULLY") %}{{ path('app_logout') }}{% else %}{{ path('app_login') }}{% endif %}">{% if is_granted("IS_AUTHENTICATED_FULLY") %}Logout{% else %}Login{% endif %}</a>
+              </li>
+              {% if not is_granted("IS_AUTHENTICATED_FULLY") %}
+                <li class="nav-item">
+                  <a class="nav-link active" aria-current="page" href="{{ path('app_register') }}">Register</a>
+                </li>
+              {% endif %}
+            </ul>
 
-    <div class"pt-8">
-        <main>
-            <div style="margin:1.5cm;margin-top:0.5cm">
-                {% block body %}{% endblock %}
-            </div>
-        </main>
-        <footer style="position:fixed;bottom:0;">
-            <div> Footer content here... </div>
-        </footer>
-    </div>
+            {# <form class="d-flex ms-auto">
+                <div class="input-group">
+                    <input class="form-control border-0 mr-2" type="search" placeholder="Search" aria-label="Search">
+                    <button class="btn btn-primary border-0" type="submit">Search</button>
+                </div>
+            </form> #}
+          </div>
+        </div>
+      </nav>
+
+      <div class"pt-8">
+          <main>
+              <div style="margin:1.5cm;margin-top:0.5cm">
+                  {% block body %}{% endblock %}
+              </div>
+          </main>
+          <footer style="position:fixed;bottom:0;">
+              <div> Footer content here... </div>
+          </footer>
+      </div>
     </body>
 </html>
