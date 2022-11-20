@@ -58,8 +58,6 @@ class TeamDataTable
                     '<a href="{{ row.delete }}" class="btn btn-danger" onclick="return confirm(\'U sure?\')">Delete</a>' .
                     ' ' .
                     '{% endif %}'.
-                    '<a href="{{ row.members }}" class="btn btn-primary">Members</a>' .
-                    ' ' .
                     '<a href="{{ row.info }}" class="btn btn-primary">Info</a>'
                 ])
             ->createAdapter(DataTableAdapter::class, [
@@ -75,7 +73,6 @@ class TeamDataTable
             $tableData[] = [
                 'delete' => $this->router->generate('team_delete', ['id' => $data->getId()]),
                 'edit' => $this->router->generate('team_edit', ['id' => $data->getId()]),
-                'members' => $this->router->generate('team_members', ['id' => $data->getId()]),
                 'name' => $data->getName(),
                 'info' => $this->router->generate('team_info', ['id' => $data->getId()]),
                 'leaderNickName' => $data->getLeaderNickName(),

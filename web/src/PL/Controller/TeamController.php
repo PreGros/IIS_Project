@@ -85,27 +85,6 @@ class TeamController extends AbstractController
         return $this->redirectToRoute('teams');
     }
 
-    #[Route('/teams/{id<\d+>}/members', name: 'team_members')]
-    public function showMembersAction(int $id, Request $request, TeamManager $teamManager, MembersTable $table): Response
-    {
-        $canModify = $this->isGranted('ROLE_ADMIN') || $teamManager->isCurrentUserLeader($id);
-
-        $form = $this->createForm(TeamAddMemberType::class, options: ['find_url' => ['id' => $id]]);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()){
-            $teamManager->addMembers(explode(' ', $form->get('members')->getData()), $id);
-            $this->addFlash('success', 'New members were added');
-            return $this->redirectToRoute('team_members', ['id' => $id]);
-        }
-
-        return $this->renderForm('team/members.html.twig', [
-            'membersForm' => $form,
-            'canModify' => $canModify,
-            'table' => $table->init(['teamId' => $id, 'canModify' => $canModify])
-        ]);
-    }
-
     #[Route('/teams/{teamId<\d+>}/members/{memberId<\d+>}/delete', name: 'delete_member')]
     public function deleteMemberAction(int $teamId, int $memberId, TeamManager $teamManager): Response
     {
@@ -120,10 +99,27 @@ class TeamController extends AbstractController
     }
 
     #[Route('/teams/{id<\d+>}/info', name: 'team_info')]
-    public function teamInfoAction(int $id, TeamManager $teamManager): Response
+    public function teamInfoAction(int $id, Request $request, TeamManager $teamManager, MembersTable $table): Response
     {
-        $teamModel = $teamManager->getTeam($id);
+        $canModify = $this->isGranted('ROLE_ADMIN') || $teamManager->isCurrentUserLeader($id);
 
-        return $this->render('team/info.html.twig', ['team' => $teamModel]);
+        $form = $this->createForm(TeamAddMemberType::class, options: ['find_url' => ['id' => $id]]);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()){
+            $teamManager->addMembers(explode(' ', $form->get('members')->getData()), $id);
+            $this->addFlash('success', 'New members were added');
+            return $this->redirectToRoute('team_members', ['id' => $id]);
+        }
+
+        $teamModel = $teamManager->getTeam($id);
+        return $this->renderForm('team/info.html.twig', [
+            'team' => $teamModel,
+            'membersForm' => $form,
+            'canModify' => $canModify,
+            'table' => $table->init(['teamId' => $id, 'canModify' => $canModify])
+        ]);
+
+        // return $this->render('team/info.html.twig', ['team' => $teamModel]);
     }
 }
