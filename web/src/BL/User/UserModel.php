@@ -137,4 +137,9 @@ class UserModel implements UserInterface, PasswordAuthenticatedUserInterface
     {
         return in_array($roleName, $this->roles);
     }
+
+    public function isCurrentUser(?int $id) : bool
+    {
+        return $this->id === $id;
+    }
 }

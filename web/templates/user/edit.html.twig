@@ -1,0 +1,32 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit user info{% endblock %}
+
+{% block body %}
+    {# {% for flash_error in app.flashes() %}
+        <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
+    {% endfor %} #}
+
+    <h1>Edit user</h1>
+    <h3>User information</h3>
+
+    {{ form_start(editForm) }}
+        {{ form_row(editForm.email) }}
+        {{ form_row(editForm.firstname) }}
+        {{ form_row(editForm.surname) }}
+        {{ form_row(editForm.phoneNumber,{
+            label: 'Telephone number'
+        }) }}
+        {{ form_row(editForm.nickname) }}
+
+        {{ form_row(editForm.submit, {
+            label: 'Confirm'
+        }) }}
+    {{ form_end(editForm) }}
+
+    <h3>User password</h3>
+    <a href="{{ path('user_change_pwd', { 'id': id }) }}" class="btn btn-primary">Change password</a>
+
+{# <div name="user-table" data-settings='{{ datatable_settings(datatable) }}'>Loading...</div> #}
+    
+{% endblock %}
