@@ -1,13 +1,16 @@
 <?php
 
-namespace App\BL\Tournament;
+namespace App\BL\Match;
 
+use App\BL\Tournament\MatchingType;
+use App\BL\Tournament\TournamentModel;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Security\Core\Security;
 
 use App\BL\Util\AutoMapper;
 use App\BL\Util\StringUtil;
 use App\BL\Util\DataTableState;
+use App\DAL\Entity\TournamentMatch;
 
 class MatchManager
 {
@@ -23,11 +26,11 @@ class MatchManager
         $this->security = $security;
     }
 
-    private function generateMatchesRoundRobin()
+    public function generateMatchesRoundRobin()
     {   
+        $tournament = $this->entityManager->getReference(\App\DAL\Entity\Tournament::class, 1);
         // number of participants
-        $count = 2000;
-        $matches = [];
+        $count = 10;
 
         /** odd number need to have imaginary match which acts like a break */
         $odd = $count % 2 !== 0;
@@ -48,13 +51,20 @@ class MatchManager
                 $second = $linkedList->offsetGet($n - $j - 1);
                 /** check if match does not contain imaginary match */
                 if (!$odd || ($first !== $n - 1 && $second !== $n - 1)){
-                    $matches[] = [$first, $second];
+                    $match = new TournamentMatch();
+                    $match
+                        ->setDuration(new \DateInterval("PT{$first}M{$second}S"))
+                        ->setStartTime(new \DateTime())
+                        ->setTournament($tournament);
+                    $this->entityManager->persist($match);
+                    //$matches[] = [$first, $second];
                 }
             }
             /** rotate right linked list without first element  */
             $linkedList->add(1, $linkedList->pop());
         }
 
+        $this->entityManager->flush();
         /**
          * optimized version (faster and needs less memory), but much less readable
          * 
@@ -72,10 +82,12 @@ class MatchManager
          */
     }
 
-    private function generateMatchesSingleElimination()
+    public function generateMatchesSingleElimination()
     {
+        $tournament = $this->entityManager->getReference(\App\DAL\Entity\Tournament::class, 2);
         // number of participants
-        $countOfParticipants = 8;
+        $countOfParticipants = 16;
+        /** @var array<\App\DAL\Entity\TournamentMatch> */
         $matches = [];
 
         $linkedList = new \SplDoublyLinkedList();
@@ -93,7 +105,21 @@ class MatchManager
 
             if ($fromLeft){
                 for ($i = 0; $i < $matchesPerLevel; $i++){
-                    $matches[$index++] = [$linkedList->shift(), $linkedList->shift()];
+                    $first = $linkedList->shift();
+                    $second = $linkedList->shift();
+                    $match = new TournamentMatch();
+                    if ($first >= $countOfParticipants){
+                        $match->addTournamentMatch($matches[$first - $countOfParticipants]);
+                    }
+                    if ($second >= $countOfParticipants){
+                        $match->addTournamentMatch($matches[$second - $countOfParticipants]);
+                    }
+                    $match
+                        ->setDuration(new \DateInterval("PT{$first}M{$second}S"))
+                        ->setStartTime(new \DateTime())
+                        ->setTournament($tournament);
+                    $matches[$index++] = $match;
+                    $this->entityManager->persist($match);
                     $linkedList->push($c++);
                 }
 
@@ -103,7 +129,21 @@ class MatchManager
             }
             else{
                 for ($i = $matchesPerLevel - 1; $i >= 0; $i--){
-                    $matches[$index + $i] = [$linkedList->pop(), $linkedList->pop()];
+                    $first = $linkedList->pop();
+                    $second = $linkedList->pop();
+                    $match = new TournamentMatch();
+                    if ($first >= $countOfParticipants){
+                        $match->addTournamentMatch($matches[$first - $countOfParticipants]);
+                    }
+                    if ($second >= $countOfParticipants){
+                        $match->addTournamentMatch($matches[$second - $countOfParticipants]);
+                    }
+                    $match
+                        ->setDuration(new \DateInterval("PT{$first}M{$second}S"))
+                        ->setStartTime(new \DateTime())
+                        ->setTournament($tournament);
+                    $matches[$index + $i] = $match;
+                    $this->entityManager->persist($match);
                     $linkedList->unshift($c++);
                 }
 
@@ -115,5 +155,61 @@ class MatchManager
             /** switch sides so one match cannot go straight to the finals */
             $fromLeft = !$fromLeft;
         }
+
+        $this->entityManager->flush();
+    }
+
+    /**
+     * @param array<MatchModel> $matches
+     * @param array<array<MatchModel>>
+     */
+    private function convertTreeToLayers(array $matches): array
+    {
+        $layers = [];
+        $layer = 0;
+        
+        foreach ($matches as $node){
+            if (in_array($node->getId(), isset($layers[$layer]) ? array_map(fn (MatchModel $m) => $m->getChildId(), $layers[$layer]) : [])){
+                if ($layer !== 0){
+                    $children = array_map(fn (MatchModel $m) => $m->getChildId(), $layers[$layer - 1]);
+                    usort($layers[$layer], function (MatchModel $a, MatchModel $b) use ($children){
+                        return
+                            (($val = array_search($a->getId(), $children)) === false ? PHP_INT_MAX : $val)
+                                <=>
+                            (($val = array_search($b->getId(), $children)) === false ? PHP_INT_MAX : $val);
+                    });
+                }
+                $layer++;
+            }
+            $layers[$layer][] = $node;
+        }
+
+        return $layers;
+    }
+
+    public function getMatches(int $id)
+    {
+        /** @var \App\DAL\Repository\TournamentRepository */
+        $tournamentRepo = $this->entityManager->getRepository(\App\DAL\Entity\Tournament::class);
+        /** @var TournamentModel */
+        $tournament = AutoMapper::map($tournamentRepo->find($id), TournamentModel::class, trackEntity: false);
+
+        /** @var \App\DAL\Repository\TournamentMatchRepository */
+        $matchesRepo = $this->entityManager->getRepository(\App\DAL\Entity\TournamentMatch::class);
+        $matcheModels = $matchesRepo->findBy(['tournament' => $id]);
+        $matches = [];
+
+        foreach ($matcheModels as $matchModel){
+            /** @var MatchModel */
+            $match = AutoMapper::map($matchModel, MatchModel::class, trackEntity: false);
+            $match->setChildId($matchModel->getChildMatch()?->getId());
+            $matches[] = $match;
+        }
+
+        if ($tournament->getMatchingType(false) === MatchingType::Elimination){
+            return $this->convertTreeToLayers($matches);
+        }
+
+        return [$matches];
     }
 }
