@@ -2,8 +2,10 @@
 
 namespace App\DAL\Repository;
 
+use App\DAL\Entity\Team;
 use App\DAL\Entity\TournamentParticipant;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -37,6 +39,21 @@ class TournamentParticipantRepository extends ServiceEntityRepository
         if ($flush) {
             $this->getEntityManager()->flush();
         }
+    }
+
+    public function findTeam(int $tournamentId, int $currUserId): TournamentParticipant
+    {
+        $queryBuilder = $this->getEntityManager()->createQueryBuilder();
+
+        return $queryBuilder
+            ->select('p')
+            ->from(TournamentParticipant::class, 'p')
+            ->innerJoin(Team::class,'t',Join::WITH, 'IDENTITY(t.leader) = :p_currUserId')
+            ->where('IDENTITY(p.tournament) = :p_tournamentId')
+            ->setParameter('p_tournamentId', $tournamentId)
+            ->setParameter('p_currUserId', $currUserId)
+            ->getQuery()
+            ->getOneOrNullResult();
     }
 
 //    /**

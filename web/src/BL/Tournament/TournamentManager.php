@@ -10,7 +10,9 @@ use App\BL\Util\StringUtil;
 use App\BL\Tournament\TournamentModel;
 use App\BL\Tournament\TournamentTableModel;
 use App\BL\Util\DataTableState;
+use App\DAL\Entity\Team;
 use App\DAL\Entity\Tournament;
+use App\DAL\Entity\TournamentParticipant;
 use App\DAL\Entity\TournamentType;
 
 class TournamentManager
@@ -186,5 +188,36 @@ class TournamentManager
 
         $this->entityManager->persist($participant);
         $this->entityManager->flush();
+    }
+
+    public function addTournamentParticipantTeam(int $tournamentId, int $teamId){
+        /** @var \App\DAL\Repository\TournamentRepository */
+        $repo = $this->entityManager->getRepository(Tournament::class);
+        
+        $tournament = $repo->find($tournamentId);
+
+        $participant = new \App\DAL\Entity\TournamentParticipant;
+        $participant
+            ->setApproved(false)
+            ->setTournament($tournament)
+            ->setSignedUpTeam(
+                $this->entityManager->getRepository(Team::class)->find($teamId)
+            );
+
+        $this->entityManager->persist($participant);
+        $this->entityManager->flush();
+    }
+
+    public function removeTournamentParticipant(int $tournamentId, int $currUserId){
+        /** @var \App\DAL\Repository\TournamentParticipantRepository */
+        $repo = $this->entityManager->getRepository(TournamentParticipant::class);
+
+        $participant = $repo->findOneBy(['tournament' => $tournamentId, 'signedUpUser' => $currUserId]);
+
+        if($participant === null){
+            $participant = $repo->findTeam($tournamentId, $currUserId);
+        }
+
+        $repo->remove($participant, true);
     }
 }
