@@ -2,6 +2,7 @@
 
 namespace App\BL\Tournament;
 
+use DateTime;
 
 class TournamentModel
 {
@@ -36,6 +37,8 @@ class TournamentModel
     private int $createdById;
 
     private string $createdByNickName;
+
+    private bool $approved;
 
     // public function __construct()
     // {
@@ -200,5 +203,21 @@ class TournamentModel
     public function setCreatedByNickName(string $val)
     {
         $this->createdByNickName = $val;
+    }
+
+    public function getApproved(): bool
+    {
+        return $this->approved;
+    }
+
+    public function setApproved(bool $val)
+    {
+        $this->approved = $val;
+    }
+
+    public function canRegistrate(): bool
+    {
+        $now = new \DateTime;
+        return (($this->registrationDateStart <= $now) && ($now <= $this->registrationDateEnd) && $this->approved);
     }
 }

@@ -41,7 +41,7 @@ class TeamManager
         $this->saveTeamImage($teamModel);
 
         /** @var Team */
-        $team = AutoMapper::map($teamModel, Team::class, trackEntity: false);
+        $team = AutoMapper::map($teamModel, Team::class, ['id'], trackEntity: false);
         $team->setLeader(
             AutoMapper::map(
                 $this->security->getUser(),
@@ -225,5 +225,19 @@ class TeamManager
         /** @var ?\App\BL\User\UserModel */
         $user = $this->security->getUser();
         return $user?->getId() === $leader->getId();
+    }
+
+    /**
+     * @return \Traversable<\App\BL\Team\TeamModel>
+     */
+    public function getUserTeams(int $userId): \Traversable
+    {
+        /** @var \App\DAL\Repository\TeamRepository */
+        $repo = $this->entityManager->getRepository(Team::class);
+
+        foreach ($repo->findBy(['leader' => $userId]) as $res){
+            /** @var \App\BL\Team\TeamModel */
+            yield  AutoMapper::map($res, \App\BL\Team\TeamModel::class, trackEntity: false);
+        }
     }
 }

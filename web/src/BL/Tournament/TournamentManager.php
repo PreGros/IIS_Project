@@ -10,7 +10,9 @@ use App\BL\Util\StringUtil;
 use App\BL\Tournament\TournamentModel;
 use App\BL\Tournament\TournamentTableModel;
 use App\BL\Util\DataTableState;
+use App\DAL\Entity\Team;
 use App\DAL\Entity\Tournament;
+use App\DAL\Entity\TournamentParticipant;
 use App\DAL\Entity\TournamentType;
 
 class TournamentManager
@@ -52,8 +54,11 @@ class TournamentManager
     {
         /** @var \App\DAL\Repository\TournamentRepository */
         $repo = $this->entityManager->getRepository(Tournament::class);
+        /** @var \App\BL\User\UserModel */
+        $user = $this->security->getUser();
         
         $paginator = $repo->findTableData(
+            $user->getId(),
             $state->getLimit(),
             $state->getStart(),
             $state->getOrderColumn(),
@@ -72,6 +77,7 @@ class TournamentManager
             $tournamentModel->setCreatedById($entity['tournament']->getCreatedBy()->getId());
             $tournamentModel->setCreatedByNickName($entity['tournament']->getCreatedBy()->getNickname());
             $tournamentModel->setApproved((bool)$entity['approved']);
+            $tournamentModel->setCurrentUserRegistrationState($entity['approved_participant']);
             $tournamentModel->setCreatedByCurrentUser($tournamentModel->getCreatedById()  === $user?->getId());
             yield $tournamentModel;
         }
@@ -88,6 +94,7 @@ class TournamentManager
         $tournamentModel = AutoMapper::map($tournament, \App\BL\Tournament\TournamentModel::class, trackEntity: true);
         $tournamentModel->setCreatedByNickName($tournament->getCreatedBy()->getNickname());
         $tournamentModel->setCreatedById($tournament->getCreatedBy()->getId());
+        $tournamentModel->setApproved($tournament->getApprovedBy() != null);
         return $tournamentModel;
     }
 
@@ -163,5 +170,58 @@ class TournamentManager
         $tournament->setApprovedBy(null);
 
         $repo->save($tournament, true);
+    }
+
+    public function addTournamentParticipantCurrUser(int $tournamentId){
+        /** @var \App\DAL\Repository\TournamentRepository */
+        $repo = $this->entityManager->getRepository(Tournament::class);
+        
+        $tournament = $repo->find($tournamentId);
+
+        $participant = new \App\DAL\Entity\TournamentParticipant;
+        $participant
+            ->setApproved(false)
+            ->setTournament($tournament)
+            ->setSignedUpUser(
+                AutoMapper::map(
+                    $this->security->getUser(),
+                    \App\DAL\Entity\User::class,
+                    trackEntity: false
+                )
+            );
+
+        $this->entityManager->persist($participant);
+        $this->entityManager->flush();
+    }
+
+    public function addTournamentParticipantTeam(int $tournamentId, int $teamId){
+        /** @var \App\DAL\Repository\TournamentRepository */
+        $repo = $this->entityManager->getRepository(Tournament::class);
+        
+        $tournament = $repo->find($tournamentId);
+
+        $participant = new \App\DAL\Entity\TournamentParticipant;
+        $participant
+            ->setApproved(false)
+            ->setTournament($tournament)
+            ->setSignedUpTeam(
+                $this->entityManager->getRepository(Team::class)->find($teamId)
+            );
+
+        $this->entityManager->persist($participant);
+        $this->entityManager->flush();
+    }
+
+    public function removeTournamentParticipant(int $tournamentId, int $currUserId){
+        /** @var \App\DAL\Repository\TournamentParticipantRepository */
+        $repo = $this->entityManager->getRepository(TournamentParticipant::class);
+
+        $participant = $repo->findOneBy(['tournament' => $tournamentId, 'signedUpUser' => $currUserId]);
+
+        if($participant === null){
+            $participant = $repo->findTeam($tournamentId, $currUserId);
+        }
+
+        $repo->remove($participant, true);
     }
 }

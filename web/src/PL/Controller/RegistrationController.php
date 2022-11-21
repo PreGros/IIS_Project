@@ -4,7 +4,6 @@ namespace App\PL\Controller;
 
 use App\BL\User\UserModel;
 use App\PL\Form\User\RegistrationFormType;
-use App\BL\Security\EmailVerifier;
 use App\BL\User\UserManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
