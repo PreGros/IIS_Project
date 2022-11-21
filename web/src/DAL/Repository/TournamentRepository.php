@@ -3,6 +3,7 @@
 namespace App\DAL\Repository;
 
 use App\DAL\Entity\Tournament;
+use App\DAL\Entity\TournamentParticipant;
 use App\DAL\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\Query\Expr\Join;
@@ -45,15 +46,39 @@ class TournamentRepository extends ServiceEntityRepository
     /**
      * @return Paginator<array<<Tournament|int>>
      */
-    public function findTableData(int $limit, int $start, string $order, bool $ascending, string $search, array $participantTypes): Paginator
+    public function findTableData(?int $currUserId, int $limit, int $start, string $order, bool $ascending, string $search, array $participantTypes): Paginator
     {
         $queryBuilder = $this->getEntityManager()->createQueryBuilder();
 
         $queryBuilder
             ->select('t tournament')
             ->addSelect('CASE WHEN (t.approvedBy IS NOT NULL) THEN 1 ELSE 0 END as approved')
+            ->addSelect('tp.approved as approved_participant')
             ->from(Tournament::class, 't')
             ->leftJoin(User::class, 'c', Join::WITH, 't.createdBy = c')
+            ->leftJoin(TournamentParticipant::class, 'tp', Join::WITH,
+                $this->getEntityManager()->createQueryBuilder()->expr()->orX(
+                    'IDENTITY(tp.tournament) = t.id and IDENTITY(tp.signedUpUser) = :p_user_id',
+                    'EXISTS(' .
+                    ($qb = $this->getEntityManager()->createQueryBuilder())
+                        ->select('tm.id')
+                        ->from(\App\DAL\Entity\Team::class, 'tm')
+                        ->where('tm.id = IDENTITY(tp.signedUpTeam)')
+                        ->andWhere($qb->expr()->orX(
+                            'IDENTITY(tm.leader) = :p_user_id',
+                            'EXISTS(' .
+                                $this->getEntityManager()->createQueryBuilder()
+                                    ->select('m')
+                                    ->from(\App\DAL\Entity\Member::class, 'm')
+                                    ->where('IDENTITY(m.team) = tm.id')
+                                    ->andWhere('IDENTITY(m.user) = :p_user_id')
+                                    ->getDQL()
+                            . ')')
+                    )
+                    ->getDQL()
+                . ')'
+                )
+            )
             ->where('t.name LIKE :p_search')
             ->orWhere('t.participantType IN (:p_types)')
             ->orWhere('c.nickname LIKE :p_search');
@@ -77,6 +102,7 @@ class TournamentRepository extends ServiceEntityRepository
         $query = $queryBuilder
             ->setParameter('p_search', "%{$search}%")
             ->setParameter('p_types', $participantTypes)
+            ->setParameter('p_user_id', $currUserId)
             ->setFirstResult($start)
             ->setMaxResults($limit)
             ->getQuery();

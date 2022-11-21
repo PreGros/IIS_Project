@@ -22,6 +22,8 @@ class TournamentTableModel
     private bool $approved;
 
     private bool $createdByCurrentUser;
+
+    private ?int $currentUserRegistrationState;
     // private ?string $approvedByNickName;
 
     // private ?int $approvedById;
@@ -119,6 +121,17 @@ class TournamentTableModel
     public function setCreatedByCurrentUser(bool $val)
     {
         $this->createdByCurrentUser = $val;
+    }
+
+    public function setCurrentUserRegistrationState(?int $val): self
+    {
+        $this->currentUserRegistrationState = $val;
+        return $this;
+    }
+
+    public function getCurrentUserRegistrationState(): ?int
+    {
+        return $this->currentUserRegistrationState;
     }
 
     // public function getApprovedById(): ?int

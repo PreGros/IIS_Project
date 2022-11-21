@@ -12,20 +12,6 @@ use App\PL\Table\Match\MatchTable;
 
 class MatchController extends AbstractController
 {
-    #[Route('/test-single-elimination', name: 'single_elimination')]
-    public function testSingleElimination(MatchManager $matchManager): Response
-    {
-        $matchManager->generateMatchesSingleElimination();
-        return $this->redirectToRoute('tournaments');
-    }
-
-    #[Route('/test-round-robin', name: 'single_elimination')]
-    public function testRoundRobin(MatchManager $matchManager): Response
-    {
-        $matchManager->generateMatchesRoundRobin();
-        return $this->redirectToRoute('tournaments');
-    }
-
     #[Route('/tournaments/{id<\d+>}/matches', name: 'matches')]
     public function getMatches(int $id, MatchManager $matchManager, MatchTable $matchTable): Response
     {
