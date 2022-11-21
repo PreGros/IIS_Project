@@ -59,6 +59,12 @@ class UserController extends AbstractController
     {
         /** @var \App\BL\User\UserModel */
         $userModel = $this->getUser();
+
+        if (!$this->isGranted('ROLE_ADMIN') && !$userModel->isCurrentUser($id)){
+            $this->addFlash('danger', 'Insufficient rights to edit team');
+            return $this->redirectToRoute('users');
+        }
+
         $form = $this->createForm(EditFormType::class, $userModel);
         $form->handleRequest($request);
 
@@ -80,6 +86,12 @@ class UserController extends AbstractController
     {
         /** @var \App\BL\User\UserModel */
         $userModel = $this->getUser();
+
+        if (!$this->isGranted('ROLE_ADMIN') && !$userModel->isCurrentUser($id)){
+            $this->addFlash('danger', 'Insufficient rights to edit team');
+            return $this->redirectToRoute('users');
+        }
+
         $form = $this->createForm(ChangePwdFormType::class);
         $form->handleRequest($request);
 
