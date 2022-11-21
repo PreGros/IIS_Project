@@ -67,6 +67,13 @@ class TournamentDataTable
                 'searchable' => false,
                 'orderable' => true
             ])
+            ->add('isCurrRegistered', TwigStringColumn::class, [
+                'label' => 'Is registred?',
+                'searchable' => false,
+                'orderable' => true,
+                'template' =>
+                    '<i class="bi {% if row.participantIsApproved %} bi-check-all {% elseif not row.participantIsApproved is null %} bi-check-lg {% else %} bi-x-lg {% endif %}"></i>'
+            ])
             ->add('action', TwigStringColumn::class, [
                 'label' => 'Action',
                 'searchable' => false,
@@ -100,6 +107,7 @@ class TournamentDataTable
                 'createdByNickName' => $data->getCreatedByNickName(),
                 'createdByInfo' => $this->router->generate('user_info', ['id' => $data->getCreatedById()]),
                 'isApproved' => $data->getApproved(),
+                'participantIsApproved' => $data->getCurrentUserRegistrationState(),
                 'approveURL' => $this->router->generate('user_approve', ['id' => $data->getId()]),
                 'disapproveURL' => $this->router->generate('user_disapprove', ['id' => $data->getId()]),
                 'modifiable' => ($this->isAdmin || $data->getCreatedByCurrentUser())

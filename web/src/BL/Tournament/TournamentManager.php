@@ -54,8 +54,11 @@ class TournamentManager
     {
         /** @var \App\DAL\Repository\TournamentRepository */
         $repo = $this->entityManager->getRepository(Tournament::class);
+        /** @var \App\BL\User\UserModel */
+        $user = $this->security->getUser();
         
         $paginator = $repo->findTableData(
+            $user->getId(),
             $state->getLimit(),
             $state->getStart(),
             $state->getOrderColumn(),
@@ -74,6 +77,7 @@ class TournamentManager
             $tournamentModel->setCreatedById($entity['tournament']->getCreatedBy()->getId());
             $tournamentModel->setCreatedByNickName($entity['tournament']->getCreatedBy()->getNickname());
             $tournamentModel->setApproved((bool)$entity['approved']);
+            $tournamentModel->setCurrentUserRegistrationState($entity['approved_participant']);
             $tournamentModel->setCreatedByCurrentUser($tournamentModel->getCreatedById()  === $user?->getId());
             yield $tournamentModel;
         }

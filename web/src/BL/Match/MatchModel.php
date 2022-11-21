@@ -2,7 +2,6 @@
 
 namespace App\BL\Match;
 
-
 class MatchModel
 {
     private int $id;
