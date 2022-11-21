@@ -13,8 +13,6 @@ use App\PL\Form\Tournament\TournamentCreateFormType;
 use App\BL\Tournament\TournamentManager;
 use App\BL\Tournament\TournamentModel;
 use App\BL\Tournament\TournamentTypeModel;
-use App\BL\User\UserManager;
-use App\DAL\Entity\Tournament;
 use App\PL\DataTable\Tournament\TournamentDataTable;
 use App\PL\Form\Tournament\TournamentEditFormType;
 use App\PL\Form\Tournament\TournamentRegistrationFormType;

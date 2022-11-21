@@ -1,0 +1,16 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Tournament matches{% endblock %}
+
+{% block body %}
+    {{ render_flash_messages() }}
+
+    <h1>Tournament matches</h1>
+
+    {% for table in tables %}
+        {{ table_render(table) }}
+        <br>
+        <hr>
+    {% endfor %}
+    
+{% endblock %}
