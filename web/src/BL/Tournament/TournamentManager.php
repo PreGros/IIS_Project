@@ -88,6 +88,7 @@ class TournamentManager
         $tournamentModel = AutoMapper::map($tournament, \App\BL\Tournament\TournamentModel::class, trackEntity: true);
         $tournamentModel->setCreatedByNickName($tournament->getCreatedBy()->getNickname());
         $tournamentModel->setCreatedById($tournament->getCreatedBy()->getId());
+        $tournamentModel->setApproved($tournament->getApprovedBy() != null);
         return $tournamentModel;
     }
 
@@ -163,5 +164,27 @@ class TournamentManager
         $tournament->setApprovedBy(null);
 
         $repo->save($tournament, true);
+    }
+
+    public function addTournamentParticipantCurrUser(int $tournamentId){
+        /** @var \App\DAL\Repository\TournamentRepository */
+        $repo = $this->entityManager->getRepository(Tournament::class);
+        
+        $tournament = $repo->find($tournamentId);
+
+        $participant = new \App\DAL\Entity\TournamentParticipant;
+        $participant
+            ->setApproved(false)
+            ->setTournament($tournament)
+            ->setSignedUpUser(
+                AutoMapper::map(
+                    $this->security->getUser(),
+                    \App\DAL\Entity\User::class,
+                    trackEntity: false
+                )
+            );
+
+        $this->entityManager->persist($participant);
+        $this->entityManager->flush();
     }
 }

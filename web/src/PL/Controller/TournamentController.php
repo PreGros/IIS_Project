@@ -2,6 +2,8 @@
 
 namespace App\PL\Controller;
 
+use App\BL\Team\TeamManager;
+use App\BL\Tournament\ParticipantType;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -11,9 +13,11 @@ use App\PL\Form\Tournament\TournamentCreateFormType;
 use App\BL\Tournament\TournamentManager;
 use App\BL\Tournament\TournamentModel;
 use App\BL\Tournament\TournamentTypeModel;
+use App\BL\User\UserManager;
 use App\DAL\Entity\Tournament;
 use App\PL\DataTable\Tournament\TournamentDataTable;
 use App\PL\Form\Tournament\TournamentEditFormType;
+use App\PL\Form\Tournament\TournamentRegistrationFormType;
 use App\PL\Form\Tournament\TournamentTypeCreateFormType;
 use App\PL\Table\Tournament\TypesTable;
 
@@ -50,10 +54,34 @@ class TournamentController extends AbstractController
     }
 
     #[Route('/tournaments/{id<\d+>}', name: 'tournament_info')]
-    public function getTournamentInfo(int $id, TournamentManager $tournamentManager): Response
+    public function getTournamentInfo(int $id, Request $request, TournamentManager $tournamentManager, TeamManager $teamManager): Response
     {
         $tournamentModel = $tournamentManager->getTournament($id);
-        return $this->render('tournament/info.html.twig', [
+
+        /** @var \App\BL\User\UserModel */
+        $user = $this->getUser();
+        $teams = $teamManager->getUserTeams($user->getId());
+
+        $teamsFormated = [];
+        foreach ($teams as $team) {
+            $teamsFormated[$team->getName()] = $team->getId();
+        }
+
+        $form = $this->createForm(TournamentRegistrationFormType::class, options: [
+            'teams' => $teamsFormated
+        ]);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()){
+            // TODO: přidat registrovaného do turnamentu
+            // $tournamentManager->updateTournament($tournament);
+
+            // $this->addFlash('success', 'Tournament was edited');
+            return $this->redirectToRoute('tournament_info', ['id' => $id]);
+        }
+
+        return $this->renderForm('tournament/info.html.twig', [
+            'form' => $form,
             'tournament' => $tournamentModel,
             'participantType' => $tournamentModel->getParticipantType(false)->label(),
             'date' => $tournamentModel->getDate()->format('j. n. Y G:i'),
@@ -62,8 +90,20 @@ class TournamentController extends AbstractController
             'winCondition' => $tournamentModel->getWinCondition(false)->label(),
             'matchingType' => $tournamentModel->getMatchingType(false)->label(),
             'routName' => 'user_info',
-            'params' => ['id' => $tournamentModel->getCreatedById()]
+            'params' => ['id' => $tournamentModel->getCreatedById()],
+            'canRegistrate' => $tournamentModel->canRegistrate(),
+            'participantIsTeam' => ($tournamentModel->getParticipantType(false) == ParticipantType::Teams),
+            'redirectParam' => ['id' => $id]
         ]);
+    }
+
+    #[Route('/tournaments/{id<\d+>}/register', name: 'tournament_register')]
+    public function registerAction(int $id, TournamentManager $tournamentManager): Response
+    {
+        // TODO: registrace přihlášeného uživatele
+        $tournamentManager->addTournamentParticipantCurrUser($id);
+        $this->addFlash('success', 'You were successfully registered in this tournament. Now wait for your approval');
+        return $this->redirectToRoute('tournament_info', ['id' => $id]);
     }
 
     #[Route('/tournaments/{id<\d+>}/delete', name: 'tournament_delete')]

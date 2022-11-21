@@ -6,11 +6,23 @@ use Symfony\Component\HttpFoundation\File\File;
 
 class TeamModel
 {
+    private string $id;
+
     private string $name;
 
     private string $imagePath;
 
     private ?File $image = null;
+
+    public function getId(): int
+    {
+        return $this->id;
+    }
+
+    // public function setId(int $val)
+    // {
+    //     $this->id = $val;
+    // }
 
     public function getName(): string
     {
