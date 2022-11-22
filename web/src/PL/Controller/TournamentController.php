@@ -40,12 +40,18 @@ class TournamentController extends AbstractController
         $tournament = new TournamentModel();
         $form = $this->createForm(TournamentCreateFormType::class, $tournament);
         $form->handleRequest($request);
+        $errMessage = "";
 
         if ($form->isSubmitted() && $form->isValid()){
-            $tournamentManager->createTournament($tournament);
+            if ($tournamentManager->checkOnCreateValidity($tournament, $errMessage)) {
+                $tournamentManager->createTournament($tournament);
 
-            $this->addFlash('success', 'Tournament was added');
-            return $this->redirectToRoute('tournaments');
+                $this->addFlash('success', 'Tournament was added');
+                return $this->redirectToRoute('tournaments');
+            }
+            else{
+                $this->addFlash('danger', $errMessage);
+            }
         }
 
         return $this->renderForm('tournament/create.html.twig', ['tournamentForm' => $form]);
@@ -151,12 +157,18 @@ class TournamentController extends AbstractController
         $tournament = $tournamentManager->getTournament($id);
         $form = $this->createForm(TournamentEditFormType::class, $tournament);
         $form->handleRequest($request);
+        $errMessage = "";
 
         if ($form->isSubmitted() && $form->isValid()){
-            $tournamentManager->updateTournament($tournament);
+            if ($tournamentManager->checkOnCreateValidity($tournament, $errMessage)) {
+                $tournamentManager->updateTournament($tournament);
 
-            $this->addFlash('success', 'Tournament was edited');
-            return $this->redirectToRoute('tournaments');
+                $this->addFlash('success', 'Tournament was edited');
+                return $this->redirectToRoute('tournaments');
+            }
+            else{
+                $this->addFlash('danger', $errMessage);
+            }
         }
 
         return $this->renderForm('tournament/edit.html.twig', ['tournamentForm' => $form]);
