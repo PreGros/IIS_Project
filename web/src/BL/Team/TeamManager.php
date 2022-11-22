@@ -230,7 +230,7 @@ class TeamManager
     /**
      * @return \Traversable<\App\BL\Team\TeamModel>
      */
-    public function getUserTeams(int $userId): \Traversable
+    public function getUserTeams(?int $userId): \Traversable
     {
         /** @var \App\DAL\Repository\TeamRepository */
         $repo = $this->entityManager->getRepository(Team::class);

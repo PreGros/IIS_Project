@@ -3,12 +3,13 @@
 namespace App\BL\Match;
 
 use App\BL\Tournament\MatchingType;
-use App\BL\Tournament\TournamentManager;
 use App\BL\Tournament\TournamentModel;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Security\Core\Security;
 
 use App\BL\Util\AutoMapper;
+use App\DAL\Entity\Tournament;
+use App\BL\Tournament\TournamentManager;
 
 class MatchManager
 {
@@ -20,13 +21,13 @@ class MatchManager
     public function __construct(
         EntityManagerInterface $entityManager,
         Security $security,
-        //MatchGenerator $matchGenerator,
+        MatchGenerator $matchGenerator,
         TournamentManager $tournamentManager
     )
     {
         $this->entityManager = $entityManager;
         $this->security = $security;
-        //$this->matchGenerator = $matchGenerator;
+        $this->matchGenerator = $matchGenerator;
         $this->tournamentManager = $tournamentManager;
     }
 
@@ -60,10 +61,7 @@ class MatchManager
 
     public function getMatches(int $id)
     {
-        /** @var \App\DAL\Repository\TournamentRepository */
-        $tournamentRepo = $this->entityManager->getRepository(\App\DAL\Entity\Tournament::class);
-        /** @var TournamentModel */
-        $tournament = AutoMapper::map($tournamentRepo->find($id), TournamentModel::class, trackEntity: false);
+        $tournament = $this->tournamentManager->getTournament($id);
 
         /** @var \App\DAL\Repository\TournamentMatchRepository */
         $matchesRepo = $this->entityManager->getRepository(\App\DAL\Entity\TournamentMatch::class);
@@ -84,18 +82,12 @@ class MatchManager
         return [$matches];
     }
 
-    public function generateMatches(int $tournamentId, bool $setParticipantsToMatches = true)
+    public function generateMatches(TournamentModel $tournament, bool $setParticipantsToMatches = true)
     {
-        $tournament = $this->tournamentManager->getTournament($tournamentId);
-
-        if (!$tournament->getApproved()){
-            return;
-        }
-
         /** @var \App\DAL\Repository\TournamentParticipantRepository */
         $participantsRepo = $this->entityManager->getRepository(\App\DAL\Entity\TournamentParticipant::class);
-        $participants = $participantsRepo->findBy(['tournament' => $tournamentId, 'approved' => true]);
-        
+        $participants = $participantsRepo->findBy(['tournament' => AutoMapper::map($tournament, Tournament::class, trackEntity: false), 'approved' => true]);
+
         $this->matchGenerator->init($participants, $tournament, $setParticipantsToMatches);
         if ($tournament->getMatchingType(false) === MatchingType::Elimination){
             $this->matchGenerator->generateMatchesSingleElimination();

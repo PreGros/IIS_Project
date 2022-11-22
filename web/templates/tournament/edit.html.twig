@@ -8,22 +8,30 @@
     <h1>Edit tournament</h1>
 
     {{ form_start(tournamentForm) }}
-        {{ form_row(tournamentForm.name) }}
-        {{ form_row(tournamentForm.description) }}
-        {{ form_row(tournamentForm.participantType) }}
-        {{ form_row(tournamentForm.maxTeamMemberCount) }}
-        {{ form_row(tournamentForm.minTeamMemberCount) }}
-        {{ form_row(tournamentForm.maxParticipantCount) }}
-        {{ form_row(tournamentForm.minParticipantCount) }}
-        {{ form_row(tournamentForm.date) }}
-        {{ form_row(tournamentForm.prize) }}
-        {{ form_row(tournamentForm.venue) }}
-        {{ form_row(tournamentForm.registrationDateStart) }}
-        {{ form_row(tournamentForm.registrationDateEnd) }}
-        {{ form_row(tournamentForm.winCondition) }}
-        {{ form_row(tournamentForm.matchingType) }}
-        {{ form_row(tournamentForm.submit, {
-            label: 'Submit'
-        }) }}
+        <div class="row">
+            <div class="col-md-6">
+                {{ form_row(tournamentForm.name) }}
+                {{ form_row(tournamentForm.description) }}
+                {{ form_row(tournamentForm.participantType) }}
+                {{ form_row(tournamentForm.maxTeamMemberCount) }}
+                {{ form_row(tournamentForm.minTeamMemberCount) }}
+                {{ form_row(tournamentForm.maxParticipantCount) }}
+                {{ form_row(tournamentForm.minParticipantCount) }}
+            </div>
+            <div class="col-md-6">
+                {{ form_row(tournamentForm.date) }}
+                {{ form_row(tournamentForm.prize) }}
+                {{ form_row(tournamentForm.venue) }}
+                {{ form_row(tournamentForm.registrationDateStart) }}
+                {{ form_row(tournamentForm.registrationDateEnd) }}
+                {{ form_row(tournamentForm.winCondition) }}
+                {{ form_row(tournamentForm.matchingType) }}
+            </div>
+        </div>
+        <div class="text-center">
+            {{ form_row(tournamentForm.submit, {
+                label: 'Submit'
+            }) }}
+        </div>
     {{ form_end(tournamentForm) }}
 {% endblock %}
