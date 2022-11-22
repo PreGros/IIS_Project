@@ -92,7 +92,7 @@
                 </li>
               {% else %}
                 <li class="nav-item">
-                  <a class="nav-link active" aria-current="page" href="{{ path('user_info', { 'id': app.user.id }) }}"><i class="bi bi-person-circle"></i>Profile setting</a>
+                  <a class="nav-link active" aria-current="page" href="{{ path('user_info', { 'id': app.user.id }) }}"><i class="bi bi-person-circle"></i>{{ app.user.nickname }}</a>
                 </li>
               {% endif %}
               <li class="nav-item">
