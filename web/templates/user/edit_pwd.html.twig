@@ -1,0 +1,18 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit user info{% endblock %}
+
+{% block body %}
+    {{ render_flash_messages() }}
+
+    <h2>Setting new password</h2>
+
+    {{ form_start(changePwdForm) }}
+        {{ form_row(changePwdForm.oldPlainPassword) }}
+        {{ form_row(changePwdForm.newPlainPassword) }}
+        {{ form_row(changePwdForm.submit) }}
+    {{ form_end(changePwdForm) }}
+
+{# <div name="user-table" data-settings='{{ datatable_settings(datatable) }}'>Loading...</div> #}
+    
+{% endblock %}

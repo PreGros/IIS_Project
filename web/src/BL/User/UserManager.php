@@ -9,6 +9,7 @@ use Symfony\Component\Mime\Address;
 
 use App\BL\Util\AutoMapper;
 use App\BL\Security\EmailVerifier;
+use App\BL\Security\UserProvider;
 use App\BL\Util\DataTableState;
 use App\DAL\Entity\User;
 
@@ -48,6 +49,15 @@ class UserManager
 
         $userModel = AutoMapper::map($user, $userModel);
         $this->sendVerificationEmail($userModel);
+    }
+
+    public function editUser(UserModel $userModel)
+    {
+        /** @var User */
+        $user = AutoMapper::map($userModel, User::class, trackEntity: false);
+
+        $this->entityManager->persist($user);
+        $this->entityManager->flush();
     }
 
     private function sendVerificationEmail(UserModel $user)
@@ -153,5 +163,21 @@ class UserManager
 
         $user = AutoMapper::map($userModel, User::class, trackEntity: false);
         $repo->save($user, true);
+    }
+
+    public function changePwd(string $oldPwd, string $newPwd, UserModel $userModel, UserProvider $userProvider) : bool
+    {
+        if (!$this->userPasswordHasher->isPasswordValid($userModel, $oldPwd)) {
+            return false;
+        }
+
+        $newHashedPassword = $this->userPasswordHasher->hashPassword(
+            $userModel,
+            $newPwd
+        );
+
+        $userProvider->upgradePassword($userModel, $newHashedPassword);
+
+        return true;
     }
 }

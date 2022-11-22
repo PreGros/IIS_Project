@@ -2,8 +2,11 @@
 
 namespace App\PL\Controller;
 
+use App\BL\Security\UserProvider;
+use App\PL\Form\User\EditFormType;
 use App\BL\User\UserManager;
 use App\PL\DataTable\User\UserDataTable;
+use App\PL\Form\User\ChangePwdFormType;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -14,7 +17,7 @@ class UserController extends AbstractController
     #[Route('/users', name: 'users')]
     public function getUsers(Request $request, UserDataTable $dataTable): Response
     {
-        $table = $dataTable->create($this->isGranted('ROLE_ADMIN'))->handleRequest($request);
+        $table = $dataTable->create($this->isGranted('ROLE_ADMIN')  )->handleRequest($request);
 
         if ($table->isCallback()){
             return $table->getResponse();
@@ -49,5 +52,61 @@ class UserController extends AbstractController
     {
         $userModel = $userManager->getUser($id);
         return $this->render('user/info.html.twig', ['user' => $userModel]);
+    }
+
+    #[Route('/users/{id<\d+>}/edit', name: 'user_edit')]
+    public function editUserInfo(int $id, UserManager $userManager, Request $request): Response
+    {
+        /** @var \App\BL\User\UserModel */
+        $userModel = $this->getUser();
+
+        if (!$this->isGranted('ROLE_ADMIN') && !$userModel->isCurrentUser($id)){
+            $this->addFlash('danger', 'Insufficient rights to edit team');
+            return $this->redirectToRoute('users');
+        }
+
+        $form = $this->createForm(EditFormType::class, $userModel);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $userManager->editUser($userModel);
+            
+            $this->addFlash('success', 'Your informations have been changed.');
+            return $this->redirectToRoute('user_info', ['id' => $userModel->getId()]);
+        }
+
+        return $this->renderForm('user/edit.html.twig', [
+            'editForm' => $form,
+            'id' => $id
+        ]);
+    }
+
+    #[Route('/users/{id<\d+>}/edit/change-pwd', name: 'user_change_pwd')]
+    public function changeUserPwd(int $id, UserManager $userManager, UserProvider $userProvider, Request $request): Response
+    {
+        /** @var \App\BL\User\UserModel */
+        $userModel = $this->getUser();
+
+        if (!$this->isGranted('ROLE_ADMIN') && !$userModel->isCurrentUser($id)){
+            $this->addFlash('danger', 'Insufficient rights to edit team');
+            return $this->redirectToRoute('users');
+        }
+
+        $form = $this->createForm(ChangePwdFormType::class);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            if ($userManager->changePwd($form->get('oldPlainPassword')->getData(), $form->get('newPlainPassword')->getData(), $userModel, $userProvider))
+            {
+                $this->addFlash('success', 'Your password have been changed.');
+                return $this->redirectToRoute('user_info', ['id' => $userModel->getId()]);
+            }
+            $this->addFlash('danger', 'Entered old password does not match current password.');
+        }
+
+        return $this->renderForm('user/edit_pwd.html.twig', [
+            'changePwdForm' => $form
+        ]);
     }
 }

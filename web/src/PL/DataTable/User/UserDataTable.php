@@ -10,6 +10,7 @@ use Omines\DataTablesBundle\DataTableFactory;
 use Omines\DataTablesBundle\Column\TextColumn;
 use Omines\DataTablesBundle\Column\TwigStringColumn;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Security\Core\Security;
 
 class UserDataTable
 {
@@ -17,17 +18,24 @@ class UserDataTable
 
     private UrlGeneratorInterface $router;
 
+    private Security $security;
+
     private UserManager $userManager;
 
-    public function __construct(DataTableFactory $dataTableFactory, UrlGeneratorInterface $router, UserManager $userManager)
+    private bool $allModifiable;
+
+    public function __construct(DataTableFactory $dataTableFactory, UrlGeneratorInterface $router, UserManager $userManager, Security $security)
     {
         $this->factory = $dataTableFactory;
         $this->router = $router;
         $this->userManager = $userManager;
+        $this->security = $security;
     }
 
     public function create(bool $allModifiable = false): DataTable
     {
+        $this->allModifiable = $allModifiable;
+
         $dataTable = $this->factory->create()
             ->add('nickname', TwigStringColumn::class, [
                 'label' => 'NickName',
@@ -41,17 +49,17 @@ class UserDataTable
                 'orderable' => true
             ]);
         
-        if ($allModifiable){
-            $dataTable->add('action', TwigStringColumn::class, [
-                'label' => 'Akce',
-                'searchable' => false,
-                'orderable' => false,
-                'template' => 
-                    '<a href="{% if row.isAdmin %} {{ row.demoteURL }} {% else %} {{ row.promoteURL }} {% endif %}" class="btn btn-secondary">{% if row.isAdmin %} Demote {% else %} Promote {% endif %}</a>' .
-                    ' ' .
-                    '<a href="{{ row.deleteURL }}" class="btn btn-danger" onclick="return confirm(\'Are you sure?\')">Delete</a>'
-            ]);
-        }
+        $dataTable->add('action', TwigStringColumn::class, [
+            'label' => 'Action',
+            'searchable' => false,
+            'orderable' => false,
+            'template' => 
+                '{% if row.canEdit %} <a href="{{ row.editUser }}" class="btn btn-primary">Edit</a>' .
+                ' {% endif %}' .
+                '{% if row.canModerate %}<a href="{% if row.isAdmin %} {{ row.demoteURL }} {% else %} {{ row.promoteURL }} {% endif %}" class="btn btn-secondary">{% if row.isAdmin %} Demote {% else %} Promote {% endif %}</a>' .
+                ' ' .
+                '<a href="{{ row.deleteURL }}" class="btn btn-danger" onclick="return confirm(\'Are you sure?\')">Delete</a>{% endif %}'
+        ]);
             
         return $dataTable->createAdapter(DataTableAdapter::class, [
                 'callback' => fn(DataTableState $state) => $this->parseTableData($state),
@@ -62,6 +70,8 @@ class UserDataTable
     private function parseTableData(DataTableState $state): array
     {
         $tableData = [];
+        /** @var \App\BL\User\UserModel */
+        $currUser = $this->security->getUser();
         foreach ($this->userManager->getUsers($state) as $user){
             $tableData[] = [
                 'email' => $user->getEmail(),
@@ -70,7 +80,10 @@ class UserDataTable
                 'isAdmin' => $user->haveRole('ROLE_ADMIN'),
                 'demoteURL' => $this->router->generate('user_demote', ['id' => $user->getId()]),
                 'promoteURL' => $this->router->generate('user_promote', ['id' => $user->getId()]),
-                'deleteURL' => $this->router->generate('user_delete', ['id' => $user->getId()])
+                'deleteURL' => $this->router->generate('user_delete', ['id' => $user->getId()]),
+                'editUser' => $this->router->generate('user_edit', ['id' => $user->getId()]),
+                'canEdit' => $user->isCurrentUser($currUser?->getId()) || $this->allModifiable,
+                'canModerate' => $this->allModifiable
             ];
         }
         return $tableData;
