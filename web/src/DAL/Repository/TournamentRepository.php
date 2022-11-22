@@ -94,7 +94,8 @@ class TournamentRepository extends ServiceEntityRepository
                     'date' => 't.date',
                     'participantType' => 't.participantType',
                     'createdByNickName' => 'c.nickname',
-                    'isApproved' => 'approved'
+                    'isApproved' => 'approved',
+                    'isCurrRegistered' => 'approved_participant'
                 },
                 $ascending ?
                     'ASC' :
