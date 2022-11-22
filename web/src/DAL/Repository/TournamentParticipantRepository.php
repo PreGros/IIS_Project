@@ -3,9 +3,12 @@
 namespace App\DAL\Repository;
 
 use App\DAL\Entity\Team;
+use App\DAL\Entity\Tournament;
 use App\DAL\Entity\TournamentParticipant;
+use App\DAL\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\Query\Expr\Join;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -54,6 +57,57 @@ class TournamentParticipantRepository extends ServiceEntityRepository
             ->setParameter('p_currUserId', $currUserId)
             ->getQuery()
             ->getOneOrNullResult();
+    }
+
+    /**
+     * @return Paginator<array<<TournnamentParticipant|int>>
+     */
+    public function findTableData(?int $currUserId, int $limit, int $start, string $order, bool $ascending, string $search, int $tournamentId): Paginator
+    {
+        $queryBuilder = $this->getEntityManager()->createQueryBuilder();
+
+        $queryBuilder
+            ->select('p participant')
+            ->addSelect('CASE WHEN (IDENTITY(t.createdBy) = :p_user_id ) THEN 1 ELSE 0 END as createdByCurrUser')
+            ->from(TournamentParticipant::class, 'p')
+            ->innerJoin(Tournament::class, 't', Join::WITH, 't.id = :p_tournament_id AND t = p.tournament')
+            ->leftJoin(User::class, 'u', Join::WITH, 'p.signedUpUser = u')
+            ->leftJoin(Team::class, 'tm', Join::WITH, 'p.signedUpTeam = tm')
+            ->where('tm.name IS NOT NULL AND tm.name LIKE :p_search')
+            ->orWhere('u.nickname IS NOT NULL AND u.nickname LIKE :p_search');
+
+        if ($order !== ''){
+            $queryBuilder
+                ->orderBy(
+                match($order){
+                    'name' => 'tm.name',
+                    'isApproved' => 'p.approved'
+                },
+                $ascending ?
+                    'ASC' :
+                    'DESC'
+                );
+            
+            if ($order === 'name'){
+                $queryBuilder
+                    ->addOrderBy(
+                        'u.nickname',
+                        $ascending ?
+                            'ASC' :
+                            'DESC'
+                    );
+            }
+        }
+        
+        $query = $queryBuilder
+            ->setParameter('p_search', "%{$search}%")
+            ->setParameter('p_tournament_id', $tournamentId)
+            ->setParameter('p_user_id', $currUserId)
+            ->setFirstResult($start)
+            ->setMaxResults($limit)
+            ->getQuery();
+
+        return new Paginator($query, false);
     }
 
 //    /**

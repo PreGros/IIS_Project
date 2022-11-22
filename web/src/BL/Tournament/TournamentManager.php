@@ -70,9 +70,6 @@ class TournamentManager
         );
         $state->setCount($paginator->count());
 
-        /** @var ?\App\BL\User\UserModel */
-        $user = $this->security->getUser();
-
         foreach ($paginator as $entity){
             /** @var TournamentTableModel */
             $tournamentModel = AutoMapper::map($entity['tournament'], TournamentTableModel::class, trackEntity: false);
@@ -245,8 +242,6 @@ class TournamentManager
             return false;
         }
         
-        
-
         return true;
     }
 
@@ -295,5 +290,40 @@ class TournamentManager
             return false;
         }
         return true;
+    }
+
+    /**
+     * @return \Traversable<TournamentParticipantTableModel>
+     */
+    public function getTournamentParticipants(DataTableState $state, int $tournamentId): \Traversable
+    {
+        /** @var \App\DAL\Repository\TournamentParticipantRepository */
+        $repo = $this->entityManager->getRepository(TournamentParticipant::class);
+        /** @var \App\BL\User\UserModel */
+        $user = $this->security->getUser();
+        
+        $paginator = $repo->findTableData(
+            $user?->getId(),
+            $state->getLimit(),
+            $state->getStart(),
+            $state->getOrderColumn(),
+            $state->isAsceding(),
+            $state->getSearch(),
+            $tournamentId
+        );
+        $state->setCount($paginator->count());
+
+        foreach ($paginator as $entity){
+            dump($entity);
+            /** @var TournamentParticipant */
+            $participant = $entity['participant'];
+            /** @var TournamentParticipantTableModel */
+            $tournamentParticipantModel = AutoMapper::map($participant, TournamentParticipantTableModel::class, trackEntity: false);
+            $tournamentParticipantModel->setCreatedByCurrentUser((bool)$entity['createdByCurrUser']);
+            $tournamentParticipantModel->setIsTeam($participant->getSignedUpTeam()!==null);
+            $tournamentParticipantModel->setIdOfParticipant($tournamentParticipantModel->getIsTeam() ? $participant->getSignedUpTeam()->getId() : $participant->getSignedUpUser()->getId());
+            $tournamentParticipantModel->setNameOfParticipant($tournamentParticipantModel->getIsTeam() ? $participant->getSignedUpTeam()->getName() : $participant->getSignedUpUser()->getNickname() );
+            yield $tournamentParticipantModel;
+        }
     }
 }
