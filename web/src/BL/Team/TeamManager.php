@@ -266,4 +266,29 @@ class TeamManager
 
         return [false, null, null];
     }
+
+    public function checkOnCreateValidity(TeamModel $teamModel, string &$errMessage) : bool
+    {
+        if (!$this->checkUniqueName($errMessage, $teamModel->getName())){
+            return false;
+        }
+
+        return true;
+    }
+
+    public function checkUniqueName(string &$errMessage, string $teamName) : bool
+    {
+        /** @var \App\DAL\Repository\TeamRepository */
+        $repo = $this->entityManager->getRepository(\App\DAL\Entity\Team::class);
+        $team = new \App\DAL\Entity\Team();
+        /** cannot get member by reference, so find by ids is performed */
+        $member = $repo->findOneBy(['name' => $teamName]);
+
+        if ($member !== NULL){
+            $errMessage = "Name is already used by another team!";
+            return false;
+        }
+
+        return true;
+    }
 }
