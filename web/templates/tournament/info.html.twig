@@ -89,16 +89,21 @@
                 <hr>
                 <h3>Register</h3>
                 
-                {% if participantIsTeam %}
-                    {{ form_start(form) }}
-                        {{ form_row(form.teams) }}
-                    {{ form_end(form) }}
+                {% if not isRegistered %}
+                    {% if participantIsTeam %}
+                        {{ form_start(form) }}
+                            {{ form_row(form.teams) }}
+                        {{ form_end(form) }}
+                    {% else %}
+                        <p>Register yourself</p>
+                        <a href="{{ path('tournament_register', registerRedirectParam) }}" type="button" class="btn btn-success">Register</a>
+                    {% endif %}
                 {% else %}
-                    <p>Register yourself</p>
-                    <a href="{{ path('tournament_register', redirectParam) }}" type="button" class="btn btn-success">Register</a>
+                    <p>You are registered as <a href="{{ path(participantIsTeam ? 'team_info' : 'user_info', {'id':participantId}) }}">{{ participantName }}</a></p>
+                    {% if canUnregister %}
+                        <a href="{{ path('tournament_unregister', unregisterRedirectParam) }}" type="button" class="btn btn-danger" onclick="return confirm(\'Are you sure?\')">Unregister</a>
+                    {% endif %}
                 {% endif %}
-
-                    {# <a href="{{ path('tournament_unregister', redirectParam) }}" type="button" class="btn btn-danger">Unregister</a> #}
             </div>
         {% endif %}
     </div>

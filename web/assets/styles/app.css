@@ -44,3 +44,9 @@ pre {
     border-radius: 15px;
     position: relative;
 }
+
+i.bi-person-circle {
+    color: white !important;
+    padding-right: 5px;
+    font-size: 200px;
+}

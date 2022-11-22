@@ -60,6 +60,26 @@ class TournamentController extends AbstractController
         $user = $this->getUser();
         $teams = $teamManager->getUserTeams($user?->getId());
 
+        $participantName = null;
+        $participantId = null;
+        $isLeader = null;
+        
+        if($tournamentModel->getCurrentUserRegistrationState() !== null){
+            // registered
+            if($tournamentModel->getParticipantType(false) == ParticipantType::Teams){
+                // registered as team
+                $ret = $teamManager->getRegisteredTeamParticipant($id, $user->getId());
+                $isLeader = $ret[0];
+                $participantId = $ret[1];
+                $participantName = $ret[2];
+            }
+            else{
+                // registered as user
+                $participantName = $user->getNickname();
+                $participantId = $user->getId();
+            }
+        }
+
         $teamsFormated = [];
         foreach ($teams as $team) {
             $teamsFormated[$team->getName()] = $team->getId();
@@ -71,10 +91,9 @@ class TournamentController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()){
-            // TODO: přidat registrovaného do turnamentu
-            // $tournamentManager->updateTournament($tournament);
+            $tournamentManager->addTournamentParticipantTeam($id, $form->get('teams')->getData());
 
-            // $this->addFlash('success', 'Tournament was edited');
+            $this->addFlash('success', 'Your team was successfully registered in this tournament. Now wait for approval');
             return $this->redirectToRoute('tournament_info', ['id' => $id]);
         }
 
@@ -91,16 +110,30 @@ class TournamentController extends AbstractController
             'params' => ['id' => $tournamentModel->getCreatedById()],
             'canRegistrate' => $tournamentModel->canRegistrate(),
             'participantIsTeam' => ($tournamentModel->getParticipantType(false) == ParticipantType::Teams),
-            'redirectParam' => ['id' => $id]
+            'registerRedirectParam' => ['id' => $id],
+            'unregisterRedirectParam' => ['id' => $id],
+            'isRegistered' => $tournamentModel->getCurrentUserRegistrationState() !== null,
+            'participantId' => $participantId,
+            'participantName' => $participantName,
+            'canUnregister' => $isLeader !== false
         ]);
     }
 
     #[Route('/tournaments/{id<\d+>}/register', name: 'tournament_register')]
     public function registerAction(int $id, TournamentManager $tournamentManager): Response
     {
-        // TODO: registrace přihlášeného uživatele
         $tournamentManager->addTournamentParticipantCurrUser($id);
         $this->addFlash('success', 'You were successfully registered in this tournament. Now wait for your approval');
+        return $this->redirectToRoute('tournament_info', ['id' => $id]);
+    }
+
+    #[Route('/tournaments/{id<\d+>}/unregister', name: 'tournament_unregister')]
+    public function unregisterAction(int $id, TournamentManager $tournamentManager): Response
+    {
+        /** @var \App\BL\User\UserModel */
+        $currUser = $this->getUser();
+        $tournamentManager->removeTournamentParticipant($id,$currUser->getId());
+        // $this->addFlash('success', 'You were successfully unregistered from this tournament');
         return $this->redirectToRoute('tournament_info', ['id' => $id]);
     }
 

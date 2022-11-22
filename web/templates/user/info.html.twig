@@ -3,11 +3,9 @@
 {% block title %}User info{% endblock %}
 
 {% block body %}
-    {# {% for flash_error in app.flashes() %}
-        <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
-    {% endfor %} #}
+    {{ render_flash_messages() }}
 
-    <h1>{{ user.nickname }}</h1>
+    <h1>{{ user.nickname }}'s user profile</h1>
 
     <dl class="row">
         <dt class="col-sm-3 h5 vert-center">Name</dt>
@@ -29,6 +27,11 @@
         <dt class="col-sm-3 h5 vert-center">Telephone number</dt>
         <dd class="col-sm-9 vert-center">{{ user.phoneNumber }}</dd>
     </dl>
+
+    {% if canEdit %}
+        <a href="{{ path('user_edit', { 'id': id }) }}" class="btn btn-primary">Edit informations</a>
+        <a href="{{ path('user_change_pwd', { 'id': id }) }}" class="btn btn-primary">Change password</a>
+    {% endif %}
 
 {# <div name="user-table" data-settings='{{ datatable_settings(datatable) }}'>Loading...</div> #}
     

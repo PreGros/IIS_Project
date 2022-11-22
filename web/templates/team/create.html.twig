@@ -3,9 +3,7 @@
 {% block title %}Create team{% endblock %}
 
 {% block body %}
-    {% for flash_error in app.flashes() %}
-        <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
-    {% endfor %}
+    {{ render_flash_messages() }}
 
     <h1>Create team</h1>
 
