@@ -42,58 +42,21 @@
               </li>
               <li class="nav-item">
                 <a class="nav-link active" aria-current="page" href="{{ path('users') }}">Users</a>
-              </li>
-              <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" data-bs-auto-close="outside">Multilevel</a>
-                <ul class="dropdown-menu shadow">
-                  <li><a class="dropdown-item" href="#">Gallery</a></li>
-                  <li><a class="dropdown-item" href="blog.html">Blog</a></li>
-                  <li class="dropstart">
-                    <a href="#" class="dropdown-item dropdown-toggle" data-bs-toggle="dropdown">Submenu Left</a>
-                    <ul class="dropdown-menu shadow">
-                      <li><a class="dropdown-item" href=""> Third level 1</a></li>
-                      <li><a class="dropdown-item" href=""> Third level 2</a></li>
-                      <li><a class="dropdown-item" href=""> Third level 3</a></li>
-                      <li><a class="dropdown-item" href=""> Third level 4</a></li>
-                      <li><a class="dropdown-item" href=""> Third level 5</a></li>
-                    </ul>
-                  </li>
-                  <li class="dropend">
-                    <a href="#" class="dropdown-item dropdown-toggle" data-bs-toggle="dropdown" data-bs-auto-close="outside">Submenu Right</a>
-                    <ul class="dropdown-menu shadow">
-                      <li><a class="dropdown-item" href=""> Second level 1</a></li>
-                      <li><a class="dropdown-item" href=""> Second level 2</a></li>
-                      <li><a class="dropdown-item" href=""> Second level 3</a></li>
-                      <li class="dropend">
-                        <a href="#" class="dropdown-item dropdown-toggle" data-bs-toggle="dropdown">Let's go deeper!</a>
-                        <ul class="dropdown-menu dropdown-submenu shadow">
-                          <li><a class="dropdown-item" href=""> Third level 1</a></li>
-                          <li><a class="dropdown-item" href=""> Third level 2</a></li>
-                          <li><a class="dropdown-item" href=""> Third level 3</a></li>
-                          <li><a class="dropdown-item" href=""> Third level 4</a></li>
-                          <li><a class="dropdown-item" href=""> Third level 5</a></li>
-                        </ul>
-                      </li>
-                      <li><a class="dropdown-item" href=""> Third level 5</a></li>
-                    </ul>
-                  </li>
-                  <li><hr class="dropdown-divider"></li>
-                  <li><a class="dropdown-item" href="#">Something else here</a></li>
-                </ul>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="#">Link</a>
-              </li>
+              </li> 
             </ul>
             <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-              <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="{% if is_granted("IS_AUTHENTICATED_FULLY") %}{{ path('app_logout') }}{% else %}{{ path('app_login') }}{% endif %}">{% if is_granted("IS_AUTHENTICATED_FULLY") %}Logout{% else %}Login{% endif %}</a>
-              </li>
               {% if not is_granted("IS_AUTHENTICATED_FULLY") %}
                 <li class="nav-item">
                   <a class="nav-link active" aria-current="page" href="{{ path('app_register') }}">Register</a>
                 </li>
+              {% else %}
+                <li class="nav-item">
+                  <a class="nav-link active" aria-current="page" href="{{ path('user_info', { 'id': app.user.id }) }}"><i class="bi bi-person-circle"></i>{{ app.user.nickname }}</a>
+                </li>
               {% endif %}
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="{% if is_granted("IS_AUTHENTICATED_FULLY") %}{{ path('app_logout') }}{% else %}{{ path('app_login') }}{% endif %}">{% if is_granted("IS_AUTHENTICATED_FULLY") %}Logout{% else %}Login{% endif %}</a>
+              </li>
             </ul>
 
             {# <form class="d-flex ms-auto">

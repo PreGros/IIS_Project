@@ -36,3 +36,16 @@ pre {
     white-space: -o-pre-wrap;    /* Opera 7 */
     word-wrap: break-word;       /* Internet Explorer 5.5+ */
 }
+
+.dt-loading {
+    width: 100%;
+    height: 300px;
+    background-color: #e9ecef;
+    border-radius: 15px;
+    position: relative;
+}
+
+i.bi-person-circle {
+    color: white !important;
+    padding-right: 5px;
+}

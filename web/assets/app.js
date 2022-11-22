@@ -292,94 +292,95 @@ function deparam(params, coerce) {
 
 window.addEventListener('load', () => {
     $('[name^="table"], [name$="table"]').each((index, element) => {
-            $(element).initDataTables($(element).data('settings'), {
-                search: {
-                    return: true,
-                },
-                ordering: true,
-                dom: 
-                "<'row'<'col-sm-12 col-md-6'B><'col-sm-12 col-md-6'f>>" +
-                "<'row'<'col-sm-12'tr>>" +
-                "<'row'<'col-sm-12 col-md-5'l><'col-sm-12 col-md-7'p>>",
-                //dom: 'Bfrtipl',
-        buttons: [
-            {
-                text: 'Reinitialize',
-                action: function (e, dt, node, config) {
-                    location.reload();
-                }
+        $(element).html('<div class="dt-loading"><div id="dt_processing" class="dataTables_processing card" style="display: block;">Loading...<div><div></div><div></div><div></div><div></div></div></div></div>')
+        $(element).initDataTables($(element).data('settings'), {
+            search: {
+                return: true,
             },
-            {
-                extend: 'columnsToggle'
+            ordering: true,
+            dom: 
+            "<'row'<'col-sm-12 col-md-6'B><'col-sm-12 col-md-6'f>>" +
+            "<'row'<'col-sm-12'tr>>" +
+            "<'row'<'col-sm-12 col-md-5'l><'col-sm-12 col-md-7'p>>",
+            //dom: 'Bfrtipl',
+            buttons: [
+                {
+                    text: 'Reinitialize',
+                    action: function (e, dt, node, config) {
+                        location.reload();
+                    }
+                },
+                {
+                    extend: 'columnsToggle'
+                }
+            ],
+            initComplete: function(settings, json) {
+                $(".buttons-columnVisibility").each((index, el) => {
+                    var span = $(el, "span");
+                    var value = $(span).text();
+                    $(span).text(value.substring(0, 1));
+                    $(el).attr('title', value);
+                });
+                // Setup - add a text input to each footer cell
+                // // Apply the search
+                // this.api()
+                // .columns()
+                // .every(function () {
+                //     var that = this;
+
+                //     $('input', this.footer()).on('keyup change clear', function () {
+                //         if (that.search() !== this.value) {
+                //             that.search(this.value).draw();
+                //         }
+                //     });
+                // });
+                // // Get number of total records
+                // // var recordsTotal = api.context[0].fnRecordsTotal();
+                // // $('#events_list h5 span').text(recordsTotal);
+
+                // // Hide some columns
+                // //api.columns([4,9]).visible(false);
+
+                // Create tr filter
+                // var tr = $('<tr id="filter_search"></tr>');
+                // // Count number of cells in a row
+                // var nbCells = document.getElementById('dt').rows[0].cells.length;
+                // // Generate cells to #filter_search row
+                // for (var i = 0; i < nbCells; i++) {
+                //     // onclick="stopPropagation(event);"
+                //     tr.append('<th><input type="search" placeholder="Search"></th>');
+                // }
+
+                // var firstHeaderRow = $('tr', api.table().header());
+                // // tr.insertAfter(firstHeaderRow);
+
+                // // $("#filter_search th").eq(5).find('input').datepicker({
+                // //     autoclose: true,
+                // //     todayHighlight: true,
+                // //     language: "fr",
+                // //     dateFormat: "dd/mm/yy",
+                // // });
+
+                // $("#filter_search input").on('keyup change', function(e) {
+                //     if (e.keyCode == 13) {
+                //         api
+                //             .column($(this).parent().index()+':visible')
+                //             .search(this.value)
+                //             .draw();
+                //     }
+                // });
+
+                // $('.buttons-columnVisibility').each(function(index, element) {
+                //     $(element).click(function() {
+                //         if (api.column(index).visible() === true) {
+                //             $('#filter_search th').eq(index).show();
+                //         } else {
+                //             $('#filter_search th').eq(index).hide();
+                //         }
+                //     });
+                // });
             }
-        ],
-        initComplete: function(settings, json) {
-            $(".buttons-columnVisibility").each((index, el) => {
-                var span = $(el, "span");
-                var value = $(span).text();
-                $(span).text(value.substring(0, 1));
-                $(el).attr('title', value);
-            });
-            // Setup - add a text input to each footer cell
-            // // Apply the search
-            // this.api()
-            // .columns()
-            // .every(function () {
-            //     var that = this;
-
-            //     $('input', this.footer()).on('keyup change clear', function () {
-            //         if (that.search() !== this.value) {
-            //             that.search(this.value).draw();
-            //         }
-            //     });
-            // });
-            // // Get number of total records
-            // // var recordsTotal = api.context[0].fnRecordsTotal();
-            // // $('#events_list h5 span').text(recordsTotal);
-
-            // // Hide some columns
-            // //api.columns([4,9]).visible(false);
-
-            // Create tr filter
-            // var tr = $('<tr id="filter_search"></tr>');
-            // // Count number of cells in a row
-            // var nbCells = document.getElementById('dt').rows[0].cells.length;
-            // // Generate cells to #filter_search row
-            // for (var i = 0; i < nbCells; i++) {
-            //     // onclick="stopPropagation(event);"
-            //     tr.append('<th><input type="search" placeholder="Search"></th>');
-            // }
-
-            // var firstHeaderRow = $('tr', api.table().header());
-            // // tr.insertAfter(firstHeaderRow);
-
-            // // $("#filter_search th").eq(5).find('input').datepicker({
-            // //     autoclose: true,
-            // //     todayHighlight: true,
-            // //     language: "fr",
-            // //     dateFormat: "dd/mm/yy",
-            // // });
-
-            // $("#filter_search input").on('keyup change', function(e) {
-            //     if (e.keyCode == 13) {
-            //         api
-            //             .column($(this).parent().index()+':visible')
-            //             .search(this.value)
-            //             .draw();
-            //     }
-            // });
-
-            // $('.buttons-columnVisibility').each(function(index, element) {
-            //     $(element).click(function() {
-            //         if (api.column(index).visible() === true) {
-            //             $('#filter_search th').eq(index).show();
-            //         } else {
-            //             $('#filter_search th').eq(index).hide();
-            //         }
-            //     });
-            // });
-        }
-    });
+        });
     });
 
     // var table = $('#example').DataTable();
