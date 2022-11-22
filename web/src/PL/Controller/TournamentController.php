@@ -99,7 +99,7 @@ class TournamentController extends AbstractController
         }
 
 
-        $table = $dataTable->create($id)->handleRequest($request);
+        $table = $dataTable->create($id, $this->isGranted('ROLE_ADMIN'))->handleRequest($request);
 
         if ($table->isCallback()){
             return $table->getResponse();
@@ -117,7 +117,7 @@ class TournamentController extends AbstractController
             'matchingType' => $tournamentModel->getMatchingType(false)->label(),
             'routName' => 'user_info',
             'params' => ['id' => $tournamentModel->getCreatedById()],
-            'showRegistrate' => (($tournamentModel->canRegistrate()) || ($tournamentModel->getCurrentUserRegistrationState() !== null)),
+            'showRegistrate' => (($tournamentModel->canRegistrate()) || ($tournamentModel->getCurrentUserRegistrationState() !== null)) && $user !== null,
             'participantIsTeam' => ($tournamentModel->getParticipantType(false) == ParticipantType::Teams),
             'registerRedirectParam' => ['id' => $id],
             'unregisterRedirectParam' => ['id' => $id],
@@ -208,5 +208,19 @@ class TournamentController extends AbstractController
     {
         $tournamentManager->disapproveTournament($id);
         return $this->redirectToRoute('tournaments');
+    }
+
+    #[Route('/tournaments/{tId<\d+>}/participants/{pId<\d+>}/approve', name: 'participant_approve')]
+    public function approveParticipant(int $tId, int $pId, TournamentManager $tournamentManager): Response
+    {
+        $tournamentManager->approveParticipant($pId);
+        return $this->redirectToRoute('tournament_info', ['id' => $tId]);
+    }
+
+    #[Route('/tournaments/{tId<\d+>}/participants/{pId<\d+>}/disapprove', name: 'participant_disapprove')]
+    public function disapproveParticipant(int $tId, int $pId, TournamentManager $tournamentManager): Response
+    {
+        $tournamentManager->disapproveParticipant($pId);
+        return $this->redirectToRoute('tournament_info', ['id' => $tId]);
     }
 }
