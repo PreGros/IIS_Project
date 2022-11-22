@@ -36,3 +36,9 @@ pre {
     white-space: -o-pre-wrap;    /* Opera 7 */
     word-wrap: break-word;       /* Internet Explorer 5.5+ */
 }
+
+i.bi-person-circle {
+    color: white !important;
+    padding-right: 5px;
+    font-size: 200px;
+}

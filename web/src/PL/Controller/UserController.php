@@ -17,7 +17,7 @@ class UserController extends AbstractController
     #[Route('/users', name: 'users')]
     public function getUsers(Request $request, UserDataTable $dataTable): Response
     {
-        $table = $dataTable->create($this->isGranted('ROLE_ADMIN')  )->handleRequest($request);
+        $table = $dataTable->create($this->isGranted('ROLE_ADMIN'))->handleRequest($request);
 
         if ($table->isCallback()){
             return $table->getResponse();
@@ -51,7 +51,17 @@ class UserController extends AbstractController
     public function getUserInfo(int $id, UserManager $userManager): Response
     {
         $userModel = $userManager->getUser($id);
-        return $this->render('user/info.html.twig', ['user' => $userModel]);
+
+        /** @var \App\BL\User\UserModel */
+        $user = $this->getUser();
+
+        
+
+        return $this->render('user/info.html.twig', [
+            'canEdit' => $user->isCurrentUser($id) || $this->isGranted('ROLE_ADMIN'),
+            'user' => $userModel,
+            'id' => $id
+        ]);
     }
 
     #[Route('/users/{id<\d+>}/edit', name: 'user_edit')]
@@ -61,7 +71,7 @@ class UserController extends AbstractController
         $userModel = $this->getUser();
 
         if (!$this->isGranted('ROLE_ADMIN') && !$userModel->isCurrentUser($id)){
-            $this->addFlash('danger', 'Insufficient rights to edit team');
+            $this->addFlash('danger', 'Insufficient rights to edit user');
             return $this->redirectToRoute('users');
         }
 
@@ -88,7 +98,7 @@ class UserController extends AbstractController
         $userModel = $this->getUser();
 
         if (!$this->isGranted('ROLE_ADMIN') && !$userModel->isCurrentUser($id)){
-            $this->addFlash('danger', 'Insufficient rights to edit team');
+            $this->addFlash('danger', 'Insufficient rights to edit user');
             return $this->redirectToRoute('users');
         }
 

@@ -86,14 +86,18 @@
               </li>
             </ul>
             <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-              <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="{% if is_granted("IS_AUTHENTICATED_FULLY") %}{{ path('app_logout') }}{% else %}{{ path('app_login') }}{% endif %}">{% if is_granted("IS_AUTHENTICATED_FULLY") %}Logout{% else %}Login{% endif %}</a>
-              </li>
               {% if not is_granted("IS_AUTHENTICATED_FULLY") %}
                 <li class="nav-item">
                   <a class="nav-link active" aria-current="page" href="{{ path('app_register') }}">Register</a>
                 </li>
+              {% else %}
+                <li class="nav-item">
+                  <a class="nav-link active" aria-current="page" href="{{ path('user_info', { 'id': app.user.id }) }}"><i class="bi bi-person-circle"></i>Profile setting</a>
+                </li>
               {% endif %}
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="{% if is_granted("IS_AUTHENTICATED_FULLY") %}{{ path('app_logout') }}{% else %}{{ path('app_login') }}{% endif %}">{% if is_granted("IS_AUTHENTICATED_FULLY") %}Logout{% else %}Login{% endif %}</a>
+              </li>
             </ul>
 
             {# <form class="d-flex ms-auto">
