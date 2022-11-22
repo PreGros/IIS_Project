@@ -58,7 +58,7 @@ class TournamentController extends AbstractController
 
         /** @var \App\BL\User\UserModel */
         $user = $this->getUser();
-        $teams = $teamManager->getUserTeams($user->getId());
+        $teams = $teamManager->getUserTeams($user?->getId());
 
         $participantName = null;
         $participantId = null;

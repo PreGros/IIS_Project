@@ -58,7 +58,7 @@ class TournamentManager
         $user = $this->security->getUser();
         
         $paginator = $repo->findTableData(
-            $user->getId(),
+            $user?->getId(),
             $state->getLimit(),
             $state->getStart(),
             $state->getOrderColumn(),
