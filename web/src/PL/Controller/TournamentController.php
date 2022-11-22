@@ -14,6 +14,7 @@ use App\BL\Tournament\TournamentManager;
 use App\BL\Tournament\TournamentModel;
 use App\BL\Tournament\TournamentTypeModel;
 use App\PL\DataTable\Tournament\TournamentDataTable;
+use App\PL\DataTable\Tournament\TournamentParticipantDataTable;
 use App\PL\Form\Tournament\TournamentEditFormType;
 use App\PL\Form\Tournament\TournamentRegistrationFormType;
 use App\PL\Form\Tournament\TournamentTypeCreateFormType;
@@ -52,7 +53,7 @@ class TournamentController extends AbstractController
     }
 
     #[Route('/tournaments/{id<\d+>}', name: 'tournament_info')]
-    public function getTournamentInfo(int $id, Request $request, TournamentManager $tournamentManager, TeamManager $teamManager): Response
+    public function getTournamentInfo(int $id, Request $request, TournamentManager $tournamentManager, TeamManager $teamManager, TournamentParticipantDataTable $dataTable): Response
     {
         $tournamentModel = $tournamentManager->getTournament($id);
 
@@ -97,8 +98,16 @@ class TournamentController extends AbstractController
             return $this->redirectToRoute('tournament_info', ['id' => $id]);
         }
 
+
+        $table = $dataTable->create($id)->handleRequest($request);
+
+        if ($table->isCallback()){
+            return $table->getResponse();
+        }
+
         return $this->renderForm('tournament/info.html.twig', [
             'form' => $form,
+            'datatable' => $table,
             'tournament' => $tournamentModel,
             'participantType' => $tournamentModel->getParticipantType(false)->label(),
             'date' => $tournamentModel->getDate()->format('j. n. Y G:i'),
@@ -108,14 +117,14 @@ class TournamentController extends AbstractController
             'matchingType' => $tournamentModel->getMatchingType(false)->label(),
             'routName' => 'user_info',
             'params' => ['id' => $tournamentModel->getCreatedById()],
-            'canRegistrate' => $tournamentModel->canRegistrate(),
+            'showRegistrate' => (($tournamentModel->canRegistrate()) || ($tournamentModel->getCurrentUserRegistrationState() !== null)),
             'participantIsTeam' => ($tournamentModel->getParticipantType(false) == ParticipantType::Teams),
             'registerRedirectParam' => ['id' => $id],
             'unregisterRedirectParam' => ['id' => $id],
             'isRegistered' => $tournamentModel->getCurrentUserRegistrationState() !== null,
             'participantId' => $participantId,
             'participantName' => $participantName,
-            'canUnregister' => $isLeader !== false
+            'canUnregister' => (($isLeader !== false) && $tournamentModel->canRegistrate() )
         ]);
     }
 
