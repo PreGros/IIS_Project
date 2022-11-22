@@ -14,6 +14,7 @@ use App\BL\Util\AutoMapper;
 use App\BL\Util\StringUtil;
 use App\BL\Team\TeamModel;
 use App\BL\Team\TeamTableModel;
+use App\DAL\Entity\Member;
 use App\DAL\Entity\Team;
 
 class TeamManager
@@ -213,12 +214,12 @@ class TeamManager
         }
     }
 
-    public function isCurrentUserLeader(int $teadId): bool
+    public function isCurrentUserLeader(int $teamId): bool
     {
         /** @var \App\DAL\Repository\TeamRepository */
         $repo = $this->entityManager->getRepository(Team::class);
 
-        $team = $repo->find($teadId);
+        $team = $repo->find($teamId);
         /** @var \App\BL\User\UserModel */
         $leader = AutoMapper::map($team->getLeader(), \App\BL\User\UserModel::class, trackEntity: false);
 
@@ -239,5 +240,30 @@ class TeamManager
             /** @var \App\BL\Team\TeamModel */
             yield  AutoMapper::map($res, \App\BL\Team\TeamModel::class, trackEntity: false);
         }
+    }
+
+    public function getRegisteredTeamParticipant($tournamentId, $currUserId)
+    {
+        /** @var \App\DAL\Repository\TournamentParticipantRepository */
+        $participantRepo = $this->entityManager->getRepository(\App\DAL\Entity\TournamentParticipant::class);
+        /** @var \App\DAL\Repository\MemberRepository */
+        $memberRepo = $this->entityManager->getRepository(\App\DAL\Entity\Member::class);
+
+        $registeredParticipantTeams = $participantRepo->findBy(['tournament' => $tournamentId]);
+
+        foreach ($registeredParticipantTeams as  $participant) {
+            $team = $participant->getSignedUpTeam();
+            if($team->getLeader()->getId() === $currUserId){
+                return [true, $team->getId(), $team->getName()];
+            }
+            else{
+                // hledej jako member
+                if($memberRepo->findOneBy(['team' => $team, 'user' => $currUserId])!==null){
+                    return [false, $team->getId(), $team->getName()];
+                }
+            }
+        }
+
+        return [false, null, null];
     }
 }

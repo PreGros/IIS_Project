@@ -57,26 +57,29 @@ class TournamentRepository extends ServiceEntityRepository
             ->from(Tournament::class, 't')
             ->leftJoin(User::class, 'c', Join::WITH, 't.createdBy = c')
             ->leftJoin(TournamentParticipant::class, 'tp', Join::WITH,
-                $this->getEntityManager()->createQueryBuilder()->expr()->orX(
-                    'IDENTITY(tp.tournament) = t.id and IDENTITY(tp.signedUpUser) = :p_user_id',
-                    'EXISTS(' .
-                    ($qb = $this->getEntityManager()->createQueryBuilder())
-                        ->select('tm.id')
-                        ->from(\App\DAL\Entity\Team::class, 'tm')
-                        ->where('tm.id = IDENTITY(tp.signedUpTeam)')
-                        ->andWhere($qb->expr()->orX(
-                            'IDENTITY(tm.leader) = :p_user_id',
-                            'EXISTS(' .
-                                $this->getEntityManager()->createQueryBuilder()
-                                    ->select('m')
-                                    ->from(\App\DAL\Entity\Member::class, 'm')
-                                    ->where('IDENTITY(m.team) = tm.id')
-                                    ->andWhere('IDENTITY(m.user) = :p_user_id')
-                                    ->getDQL()
-                            . ')')
+                $this->getEntityManager()->createQueryBuilder()->expr()->andX(
+                    'IDENTITY(tp.tournament) = t.id',
+                    $this->getEntityManager()->createQueryBuilder()->expr()->orX(
+                        'IDENTITY(tp.signedUpUser) = :p_user_id',
+                        'EXISTS(' .
+                        ($qb = $this->getEntityManager()->createQueryBuilder())
+                            ->select('tm.id')
+                            ->from(\App\DAL\Entity\Team::class, 'tm')
+                            ->where('tm.id = IDENTITY(tp.signedUpTeam)')
+                            ->andWhere($qb->expr()->orX(
+                                'IDENTITY(tm.leader) = :p_user_id',
+                                'EXISTS(' .
+                                    $this->getEntityManager()->createQueryBuilder()
+                                        ->select('m')
+                                        ->from(\App\DAL\Entity\Member::class, 'm')
+                                        ->where('IDENTITY(m.team) = tm.id')
+                                        ->andWhere('IDENTITY(m.user) = :p_user_id')
+                                        ->getDQL()
+                                . ')')
+                        )
+                        ->getDQL()
+                    . ')'
                     )
-                    ->getDQL()
-                . ')'
                 )
             )
             ->where('t.name LIKE :p_search')
@@ -108,6 +111,46 @@ class TournamentRepository extends ServiceEntityRepository
             ->getQuery();
 
         return new Paginator($query, false);
+    }
+
+    public function findInfo(int $id, int $userId): array
+    {
+        return $this->getEntityManager()->createQueryBuilder()
+            ->select('t tournament')
+            ->addSelect('tp.approved as approved_participant')
+            ->from(Tournament::class, 't')
+            ->leftJoin(User::class, 'c', Join::WITH, 't.createdBy = c')
+            ->leftJoin(TournamentParticipant::class, 'tp', Join::WITH,
+                $this->getEntityManager()->createQueryBuilder()->expr()->andX(
+                    'IDENTITY(tp.tournament) = t.id',
+                    $this->getEntityManager()->createQueryBuilder()->expr()->orX(
+                        'IDENTITY(tp.signedUpUser) = :p_user_id',
+                        'EXISTS(' .
+                        ($qb = $this->getEntityManager()->createQueryBuilder())
+                            ->select('tm.id')
+                            ->from(\App\DAL\Entity\Team::class, 'tm')
+                            ->where('tm.id = IDENTITY(tp.signedUpTeam)')
+                            ->andWhere($qb->expr()->orX(
+                                'IDENTITY(tm.leader) = :p_user_id',
+                                'EXISTS(' .
+                                    $this->getEntityManager()->createQueryBuilder()
+                                        ->select('m')
+                                        ->from(\App\DAL\Entity\Member::class, 'm')
+                                        ->where('IDENTITY(m.team) = tm.id')
+                                        ->andWhere('IDENTITY(m.user) = :p_user_id')
+                                        ->getDQL()
+                                . ')')
+                        )
+                        ->getDQL()
+                    . ')'
+                    )
+                )
+            )
+            ->where('t.id = :p_id')
+            ->setParameter('p_id', $id)
+            ->setParameter('p_user_id', $userId)
+            ->getQuery()
+            ->getOneOrNullResult();
     }
 
 //    /**

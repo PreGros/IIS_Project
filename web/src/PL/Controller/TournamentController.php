@@ -60,6 +60,26 @@ class TournamentController extends AbstractController
         $user = $this->getUser();
         $teams = $teamManager->getUserTeams($user->getId());
 
+        $participantName = null;
+        $participantId = null;
+        $isLeader = null;
+        
+        if($tournamentModel->getCurrentUserRegistrationState() !== null){
+            // registered
+            if($tournamentModel->getParticipantType(false) == ParticipantType::Teams){
+                // registered as team
+                $ret = $teamManager->getRegisteredTeamParticipant($id, $user->getId());
+                $isLeader = $ret[0];
+                $participantId = $ret[1];
+                $participantName = $ret[2];
+            }
+            else{
+                // registered as user
+                $participantName = $user->getNickname();
+                $participantId = $user->getId();
+            }
+        }
+
         $teamsFormated = [];
         foreach ($teams as $team) {
             $teamsFormated[$team->getName()] = $team->getId();
@@ -71,7 +91,6 @@ class TournamentController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()){
-            dump($form->get('teams')->getData());
             $tournamentManager->addTournamentParticipantTeam($id, $form->get('teams')->getData());
 
             $this->addFlash('success', 'Your team was successfully registered in this tournament. Now wait for approval');
@@ -93,7 +112,10 @@ class TournamentController extends AbstractController
             'participantIsTeam' => ($tournamentModel->getParticipantType(false) == ParticipantType::Teams),
             'registerRedirectParam' => ['id' => $id],
             'unregisterRedirectParam' => ['id' => $id],
-            'isRegistered' => true //TODO:
+            'isRegistered' => $tournamentModel->getCurrentUserRegistrationState() !== null,
+            'participantId' => $participantId,
+            'participantName' => $participantName,
+            'canUnregister' => $isLeader !== false
         ]);
     }
 

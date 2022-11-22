@@ -40,6 +40,8 @@ class TournamentModel
 
     private bool $approved;
 
+    private ?int $currentUserRegistrationState;
+
     // public function __construct()
     // {
     //     $this->date = new \DateTime();
@@ -219,5 +221,16 @@ class TournamentModel
     {
         $now = new \DateTime;
         return (($this->registrationDateStart <= $now) && ($now <= $this->registrationDateEnd) && $this->approved);
+    }
+
+    public function setCurrentUserRegistrationState(?int $val): self
+    {
+        $this->currentUserRegistrationState = $val;
+        return $this;
+    }
+
+    public function getCurrentUserRegistrationState(): ?int
+    {
+        return $this->currentUserRegistrationState;
     }
 }

@@ -99,7 +99,10 @@
                         <a href="{{ path('tournament_register', registerRedirectParam) }}" type="button" class="btn btn-success">Register</a>
                     {% endif %}
                 {% else %}
-                    <a href="{{ path('tournament_unregister', unregisterRedirectParam) }}" type="button" class="btn btn-danger" onclick="return confirm(\'Are you sure?\')">Unregister</a>
+                    <p>You are registered as <a href="{{ path(participantIsTeam ? 'team_info' : 'user_info', {'id':participantId}) }}">{{ participantName }}</a></p>
+                    {% if canUnregister %}
+                        <a href="{{ path('tournament_unregister', unregisterRedirectParam) }}" type="button" class="btn btn-danger" onclick="return confirm(\'Are you sure?\')">Unregister</a>
+                    {% endif %}
                 {% endif %}
             </div>
         {% endif %}

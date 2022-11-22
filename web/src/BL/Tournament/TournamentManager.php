@@ -88,13 +88,16 @@ class TournamentManager
         /** @var \App\DAL\Repository\TournamentRepository */
         $repo = $this->entityManager->getRepository(Tournament::class);
         
-        $tournament = $repo->find($id);
+        /** @var \App\BL\User\UserModel */
+        $user = $this->security->getUser();
+        $tournament = $repo->findInfo($id, $user?->getId());
 
         /** @var \App\BL\Tournament\TournamentModel */
-        $tournamentModel = AutoMapper::map($tournament, \App\BL\Tournament\TournamentModel::class, trackEntity: true);
-        $tournamentModel->setCreatedByNickName($tournament->getCreatedBy()->getNickname());
-        $tournamentModel->setCreatedById($tournament->getCreatedBy()->getId());
-        $tournamentModel->setApproved($tournament->getApprovedBy() != null);
+        $tournamentModel = AutoMapper::map($tournament['tournament'], \App\BL\Tournament\TournamentModel::class, trackEntity: true);
+        $tournamentModel->setCreatedByNickName($tournament['tournament']->getCreatedBy()->getNickname());
+        $tournamentModel->setCreatedById($tournament['tournament']->getCreatedBy()->getId());
+        $tournamentModel->setApproved($tournament['tournament']->getApprovedBy() !== null);
+        $tournamentModel->setCurrentUserRegistrationState($tournament['approved_participant']);
         return $tournamentModel;
     }
 
