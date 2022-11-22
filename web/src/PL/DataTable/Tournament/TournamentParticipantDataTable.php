@@ -23,6 +23,8 @@ class TournamentParticipantDataTable
 
     private int $tournamentId;
 
+    private bool $isAdmin;
+
     public function __construct(DataTableFactory $dataTableFactory, UrlGeneratorInterface $router, TournamentManager $tournamentManager)
     {
         $this->factory = $dataTableFactory;
@@ -30,9 +32,10 @@ class TournamentParticipantDataTable
         $this->tournamentManager = $tournamentManager;
     }
 
-    public function create(int $tournamentId): DataTable
+    public function create(int $tournamentId, bool $isAdmin): DataTable
     {
         $this->tournamentId = $tournamentId;
+        $this->isAdmin = $isAdmin;
 
         $dataTable = $this->factory->create()
             ->add('name', TwigStringColumn::class, [
@@ -48,7 +51,7 @@ class TournamentParticipantDataTable
                 'template' =>
                     '<i class="bi {% if row.isApproved %} bi-check-lg {% else %} bi-x-lg {% endif %}"></i>'.
                     ' ' .
-                    '<a href="{% if row.isApproved %}{{ row.disapproveURL }}{% else %}{{ row.approveURL }}{% endif %}" class="btn btn-secondary">{% if row.isApproved %}Disapprove{% else %}Approve{% endif %}</a>'
+                    '{% if row.canApprove %}<a href="{% if row.isApproved %}{{ row.disapproveURL }}{% else %}{{ row.approveURL }}{% endif %}" class="btn btn-secondary">{% if row.isApproved %}Disapprove{% else %}Approve{% endif %}</a>{% endif %}'
             ]);
 
 
@@ -66,11 +69,9 @@ class TournamentParticipantDataTable
                 'info' => $this->router->generate($data->getIsTeam() ? 'team_info' : 'user_info', ['id' => $data->getIdOfParticipant()]),
                 'displayName' => $data->getNameOfParticipant(),
                 'isApproved' => $data->getApproved(),
-                //'approveURL' => $this->router->generate('participant_approve', ['id' => $data->getIdOfParticipant()]),
-                'approveURL' => $this->router->generate('tournament_info', ['id' => $this->tournamentId]),
-                //'disapproveURL' => $this->router->generate('participant_disapprove', ['id' => $data->getIdOfParticipant()]),
-                'disapproveURL' => $this->router->generate('tournament_info', ['id' => $this->tournamentId])
-                //'modifiable' => ($this->isCreator || $data->getCreatedByCurrentUser())
+                'canApprove' => $data->getCreatedByCurrentUser() || $this->isAdmin,
+                'approveURL' => $this->router->generate('participant_approve', ['tId' => $this->tournamentId, 'pId' => $data->getId()]),
+                'disapproveURL' => $this->router->generate('participant_disapprove', ['tId' => $this->tournamentId, 'pId' => $data->getId()])
             ];
         }
         return $tableData;

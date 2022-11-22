@@ -314,7 +314,6 @@ class TournamentManager
         $state->setCount($paginator->count());
 
         foreach ($paginator as $entity){
-            dump($entity);
             /** @var TournamentParticipant */
             $participant = $entity['participant'];
             /** @var TournamentParticipantTableModel */
@@ -325,5 +324,25 @@ class TournamentManager
             $tournamentParticipantModel->setNameOfParticipant($tournamentParticipantModel->getIsTeam() ? $participant->getSignedUpTeam()->getName() : $participant->getSignedUpUser()->getNickname() );
             yield $tournamentParticipantModel;
         }
+    }
+
+    public function approveParticipant(int $id){
+        /** @var \App\DAL\Repository\TournamentParticipantRepository */
+        $repo = $this->entityManager->getRepository(TournamentParticipant::class);
+        
+        $participant = $repo->find($id);
+        $participant->setApproved(true);
+
+        $repo->save($participant, true);
+    }
+
+    public function disapproveParticipant(int $id){
+        /** @var \App\DAL\Repository\TournamentParticipantRepository */
+        $repo = $this->entityManager->getRepository(TournamentParticipant::class);
+        
+        $participant = $repo->find($id);
+        $participant->setApproved(false);
+
+        $repo->save($participant, true);
     }
 }

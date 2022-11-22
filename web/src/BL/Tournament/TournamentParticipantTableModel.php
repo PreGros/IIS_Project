@@ -5,6 +5,8 @@ namespace App\BL\Tournament;
 
 class TournamentParticipantTableModel
 {
+    private int $id;
+
     private int $idOfParticipant;
 
     private string $nameOfParticipant;
@@ -14,6 +16,16 @@ class TournamentParticipantTableModel
     private bool $approved;
 
     private bool $createdByCurrentUser;
+
+    public function getId(): int
+    {
+        return $this->id;
+    }
+
+    public function setId(int $val)
+    {
+        $this->id = $val;
+    }
 
     public function getIdOfParticipant(): int
     {
