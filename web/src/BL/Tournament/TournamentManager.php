@@ -43,7 +43,13 @@ class TournamentManager
             )
         );
 
-        //TODO: setTournamentType
+        $tournament->setTournamentType(
+            AutoMapper::map(
+                $tournamentModel->getTournamentTypeModel(),
+                \App\DAL\Entity\TournamentType::class,
+                trackEntity: false
+            )
+        );
 
         $this->entityManager->persist($tournament);
         $this->entityManager->flush();
@@ -78,6 +84,7 @@ class TournamentManager
             $tournamentModel->setApproved((bool)$entity['approved']);
             $tournamentModel->setCurrentUserRegistrationState($entity['approved_participant']);
             $tournamentModel->setCreatedByCurrentUser($tournamentModel->getCreatedById()  === $user?->getId());
+            $tournamentModel->setTournamentTypeName($entity['type_name']);
             yield $tournamentModel;
         }
     }
@@ -120,13 +127,13 @@ class TournamentManager
     /**
      * @return \Traversable<TournamentType>
      */
-    public function getTournamentTypes(): \Traversable
+    public function getTournamentTypes(bool $trackEntity = false): \Traversable
     {
         /** @var \App\DAL\Repository\TournamentTypeRepository */
         $repo = $this->entityManager->getRepository(TournamentType::class);
 
         foreach ($repo->findAll() as $type){
-            yield AutoMapper::map($type, TournamentTypeModel::class, trackEntity: false);
+            yield AutoMapper::map($type, TournamentTypeModel::class, trackEntity: $trackEntity);
         }
     }
 
@@ -265,8 +272,6 @@ class TournamentManager
     public function checkTeamMemberCount(string &$errMessage, TournamentModel $tournament, ?int $numberA, ?int $numberB) : bool
     {
         /** if max number is not defined than it is set to minimum number (minimum = maximum) */
-        dump($numberA);
-        dump($numberB);
         if ($numberA === NULL){
             $tournament->setMinTeamMemberCount(0);
             $numberA = 0;
@@ -344,5 +349,14 @@ class TournamentManager
         $participant->setApproved(false);
 
         $repo->save($participant, true);
+    }
+
+    public function getFormTournamentType() : array
+    {
+        $typesFormated = [];
+        foreach ($this->getTournamentTypes(true) as $type){
+            $typesFormated[$type->getName()] = $type;
+        }
+        return $typesFormated;
     }
 }

@@ -4,6 +4,7 @@ namespace App\DAL\Repository;
 
 use App\DAL\Entity\Tournament;
 use App\DAL\Entity\TournamentParticipant;
+use App\DAL\Entity\TournamentType;
 use App\DAL\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\Query\Expr\Join;
@@ -54,7 +55,9 @@ class TournamentRepository extends ServiceEntityRepository
             ->select('t tournament')
             ->addSelect('CASE WHEN (t.approvedBy IS NOT NULL) THEN 1 ELSE 0 END as approved')
             ->addSelect('tp.approved as approved_participant')
+            ->addSelect('tt.name as type_name')
             ->from(Tournament::class, 't')
+            ->innerJoin(TournamentType::class, 'tt', Join::WITH, 't.tournamentType = tt')
             ->leftJoin(User::class, 'c', Join::WITH, 't.createdBy = c')
             ->leftJoin(TournamentParticipant::class, 'tp', Join::WITH,
                 $this->getEntityManager()->createQueryBuilder()->expr()->andX(
@@ -83,6 +86,7 @@ class TournamentRepository extends ServiceEntityRepository
                 )
             )
             ->where('t.name LIKE :p_search')
+            ->orWhere('tt.name LIKE :p_search')
             ->orWhere('t.participantType IN (:p_types)')
             ->orWhere('c.nickname LIKE :p_search');
 
@@ -92,6 +96,7 @@ class TournamentRepository extends ServiceEntityRepository
                 match($order){
                     'name' => 't.name',
                     'date' => 't.date',
+                    'type' => 'tt.name',
                     'participantType' => 't.participantType',
                     'createdByNickName' => 'c.nickname',
                     'isApproved' => 'approved',

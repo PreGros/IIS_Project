@@ -2,8 +2,6 @@
 
 namespace App\BL\Tournament;
 
-use DateTime;
-
 class TournamentModel
 {
     private string $name;
@@ -41,6 +39,8 @@ class TournamentModel
     private bool $approved;
 
     private ?int $currentUserRegistrationState;
+
+    private TournamentTypeModel $tournamentTypeModel;
 
     // public function __construct()
     // {
@@ -232,5 +232,16 @@ class TournamentModel
     public function getCurrentUserRegistrationState(): ?int
     {
         return $this->currentUserRegistrationState;
+    }
+
+    public function setTournamentTypeModel(?TournamentTypeModel $val): self
+    {
+        $this->tournamentTypeModel = $val;
+        return $this;
+    }
+
+    public function getTournamentTypeModel(): ?TournamentTypeModel
+    {
+        return $this->tournamentTypeModel;
     }
 }
