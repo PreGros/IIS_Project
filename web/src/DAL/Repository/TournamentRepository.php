@@ -114,7 +114,7 @@ class TournamentRepository extends ServiceEntityRepository
         return new Paginator($query, false);
     }
 
-    public function findInfo(int $id, int $userId): array
+    public function findInfo(int $id, ?int $userId): array
     {
         return $this->getEntityManager()->createQueryBuilder()
             ->select('t tournament')

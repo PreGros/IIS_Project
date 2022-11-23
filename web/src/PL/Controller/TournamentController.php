@@ -14,6 +14,7 @@ use App\BL\Tournament\TournamentManager;
 use App\BL\Tournament\TournamentModel;
 use App\BL\Tournament\TournamentTypeModel;
 use App\PL\DataTable\Tournament\TournamentDataTable;
+use App\PL\DataTable\Tournament\TournamentParticipantDataTable;
 use App\PL\Form\Tournament\TournamentEditFormType;
 use App\PL\Form\Tournament\TournamentRegistrationFormType;
 use App\PL\Form\Tournament\TournamentTypeCreateFormType;
@@ -40,19 +41,25 @@ class TournamentController extends AbstractController
         $tournament = new TournamentModel();
         $form = $this->createForm(TournamentCreateFormType::class, $tournament);
         $form->handleRequest($request);
+        $errMessage = "";
 
         if ($form->isSubmitted() && $form->isValid()){
-            $tournamentManager->createTournament($tournament);
+            if ($tournamentManager->checkOnCreateValidity($tournament, $errMessage)) {
+                $tournamentManager->createTournament($tournament);
 
-            $this->addFlash('success', 'Tournament was added');
-            return $this->redirectToRoute('tournaments');
+                $this->addFlash('success', 'Tournament was added');
+                return $this->redirectToRoute('tournaments');
+            }
+            else{
+                $this->addFlash('danger', $errMessage);
+            }
         }
 
         return $this->renderForm('tournament/create.html.twig', ['tournamentForm' => $form]);
     }
 
     #[Route('/tournaments/{id<\d+>}', name: 'tournament_info')]
-    public function getTournamentInfo(int $id, Request $request, TournamentManager $tournamentManager, TeamManager $teamManager): Response
+    public function getTournamentInfo(int $id, Request $request, TournamentManager $tournamentManager, TeamManager $teamManager, TournamentParticipantDataTable $dataTable): Response
     {
         $tournamentModel = $tournamentManager->getTournament($id);
 
@@ -97,8 +104,16 @@ class TournamentController extends AbstractController
             return $this->redirectToRoute('tournament_info', ['id' => $id]);
         }
 
+
+        $table = $dataTable->create($id, $this->isGranted('ROLE_ADMIN'))->handleRequest($request);
+
+        if ($table->isCallback()){
+            return $table->getResponse();
+        }
+
         return $this->renderForm('tournament/info.html.twig', [
             'form' => $form,
+            'datatable' => $table,
             'tournament' => $tournamentModel,
             'participantType' => $tournamentModel->getParticipantType(false)->label(),
             'date' => $tournamentModel->getDate()->format('j. n. Y G:i'),
@@ -108,14 +123,14 @@ class TournamentController extends AbstractController
             'matchingType' => $tournamentModel->getMatchingType(false)->label(),
             'routName' => 'user_info',
             'params' => ['id' => $tournamentModel->getCreatedById()],
-            'canRegistrate' => $tournamentModel->canRegistrate(),
+            'showRegistrate' => (($tournamentModel->canRegistrate()) || ($tournamentModel->getCurrentUserRegistrationState() !== null)) && $user !== null,
             'participantIsTeam' => ($tournamentModel->getParticipantType(false) == ParticipantType::Teams),
             'registerRedirectParam' => ['id' => $id],
             'unregisterRedirectParam' => ['id' => $id],
             'isRegistered' => $tournamentModel->getCurrentUserRegistrationState() !== null,
             'participantId' => $participantId,
             'participantName' => $participantName,
-            'canUnregister' => $isLeader !== false
+            'canUnregister' => (($isLeader !== false) && $tournamentModel->canRegistrate() )
         ]);
     }
 
@@ -151,12 +166,18 @@ class TournamentController extends AbstractController
         $tournament = $tournamentManager->getTournament($id);
         $form = $this->createForm(TournamentEditFormType::class, $tournament);
         $form->handleRequest($request);
+        $errMessage = "";
 
         if ($form->isSubmitted() && $form->isValid()){
-            $tournamentManager->updateTournament($tournament);
+            if ($tournamentManager->checkOnCreateValidity($tournament, $errMessage)) {
+                $tournamentManager->updateTournament($tournament);
 
-            $this->addFlash('success', 'Tournament was edited');
-            return $this->redirectToRoute('tournaments');
+                $this->addFlash('success', 'Tournament was edited');
+                return $this->redirectToRoute('tournaments');
+            }
+            else{
+                $this->addFlash('danger', $errMessage);
+            }
         }
 
         return $this->renderForm('tournament/edit.html.twig', ['tournamentForm' => $form]);
@@ -199,5 +220,19 @@ class TournamentController extends AbstractController
     {
         $tournamentManager->disapproveTournament($id);
         return $this->redirectToRoute('tournaments');
+    }
+
+    #[Route('/tournaments/{tId<\d+>}/participants/{pId<\d+>}/approve', name: 'participant_approve')]
+    public function approveParticipant(int $tId, int $pId, TournamentManager $tournamentManager): Response
+    {
+        $tournamentManager->approveParticipant($pId);
+        return $this->redirectToRoute('tournament_info', ['id' => $tId]);
+    }
+
+    #[Route('/tournaments/{tId<\d+>}/participants/{pId<\d+>}/disapprove', name: 'participant_disapprove')]
+    public function disapproveParticipant(int $tId, int $pId, TournamentManager $tournamentManager): Response
+    {
+        $tournamentManager->disapproveParticipant($pId);
+        return $this->redirectToRoute('tournament_info', ['id' => $tId]);
     }
 }

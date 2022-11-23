@@ -58,7 +58,7 @@ class UserController extends AbstractController
         
 
         return $this->render('user/info.html.twig', [
-            'canEdit' => $user->isCurrentUser($id) || $this->isGranted('ROLE_ADMIN'),
+            'canEdit' => $user?->isCurrentUser($id) || $this->isGranted('ROLE_ADMIN'),
             'user' => $userModel,
             'id' => $id
         ]);

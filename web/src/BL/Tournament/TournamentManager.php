@@ -14,6 +14,8 @@ use App\DAL\Entity\Team;
 use App\DAL\Entity\Tournament;
 use App\DAL\Entity\TournamentParticipant;
 use App\DAL\Entity\TournamentType;
+use DateTime;
+use Symfony\Component\Form\Test\FormInterface;
 
 class TournamentManager
 {
@@ -67,9 +69,6 @@ class TournamentManager
             ParticipantType::getByName($state->getSearch())
         );
         $state->setCount($paginator->count());
-
-        /** @var ?\App\BL\User\UserModel */
-        $user = $this->security->getUser();
 
         foreach ($paginator as $entity){
             /** @var TournamentTableModel */
@@ -226,5 +225,124 @@ class TournamentManager
         }
 
         $repo->remove($participant, true);
+    }
+
+    /*** For different danger warnings */
+    public function checkOnCreateValidity(TournamentModel $tournament, string &$errMessage) : bool
+    {
+        if (!$this->checkTeamMemberCount($errMessage, $tournament, $tournament->getMinTeamMemberCount(), $tournament->getMaxTeamMemberCount())){
+            return false;
+        }
+
+        if (!$this->checkParticipantCount($errMessage, $tournament->getMinParticipantCount(), $tournament->getMaxParticipantCount())){
+            return false;
+        }
+        
+        if (!$this->checkRegStartValidity($errMessage, $tournament->getRegistrationDateStart(), $tournament->getRegistrationDateEnd(), $tournament->getDate())){
+            return false;
+        }
+        
+        return true;
+    }
+
+    public function checkRegStartValidity(string &$errMessage, DateTime $registrationStart,DateTime $registrationEnd, DateTime $tournamentStart) : bool
+    {
+        if ($registrationStart >= $registrationEnd){
+            $errMessage = "Registration start date needs to be before registration end!";
+            return false;
+        }
+        if ($registrationStart >= $tournamentStart){
+            $errMessage = "Registration start date needs to be before tournament start!";
+            return false;
+        }
+        if ($registrationEnd >= $tournamentStart){
+            $errMessage = "Registration end date needs to be before tournament start!";
+            return false;
+        }
+        return true;
+    }
+
+    public function checkTeamMemberCount(string &$errMessage, TournamentModel $tournament, ?int $numberA, ?int $numberB) : bool
+    {
+        /** if max number is not defined than it is set to minimum number (minimum = maximum) */
+        dump($numberA);
+        dump($numberB);
+        if ($numberA === NULL){
+            $tournament->setMinTeamMemberCount(0);
+            $numberA = 0;
+        }
+        if ($numberB === NULL){
+            $errMessage = "Maximum team member count needs to be specified!";
+            return false;
+        }
+
+        if ($numberA > $numberB){
+            $errMessage = "Minimum team member count cannot be bigger than maximum team member count!";
+            return false;
+        }
+        return true;
+    }
+
+    public function checkParticipantCount(string &$errMessage, ?int $numberA, ?int $numberB) : bool
+    {
+        if ($numberA > $numberB){
+            $errMessage = "Minimum participant count cannot be bigger than maximum participant count!";
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * @return \Traversable<TournamentParticipantTableModel>
+     */
+    public function getTournamentParticipants(DataTableState $state, int $tournamentId): \Traversable
+    {
+        /** @var \App\DAL\Repository\TournamentParticipantRepository */
+        $repo = $this->entityManager->getRepository(TournamentParticipant::class);
+        /** @var \App\BL\User\UserModel */
+        $user = $this->security->getUser();
+        
+        $paginator = $repo->findTableData(
+            $user?->getId(),
+            $state->getLimit(),
+            $state->getStart(),
+            $state->getOrderColumn(),
+            $state->isAsceding(),
+            $state->getSearch(),
+            $tournamentId
+        );
+        $state->setCount($paginator->count());
+
+        foreach ($paginator as $entity){
+            /** @var TournamentParticipant */
+            $participant = $entity['participant'];
+            /** @var TournamentParticipantTableModel */
+            $tournamentParticipantModel = AutoMapper::map($participant, TournamentParticipantTableModel::class, trackEntity: false);
+            $tournamentParticipantModel->setCreatedByCurrentUser((bool)$entity['createdByCurrUser']);
+            $tournamentParticipantModel->setIsTeam($participant->getSignedUpTeam()!==null);
+            $tournamentParticipantModel->setIdOfParticipant($tournamentParticipantModel->getIsTeam() ? $participant->getSignedUpTeam()->getId() : $participant->getSignedUpUser()->getId());
+            $tournamentParticipantModel->setNameOfParticipant($tournamentParticipantModel->getIsTeam() ? $participant->getSignedUpTeam()->getName() : $participant->getSignedUpUser()->getNickname() );
+            yield $tournamentParticipantModel;
+        }
+    }
+
+    public function approveParticipant(int $id){
+        /** @var \App\DAL\Repository\TournamentParticipantRepository */
+        $repo = $this->entityManager->getRepository(TournamentParticipant::class);
+        
+        $participant = $repo->find($id);
+        $participant->setApproved(true);
+
+        $repo->save($participant, true);
+    }
+
+    public function disapproveParticipant(int $id){
+        /** @var \App\DAL\Repository\TournamentParticipantRepository */
+        $repo = $this->entityManager->getRepository(TournamentParticipant::class);
+        
+        $participant = $repo->find($id);
+        $participant->setApproved(false);
+
+        $repo->save($participant, true);
     }
 }
