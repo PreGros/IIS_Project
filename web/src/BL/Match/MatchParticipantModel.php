@@ -18,6 +18,12 @@ class MatchParticipantModel
         return $this->participant;
     }
 
+    public function setParticipant(null|UserModel|TeamModel $val): self
+    {
+        $this->participant = $val;
+        return $this;
+    }
+
     public function getParticipantName(): string
     {
         return 
@@ -32,15 +38,9 @@ class MatchParticipantModel
             ($this->participant instanceof UserModel ? false : null);
     }
 
-    public function getParticipantId(): int
+    public function getParticipantId(): ?int
     {
-        return $this->participant->getId();
-    }
-
-    public function setParticipant(null|UserModel|TeamModel $val): self
-    {
-        $this->participant = $val;
-        return $this;
+        return $this->participant?->getId();
     }
 
     public function getResult(): string

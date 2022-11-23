@@ -66,6 +66,9 @@ class Tournament
     #[ORM\ManyToOne]
     private ?User $approvedBy = null;
 
+    #[ORM\ManyToOne]
+    private ?TournamentParticipant $winner = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -271,6 +274,18 @@ class Tournament
     public function setApprovedBy(?User $approvedBy): self
     {
         $this->approvedBy = $approvedBy;
+
+        return $this;
+    }
+
+    public function getWinner(): ?TournamentParticipant
+    {
+        return $this->winner;
+    }
+
+    public function setWinner(?TournamentParticipant $winner): self
+    {
+        $this->winner = $winner;
 
         return $this;
     }

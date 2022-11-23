@@ -2,6 +2,7 @@
 
 namespace App\DAL\Repository;
 
+use App\DAL\Entity\MatchParticipant;
 use App\DAL\Entity\Team;
 use App\DAL\Entity\Tournament;
 use App\DAL\Entity\TournamentParticipant;
@@ -110,6 +111,16 @@ class TournamentParticipantRepository extends ServiceEntityRepository
         return new Paginator($query, false);
     }
 
+
+    public function findOneByMatchParticipant(int $matchParticipantId): ?TournamentParticipant
+    {
+        return $this->createQueryBuilder('tp')
+            ->innerJoin(MatchParticipant::class, 'mp', Join::WITH, 'tp = mp.tournamentParticipant')
+            ->where('mp.id = :p_matchParticipantId')
+            ->setParameter('p_matchParticipantId', $matchParticipantId)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 //    /**
 //     * @return TournamentParticipant[] Returns an array of TournamentParticipant objects
 //     */

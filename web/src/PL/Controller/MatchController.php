@@ -87,7 +87,7 @@ class MatchController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()){
-            $matchManager->setMatchResult($match);
+            $matchManager->setMatchResult($match, $tournament);
             $this->addFlash('success', 'Result was set');
             return $this->redirectToRoute('matches', ['id' => $tournamentId]);
         }

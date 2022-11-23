@@ -267,8 +267,6 @@ class TournamentManager
     public function checkTeamMemberCount(string &$errMessage, TournamentModel $tournament, ?int $numberA, ?int $numberB) : bool
     {
         /** if max number is not defined than it is set to minimum number (minimum = maximum) */
-        dump($numberA);
-        dump($numberB);
         if ($numberA === NULL){
             $tournament->setMinTeamMemberCount(0);
             $numberA = 0;
@@ -328,7 +326,8 @@ class TournamentManager
         }
     }
 
-    public function approveParticipant(int $id){
+    public function approveParticipant(int $id)
+    {
         /** @var \App\DAL\Repository\TournamentParticipantRepository */
         $repo = $this->entityManager->getRepository(TournamentParticipant::class);
         
@@ -338,7 +337,8 @@ class TournamentManager
         $repo->save($participant, true);
     }
 
-    public function disapproveParticipant(int $id){
+    public function disapproveParticipant(int $id)
+    {
         /** @var \App\DAL\Repository\TournamentParticipantRepository */
         $repo = $this->entityManager->getRepository(TournamentParticipant::class);
         
@@ -356,5 +356,17 @@ class TournamentManager
         $match = $repo->findOneBy(['tournament' => $tournamentId]);
 
         return $match !== null;
+    }
+
+    public function setWinner(TournamentModel $tournament, int $matchParticipantId)
+    {
+        /** @var \App\DAL\Repository\TournamentParticipantRepository */
+        $repo = $this->entityManager->getRepository(\App\DAL\Entity\TournamentParticipant::class);
+        /** @var Tournament */
+        $tournamentEntity = AutoMapper::map($tournament, \App\DAL\Entity\Tournament::class, trackEntity: false);
+        $tournamentEntity->setWinner($repo->findOneByMatchParticipant($matchParticipantId));
+
+        $this->entityManager->persist($tournamentEntity);
+        $this->entityManager->flush();
     }
 }
