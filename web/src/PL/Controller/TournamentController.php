@@ -200,12 +200,16 @@ class TournamentController extends AbstractController
         $type = new TournamentTypeModel();
         $form = $this->createForm(TournamentTypeCreateFormType::class, $type);
         $form->handleRequest($request);
+        $errMessage = "";
 
         if ($form->isSubmitted() && $form->isValid()){
-            $tournamentManager->createTournamentType($type);
+            if ($tournamentManager->checkOnCreateTypeValidity($type, $errMessage)){
+                $tournamentManager->createTournamentType($type);
 
-            $this->addFlash('success', 'Tournament type was added');
-            return $this->redirectToRoute('tournament_types');
+                $this->addFlash('success', 'Tournament type was added');
+                return $this->redirectToRoute('tournament_types');
+            }
+            $this->addFlash('danger', $errMessage);
         }
 
         return $this->renderForm('tournament/types.html.twig', ['tournamentTypeForm' => $form, 'table' => $typesTable->init()]);

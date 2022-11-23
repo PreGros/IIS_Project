@@ -180,4 +180,46 @@ class UserManager
 
         return true;
     }
+
+    public function checkOnCreateValidity(UserModel $userModel, string &$errMessage) : bool
+    {
+        if (!$this->checkUniqueNickname($errMessage, $userModel->getNickname())){
+            return false;
+        }
+        if (!$this->checkUniqueEmail($errMessage, $userModel->getEmail())){
+            return false;
+        }
+
+        return true;
+    }
+
+    public function checkUniqueNickname(string &$errMessage, string $userNickname) : bool
+    {
+        /** @var \App\DAL\Repository\UserRepository */
+        $repo = $this->entityManager->getRepository(\App\DAL\Entity\User::class);
+        /** cannot get member by reference, so find by ids is performed */
+        $user = $repo->findOneBy(['nickname' => $userNickname]);
+    
+        if ($user !== NULL){
+            $errMessage = "User with given nickname already exists";
+            return false;
+        }
+
+        return true;
+    }
+
+    public function checkUniqueEmail(string &$errMessage, string $userEmail) : bool
+    {
+        /** @var \App\DAL\Repository\UserRepository */
+        $repo = $this->entityManager->getRepository(\App\DAL\Entity\User::class);
+        /** cannot get member by reference, so find by ids is performed */
+        $user = $repo->findOneBy(['email' => $userEmail]);
+    
+        if ($user !== NULL){
+            $errMessage = "User with given email already exists";
+            return false;
+        }
+
+        return true;
+    }
 }

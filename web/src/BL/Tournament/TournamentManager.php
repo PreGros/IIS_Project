@@ -299,6 +299,30 @@ class TournamentManager
         return true;
     }
 
+    public function checkOnCreateTypeValidity(TournamentTypeModel $tournamentType, string &$errMessage) : bool
+    {
+        if (!$this->checkUniqueTypeName($errMessage, $tournamentType->getName())){
+            return false;
+        }
+        
+        return true;
+    }
+
+    public function checkUniqueTypeName(string &$errMessage, string $typeName) : bool
+    {
+        /** @var \App\DAL\Repository\TournamentTypeRepository */
+        $repo = $this->entityManager->getRepository(\App\DAL\Entity\TournamentType::class);
+        /** cannot get member by reference, so find by ids is performed */
+        $type = $repo->findOneBy(['name' => $typeName]);
+
+        if ($type !== NULL){
+            $errMessage = "This tournament type already exists!";
+            return false;
+        }
+
+        return true;
+    }
+
     /**
      * @return \Traversable<TournamentParticipantTableModel>
      */

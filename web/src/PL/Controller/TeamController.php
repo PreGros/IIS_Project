@@ -44,9 +44,7 @@ class TeamController extends AbstractController
                 $this->addFlash('success', 'Team successfuly created!');
                 return $this->redirectToRoute('teams');
             }
-            else{
-                $this->addFlash('danger', $errMessage);
-            }
+            $this->addFlash('danger', $errMessage);
         }
 
         return $this->renderForm('team/create.html.twig', ['teamForm' => $form]);
