@@ -239,7 +239,7 @@ class TournamentManager
     /*** For different danger warnings */
     public function checkOnCreateValidity(TournamentModel $tournament, string &$errMessage) : bool
     {
-        if (!$this->checkTeamMemberCount($errMessage, $tournament, $tournament->getMinTeamMemberCount(), $tournament->getMaxTeamMemberCount())){
+        if (!$this->checkTeamMemberCount($errMessage, $tournament, $tournament->getMinTeamMemberCount(), $tournament->getMaxTeamMemberCount(), $tournament->getParticipantType(false))){
             return false;
         }
 
@@ -271,14 +271,14 @@ class TournamentManager
         return true;
     }
 
-    public function checkTeamMemberCount(string &$errMessage, TournamentModel $tournament, ?int $numberA, ?int $numberB) : bool
+    public function checkTeamMemberCount(string &$errMessage, TournamentModel $tournament, ?int $numberA, ?int $numberB, ParticipantType $participantType) : bool
     {
         /** if max number is not defined than it is set to minimum number (minimum = maximum) */
         if ($numberA === NULL){
             $tournament->setMinTeamMemberCount(0);
             $numberA = 0;
         }
-        if ($numberB === NULL){
+        if ($numberB === NULL && $participantType === ParticipantType::Teams){
             $errMessage = "Maximum team member count needs to be specified!";
             return false;
         }
