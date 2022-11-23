@@ -242,6 +242,16 @@ class TeamManager
         }
     }
 
+    public function getFormatedUserTeams(?int $userId) : array
+    {
+        $teams = $this->getUserTeams($userId);
+        $teamsFormated = [];
+        foreach ($teams as $team) {
+            $teamsFormated[$team->getName()] = $team->getId();
+        }
+        return $teamsFormated;
+    }
+
     public function getRegisteredTeamParticipant($tournamentId, $currUserId)
     {
         /** @var \App\DAL\Repository\TournamentParticipantRepository */
@@ -291,4 +301,6 @@ class TeamManager
 
         return true;
     }
+
+
 }

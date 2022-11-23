@@ -86,6 +86,20 @@
 
         
         <div class="col-md-6">
+            {% if (registrationEnded) %}
+                <hr>
+                <h3>Matches</h3>
+
+                {% if not matchesGenerated %}
+                    {{ form_start(matchForm) }}
+                        {{ form_row(matchForm.duration) }}
+                    {{ form_end(matchForm) }}
+                {% else %}
+                    <a href="{{ path('tournaments') }}" type="button" class="btn btn-primary">Matches info</a>
+                {% endif %}
+            {% endif %}
+
+
             {% if (showRegistrate) %}
                 <hr>
                 <h3>Register</h3>

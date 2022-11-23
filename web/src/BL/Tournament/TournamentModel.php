@@ -233,4 +233,10 @@ class TournamentModel
     {
         return $this->currentUserRegistrationState;
     }
+
+    public function registrationEnded(): bool
+    {
+        $now = new \DateTime;
+        return $now >= $this->registrationDateEnd;
+    }
 }
