@@ -47,6 +47,11 @@ class TournamentDataTable
                 'orderable' => true,
                 'template' => '<a href="{{ row.createdByInfo }}">{{ row.createdByNickName }}</a>'
             ])
+            ->add('type', TextColumn::class, [
+                'label' => 'Tournament Type',
+                'searchable' => true,
+                'orderable' => true
+            ])
             ->add('participantType', TextColumn::class, [
                 'label' => 'Participant Type',
                 'searchable' => true,
@@ -110,7 +115,8 @@ class TournamentDataTable
                 'participantIsApproved' => $data->getCurrentUserRegistrationState(),
                 'approveURL' => $this->router->generate('user_approve', ['id' => $data->getId()]),
                 'disapproveURL' => $this->router->generate('user_disapprove', ['id' => $data->getId()]),
-                'modifiable' => ($this->isAdmin || $data->getCreatedByCurrentUser())
+                'modifiable' => ($this->isAdmin || $data->getCreatedByCurrentUser()),
+                'type' => $data->getTournamentTypeName()
             ];
         }
         return $tableData;

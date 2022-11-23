@@ -45,7 +45,13 @@ class TournamentManager
             )
         );
 
-        //TODO: setTournamentType
+        $tournament->setTournamentType(
+            AutoMapper::map(
+                $tournamentModel->getTournamentTypeModel(),
+                \App\DAL\Entity\TournamentType::class,
+                trackEntity: false
+            )
+        );
 
         $this->entityManager->persist($tournament);
         $this->entityManager->flush();
@@ -80,6 +86,7 @@ class TournamentManager
             $tournamentModel->setApproved((bool)$entity['approved']);
             $tournamentModel->setCurrentUserRegistrationState($entity['approved_participant']);
             $tournamentModel->setCreatedByCurrentUser($tournamentModel->getCreatedById()  === $user?->getId());
+            $tournamentModel->setTournamentTypeName($entity['type_name']);
             yield $tournamentModel;
         }
     }
@@ -122,13 +129,13 @@ class TournamentManager
     /**
      * @return \Traversable<TournamentType>
      */
-    public function getTournamentTypes(): \Traversable
+    public function getTournamentTypes(bool $trackEntity = false): \Traversable
     {
         /** @var \App\DAL\Repository\TournamentTypeRepository */
         $repo = $this->entityManager->getRepository(TournamentType::class);
 
         foreach ($repo->findAll() as $type){
-            yield AutoMapper::map($type, TournamentTypeModel::class, trackEntity: false);
+            yield AutoMapper::map($type, TournamentTypeModel::class, trackEntity: $trackEntity);
         }
     }
 
@@ -292,6 +299,30 @@ class TournamentManager
         return true;
     }
 
+    public function checkOnCreateTypeValidity(TournamentTypeModel $tournamentType, string &$errMessage) : bool
+    {
+        if (!$this->checkUniqueTypeName($errMessage, $tournamentType->getName())){
+            return false;
+        }
+        
+        return true;
+    }
+
+    public function checkUniqueTypeName(string &$errMessage, string $typeName) : bool
+    {
+        /** @var \App\DAL\Repository\TournamentTypeRepository */
+        $repo = $this->entityManager->getRepository(\App\DAL\Entity\TournamentType::class);
+        /** cannot get member by reference, so find by ids is performed */
+        $type = $repo->findOneBy(['name' => $typeName]);
+
+        if ($type !== NULL){
+            $errMessage = "This tournament type already exists!";
+            return false;
+        }
+
+        return true;
+    }
+
     /**
      * @return \Traversable<TournamentParticipantTableModel>
      */
@@ -348,6 +379,15 @@ class TournamentManager
         $repo->save($participant, true);
     }
 
+    public function getFormTournamentType() : array
+    {
+        $typesFormated = [];
+        foreach ($this->getTournamentTypes(true) as $type){
+            $typesFormated[$type->getName()] = $type;
+        }
+        return $typesFormated;
+    }
+    
     public function areTournamentMatchesGenerated(int $tournamentId) : bool
     {
         /** @var \App\DAL\Repository\TournamentMatchRepository */

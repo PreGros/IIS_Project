@@ -4,6 +4,7 @@ namespace App\PL\Form\Tournament;
 
 use App\BL\Tournament\MatchingType;
 use App\BL\Tournament\ParticipantType;
+use App\BL\Tournament\TournamentManager;
 use App\BL\Tournament\TournamentModel;
 use App\BL\Tournament\WinCondition;
 use Symfony\Component\Form\AbstractType;
@@ -18,6 +19,15 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class TournamentCreateFormType extends AbstractType
 {
+    private TournamentManager $tournamentManager;
+
+    public function __construct(
+        TournamentManager $tournamentManager
+    )
+    {
+        $this->tournamentManager = $tournamentManager;
+    }
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
@@ -73,6 +83,10 @@ class TournamentCreateFormType extends AbstractType
             ])
             ->add('submit', SubmitType::class, [
                 'attr' => ['class' => 'w-50 btn-primary']
+            ])
+            ->add('tournamentTypeModel', ChoiceType::class, [
+                'choices' => $this->tournamentManager->getFormTournamentType(),
+                'label' => 'Tournament type'
             ])
         ;
     }

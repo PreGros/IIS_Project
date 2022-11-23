@@ -26,7 +26,7 @@ class RegistrationController extends AbstractController
     }
 
     #[Route('/register', name: 'app_register')]
-    public function register(Request $request, UserAuthenticatorInterface $authenticatorManager): Response
+    public function register(Request $request, UserAuthenticatorInterface $authenticatorManager, UserManager $userManager): Response
     {
         if ($this->isGranted('IS_AUTHENTICATED_FULLY')){
             $this->addFlash('warning', 'Please, logout first (U DUMB)');
@@ -36,18 +36,22 @@ class RegistrationController extends AbstractController
         $user = new UserModel();
         $form = $this->createForm(RegistrationFormType::class, $user);
         $form->handleRequest($request);
+        $errMessage = "";
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->userManager->registerUser($user, $form->get('plainPassword')->getData());
+            if ($userManager->checkOnCreateValidity($user, $errMessage)){
+                $this->userManager->registerUser($user, $form->get('plainPassword')->getData());
 
-            $authenticatorManager->authenticateUser(
-                $user,
-                $this->authenticator, $request,
-                [(new RememberMeBadge())->enable()]
-            );
-            
-            $this->addFlash('success', 'Your account was created. Please, confirm your email adress');
-            return $this->redirectToRoute('tournaments');
+                $authenticatorManager->authenticateUser(
+                    $user,
+                    $this->authenticator, $request,
+                    [(new RememberMeBadge())->enable()]
+                );
+                
+                $this->addFlash('success', 'Your account was created. Please, confirm your email adress');
+                return $this->redirectToRoute('tournaments');
+            }
+            $this->addFlash('danger', $errMessage);
         }
 
         return $this->render('registration/register.html.twig', [
