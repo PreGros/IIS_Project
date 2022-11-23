@@ -6,7 +6,7 @@ class MatchModel
 {
     private int $id;
 
-    private ?int $childId;
+    private ?MatchModel $child;
 
     private \DateInterval $duration;
 
@@ -27,14 +27,14 @@ class MatchModel
         return $this;
     }
 
-    public function getChildId(): ?int
+    public function getChild(): ?MatchModel
     {
-        return $this->childId;
+        return $this->child;
     }
 
-    public function setChildId(?int $val): self
+    public function setChild(?MatchModel $val): self
     {
-        $this->childId = $val;
+        $this->child = $val;
         return $this;
     }
 
@@ -60,9 +60,19 @@ class MatchModel
         return $this;
     }
 
+    public function hasStarted() : bool
+    {
+        return $this->startTime < new \DateTime();
+    }
+
     public function hasEnded(): bool
     {
         return (new \DateTime())->getTimestamp() > ($this->startTime->getTimestamp() + (int)$this->duration->format('%s'));
+    }
+
+    public function childMatchStarted() : bool
+    {
+        return ($this->child === null) ? false : $this->child->getStartTime() < new \DateTime();
     }
 
     public function getParticipant1(): ?MatchParticipantModel

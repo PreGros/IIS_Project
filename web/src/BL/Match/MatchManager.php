@@ -46,9 +46,9 @@ class MatchManager
         $layer = 0;
 
         foreach ($matches as $node){
-            if (in_array($node->getId(), isset($layers[$layer]) ? array_map(fn (MatchModel $m) => $m->getChildId(), $layers[$layer]) : [])){
+            if (in_array($node->getId(), isset($layers[$layer]) ? array_map(fn (MatchModel $m) => $m->getChild()?->getId(), $layers[$layer]) : [])){
                 if ($layer !== 0){
-                    $children = array_map(fn (MatchModel $m) => $m->getChildId(), $layers[$layer - 1]);
+                    $children = array_map(fn (MatchModel $m) => $m->getChild()?->getId(), $layers[$layer - 1]);
                     usort($layers[$layer], function (MatchModel $a, MatchModel $b) use ($children){
                         return
                             (($val = array_search($a->getId(), $children)) === false ? PHP_INT_MAX : $val)
@@ -77,7 +77,7 @@ class MatchManager
             if ($entities[$i] instanceof \App\DAL\Entity\TournamentMatch){
                 /** @var MatchModel $match */
                 $match = AutoMapper::map($entities[$i], MatchModel::class, trackEntity: false);
-                $match->setChildId($entities[$i]->getChildMatch()?->getId());
+                $match->setChild($entities[$i]->getChildMatch() !== null ? AutoMapper::map($entities[$i]->getChildMatch(), MatchModel::class, trackEntity: false) : null);
                 $matches[++$matchIndex] = $match;
                 $matchParticipantCount = 0;
                 continue;
@@ -111,13 +111,13 @@ class MatchManager
         return $matchP->setParticipant($team ?? $user ?? null);
     }
 
-    public function generateMatches(TournamentModel $tournament, bool $setParticipantsToMatches = true)
+    public function generateMatches(TournamentModel $tournament, \DateInterval $matchDuration, \DateInterval $breakDuration, bool $setParticipantsToMatches = true)
     {
         /** @var \App\DAL\Repository\TournamentParticipantRepository */
         $participantsRepo = $this->entityManager->getRepository(\App\DAL\Entity\TournamentParticipant::class);
         $participants = $participantsRepo->findBy(['tournament' => AutoMapper::map($tournament, Tournament::class, trackEntity: false), 'approved' => true]);
 
-        $this->matchGenerator->init($participants, $tournament, $setParticipantsToMatches);
+        $this->matchGenerator->init($participants, $tournament, $matchDuration, $breakDuration, $setParticipantsToMatches);
         if ($tournament->getMatchingType(false) === MatchingType::Elimination){
             $this->matchGenerator->generateMatchesSingleElimination();
             return;
@@ -134,7 +134,7 @@ class MatchManager
 
         /** @var MatchModel $match */
         $match = AutoMapper::map($entities[0], MatchModel::class);
-        $match->setChildId($entities[0]->getChildMatch()?->getId());
+        $match->setChild($entities[0]->getChildMatch() !== null ? AutoMapper::map($entities[0]->getChildMatch(), MatchModel::class, trackEntity: false) : null);
         
         $matchParticipantCount = 0;
         foreach ($entities as $entity){
@@ -211,12 +211,12 @@ class MatchManager
             return;
         }
         
-        if ($match->getChildId() === null){
+        if ($match->getChild()?->getId() === null){
             $this->tournamentManager->setWinner($tournament, $firstWin ? $matchParticipant1Id : $matchParticipant2Id);
             return;
         }
         
-        $nextMatch = $this->getMatch($match->getChildId());
+        $nextMatch = $this->getMatch($match->getChild()?->getId());
         /** @var TournamentMatch */
         $nextMatchEntity = AutoMapper::map($nextMatch, TournamentMatch::class, trackEntity: false);
         /** @var MatchParticipant */
