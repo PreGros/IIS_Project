@@ -17,8 +17,8 @@ class MatchParticipant
     #[ORM\Column(nullable: true)]
     private ?float $points = null;
 
-    #[ORM\Column(type: Types::TIME_MUTABLE, nullable: true)]
-    private ?\DateTimeInterface $completionTime = null;
+    #[ORM\Column(nullable: true)]
+    private ?\DateInterval $completionTime = null;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]

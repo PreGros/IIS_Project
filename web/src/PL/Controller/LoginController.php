@@ -17,7 +17,7 @@ class LoginController extends AbstractController
     {
         if ($this->isGranted('IS_AUTHENTICATED_FULLY')){
             $this->addFlash('warning', 'Pathetic, forgetful human (u are logged in)');
-            return $this->redirectToRoute('teams');
+            return $this->redirectToRoute('tournaments');
         }
 
         if (($error = $authenticationUtils->getLastAuthenticationError()) !== null){

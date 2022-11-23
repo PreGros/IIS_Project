@@ -154,7 +154,7 @@ class MatchGenerator
             ->setTournament($this->tournament);
 
         if (!$this->setParticipantsToMatches){
-            return $match;   
+            return $match;
         }
 
         if ($first < $this->countOfParticipants){

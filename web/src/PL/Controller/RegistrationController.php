@@ -30,7 +30,7 @@ class RegistrationController extends AbstractController
     {
         if ($this->isGranted('IS_AUTHENTICATED_FULLY')){
             $this->addFlash('warning', 'Please, logout first (U DUMB)');
-            return $this->redirectToRoute('teams');
+            return $this->redirectToRoute('tournaments');
         }
 
         $user = new UserModel();
@@ -46,8 +46,8 @@ class RegistrationController extends AbstractController
                 [(new RememberMeBadge())->enable()]
             );
             
-            $this->addFlash('success', 'Your email address has been verified.');
-            return $this->redirectToRoute('datatable');
+            $this->addFlash('success', 'Your account was created. Please, confirm your email adress');
+            return $this->redirectToRoute('tournaments');
         }
 
         return $this->render('registration/register.html.twig', [
@@ -69,9 +69,8 @@ class RegistrationController extends AbstractController
             return $this->redirectToRoute('app_register');
         }
 
-        // TODO: Change the redirect on success and handle or remove the flash message in your templates
         $this->addFlash('success', 'Your email address has been verified.');
 
-        return $this->redirectToRoute('teams');
+        return $this->redirectToRoute('tournaments');
     }
 }

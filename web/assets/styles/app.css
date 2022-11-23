@@ -49,3 +49,12 @@ i.bi-person-circle {
     color: white !important;
     padding-right: 5px;
 }
+
+.btn.disabled.w-label {
+    pointer-events: auto;
+    cursor: default;
+}
+
+.column-label{
+    display: block;
+}
