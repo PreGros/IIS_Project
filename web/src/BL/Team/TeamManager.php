@@ -261,9 +261,9 @@ class TeamManager
 
         $registeredParticipantTeams = $participantRepo->findBy(['tournament' => $tournamentId]);
 
-        foreach ($registeredParticipantTeams as  $participant) {
+        foreach ($registeredParticipantTeams as $participant) {
             $team = $participant->getSignedUpTeam();
-            if($team->getLeader()->getId() === $currUserId){
+            if($team?->getLeader()->getId() === $currUserId){
                 return [true, $team->getId(), $team->getName()];
             }
             else{

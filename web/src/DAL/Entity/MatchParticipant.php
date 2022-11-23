@@ -45,12 +45,12 @@ class MatchParticipant
         return $this;
     }
 
-    public function getCompletionTime(): ?\DateTimeInterface
+    public function getCompletionTime(): ?\DateInterval
     {
         return $this->completionTime;
     }
 
-    public function setCompletionTime(?\DateTimeInterface $completionTime): self
+    public function setCompletionTime(?\DateInterval $completionTime): self
     {
         $this->completionTime = $completionTime;
 

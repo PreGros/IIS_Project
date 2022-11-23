@@ -18,7 +18,6 @@ class MatchManager
     private EntityManagerInterface $entityManager;
     private Security $security;
     private MatchGenerator $matchGenerator;
-    private TournamentManager $tournamentManager;
 
     public function __construct(
         EntityManagerInterface $entityManager,
@@ -30,7 +29,6 @@ class MatchManager
         $this->entityManager = $entityManager;
         $this->security = $security;
         $this->matchGenerator = $matchGenerator;
-        $this->tournamentManager = $tournamentManager;
     }
 
     /**
@@ -41,7 +39,7 @@ class MatchManager
     {
         $layers = [];
         $layer = 0;
-        
+
         foreach ($matches as $node){
             if (in_array($node->getId(), isset($layers[$layer]) ? array_map(fn (MatchModel $m) => $m->getChildId(), $layers[$layer]) : [])){
                 if ($layer !== 0){
@@ -65,7 +63,7 @@ class MatchManager
     {
         /** @var \App\DAL\Repository\TournamentMatchRepository */
         $matchesRepo = $this->entityManager->getRepository(\App\DAL\Entity\TournamentMatch::class);
-        $entities = $matchesRepo->findWithParticipants($tournament->getId());
+        $entities = $matchesRepo->findAllWithParticipants($tournament->getId());
         /** @var array<MatchModel> */
         $matches = [];
         $matchIndex = -1;
@@ -98,10 +96,10 @@ class MatchManager
         return [$matches];
     }
 
-    private function mapMatchParticipant(\App\DAL\Entity\MatchParticipant $matchParticipant): MatchParticipantModel
+    private function mapMatchParticipant(\App\DAL\Entity\MatchParticipant $matchParticipant, bool $trackParticipant = false): MatchParticipantModel
     {
         /** @var MatchParticipantModel */
-        $matchP = AutoMapper::map($matchParticipant, MatchParticipantModel::class, trackEntity: false);
+        $matchP = AutoMapper::map($matchParticipant, MatchParticipantModel::class, trackEntity: $trackParticipant);
         $tournamentP = $matchParticipant->getTournamentParticipant();
         $team = $tournamentP?->getSignedUpTeam() !== null ? AutoMapper::map($tournamentP->getSignedUpTeam(), TeamModel::class, trackEntity: false) : null;
         $user = $tournamentP?->getSignedUpUser() !== null ? AutoMapper::map($tournamentP->getSignedUpUser(), UserModel::class, trackEntity: false) : null;
@@ -121,5 +119,47 @@ class MatchManager
         }
 
         $this->matchGenerator->generateMatchesRoundRobin();
+    }
+
+    public function getMatch(int $id): MatchModel
+    {
+        /** @var \App\DAL\Repository\TournamentMatchRepository */
+        $matchesRepo = $this->entityManager->getRepository(\App\DAL\Entity\TournamentMatch::class);
+        $entities = $matchesRepo->findWithParticipants($id);
+        
+        /** @var MatchModel $match */
+        $match = AutoMapper::map($entities[0], MatchModel::class, trackEntity: false);
+        
+        $matchParticipantCount = 0;
+        foreach ($entities as $entity){
+            if ($entity instanceof \App\DAL\Entity\MatchParticipant){
+                if ($matchParticipantCount === 0){
+                    $match->setParticipant1($this->mapMatchParticipant($entity, true));
+                }
+                elseif ($matchParticipantCount === 1){
+                    $match->setParticipant2($this->mapMatchParticipant($entity, true));
+                }
+                $matchParticipantCount++;
+            }
+        }
+
+        return $match;
+    }
+
+    public function setMatchResult(MatchModel $match)
+    {
+        $participant1 = $match->getParticipant1() !== null ? AutoMapper::map($match->getParticipant1(), \App\DAL\Entity\MatchParticipant::class, trackEntity: false) : null;
+        $participant2 = $match->getParticipant2() !== null ? AutoMapper::map($match->getParticipant2(), \App\DAL\Entity\MatchParticipant::class, trackEntity: false) : null;
+    
+        if ($participant1 !== null){
+            $this->entityManager->persist($participant1);
+        }
+        if ($participant2 !== null){
+            $this->entityManager->persist($participant2);
+        }
+
+        if ($participant1 !== null || $participant2 !== null){
+            $this->entityManager->flush();
+        }
     }
 }

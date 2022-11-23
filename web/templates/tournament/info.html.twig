@@ -114,7 +114,7 @@
                         <a href="{{ path('tournament_register', registerRedirectParam) }}" type="button" class="btn btn-success">Register</a>
                     {% endif %}
                 {% else %}
-                    <p>You are registered as <a href="{{ path(participantIsTeam ? 'team_info' : 'user_info', {'id':participantId}) }}">{{ participantName }}</a></p>
+                    <p>You are registered as <a href="{{ path(participantIsTeam ? 'team_info' : 'user_info', {'id': participantId ?? 0}) }}">{{ participantName }}</a></p>
                     <a href="{{ path('tournament_unregister', unregisterRedirectParam) }}" type="button" class="btn btn-danger {% if canUnregister %}" {% else %} disabled" aria-disabled="true" {% endif %}>Unregister</a>
                 {% endif %}
             {% endif %}

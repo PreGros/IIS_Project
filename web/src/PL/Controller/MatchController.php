@@ -9,6 +9,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 use App\BL\Match\MatchManager;
 use App\BL\Tournament\TournamentManager;
+use App\BL\Tournament\WinCondition;
+use App\PL\Form\Match\MatchSetResultFormType;
 use App\PL\Table\Match\MatchTable;
 
 class MatchController extends AbstractController
@@ -69,7 +71,7 @@ class MatchController extends AbstractController
     }
 
     #[Route('/tournaments/{tournamentId<\d+>}/matches/{matchId<\d+>}/set-result', name: 'set_match_result')]
-    public function setMatchResultAction(int $tournamentId, int $matchId, MatchManager $matchManager, TournamentManager $tournamentManager): Response
+    public function setMatchResultAction(int $tournamentId, int $matchId, Request $request, MatchManager $matchManager, TournamentManager $tournamentManager): Response
     {
         /** @var \App\BL\User\UserModel */
         $user = $this->getUser();
@@ -79,7 +81,17 @@ class MatchController extends AbstractController
             return $this->redirectToRoute('matches', ['id' => $tournamentId]);
         }
 
-        
-        return $this->redirectToRoute('matches', ['id' => $tournamentId]);
+        $usePoints = $tournament->getWinCondition(false) === WinCondition::MaxPoints || $tournament->getWinCondition(false) === WinCondition::MinPoints;
+        $match = $matchManager->getMatch($matchId);
+        $form = $this->createForm(MatchSetResultFormType::class, $match, ['match' => $match, 'use_points' => $usePoints]);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()){
+            $matchManager->setMatchResult($match);
+            $this->addFlash('success', 'Result was set');
+            return $this->redirectToRoute('matches', ['id' => $tournamentId]);
+        }
+
+        return $this->renderForm('match/set_result.html.twig', ['form' => $form, 'use_points' => $usePoints]);
     }
 }

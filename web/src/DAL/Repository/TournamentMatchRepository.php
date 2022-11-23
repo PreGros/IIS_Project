@@ -45,7 +45,7 @@ class TournamentMatchRepository extends ServiceEntityRepository
         }
     }
 
-    public function findWithParticipants(int $tournamentId): array
+    public function findAllWithParticipants(int $tournamentId): array
     {
         return $this->getEntityManager()->createQueryBuilder()
             ->select('m, p, tp, u, tm')
@@ -55,10 +55,26 @@ class TournamentMatchRepository extends ServiceEntityRepository
             ->leftJoin(User::class, 'u', Join::WITH, 'tp.signedUpUser = u')
             ->leftJoin(Team::class, 'tm', Join::WITH, 'tp.signedUpTeam = tm')
             ->where('IDENTITY(m.tournament) = :p_tournament_id')
+            ->orderBy('m.id')
+            ->addOrderBy('p.id')
             ->setParameter('p_tournament_id', $tournamentId)
             ->getQuery()
             ->getResult();
+    }
 
+    public function findWithParticipants(int $matchId): array
+    {
+        return $this->getEntityManager()->createQueryBuilder()
+            ->select('m, p, tp, u, tm')
+            ->from(TournamentMatch::class, 'm')
+            ->leftJoin(MatchParticipant::class, 'p', Join::WITH, 'p.tournamentMatch = m')
+            ->leftJoin(TournamentParticipant::class, 'tp', Join::WITH, 'p.tournamentParticipant = tp')
+            ->leftJoin(User::class, 'u', Join::WITH, 'tp.signedUpUser = u')
+            ->leftJoin(Team::class, 'tm', Join::WITH, 'tp.signedUpTeam = tm')
+            ->where('m.id = :p_match_id')
+            ->setParameter('p_match_id', $matchId)
+            ->getQuery()
+            ->getResult();
     }
 
 //    /**

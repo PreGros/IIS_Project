@@ -72,8 +72,8 @@ class MatchTable extends BaseTable
                 [
                     'participant1' => $match->getParticipant1()?->getParticipantName(),
                     'participant2' => $match->getParticipant2()?->getParticipantName(),
-                    'participant1Url' => $this->router->generate($match->getParticipant1()?->isParticipantTeam() ? 'team_info' : 'user_info', ['id' => $match->getParticipant1()?->getParticipantId()]),
-                    'participant2Url' => $this->router->generate($match->getParticipant2()?->isParticipantTeam() ? 'team_info' : 'user_info', ['id' => $match->getParticipant2()?->getParticipantId()]),
+                    'participant1Url' => $this->router->generate($match->getParticipant1()?->isParticipantTeam() ? 'team_info' : 'user_info', ['id' => $match->getParticipant1()?->getParticipantId() ?? 0]),
+                    'participant2Url' => $this->router->generate($match->getParticipant2()?->isParticipantTeam() ? 'team_info' : 'user_info', ['id' => $match->getParticipant2()?->getParticipantId() ?? 0]),
                 ]
             );
 
