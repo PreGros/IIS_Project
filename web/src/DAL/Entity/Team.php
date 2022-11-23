@@ -15,7 +15,6 @@ class Team
     #[ORM\Column]
     private ?int $id = null;
 
-    // TODO: nema byt unique? - mozna i jako <<PK>>
     #[ORM\Column(length: 255, unique: true)]
     private ?string $name = null;
 
