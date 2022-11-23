@@ -63,17 +63,20 @@ class TournamentCreateFormType extends AbstractType
                 ]
             ])
             ->add('date', DateTimeType::class, [
-                'label' => 'Tournament start date'
+                'label' => 'Tournament start date',
+                'data' => (new \DateTime())->add(new \DateInterval('P14D'))
             ])
             ->add('prize', TextType::class, [
                 'required' => false
             ])
             ->add('venue', TextType::class)
             ->add('registrationDateStart', DateTimeType::class, [
-                'label' => 'Registration start date'
+                'label' => 'Registration start date',
+                'data' => new \DateTime()
             ])
             ->add('registrationDateEnd', DateTimeType::class, [
-                'label' => 'Registration end date'
+                'label' => 'Registration end date',
+                'data' => (new \DateTime())->add(new \DateInterval('P7D'))
             ])
             ->add('winCondition', ChoiceType::class, [
                 'choices' => WinCondition::getTypes()

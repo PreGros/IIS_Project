@@ -30,6 +30,13 @@ class TournamentMatchGenerationFormType extends AbstractType
                 'with_minutes'  => true,
                 'with_seconds'  => true
             ])
+            ->add('brek', TimeType::class, [
+                'label' => 'Break duration',
+                'widget' => 'single_text',
+                'html5' => true,
+                'with_minutes'  => true,
+                'with_seconds'  => true
+            ])
             ->add('submit', SubmitType::class, [
                 'label' => 'Generate Matches'
             ])

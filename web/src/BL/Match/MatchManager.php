@@ -111,13 +111,13 @@ class MatchManager
         return $matchP->setParticipant($team ?? $user ?? null);
     }
 
-    public function generateMatches(TournamentModel $tournament, bool $setParticipantsToMatches = true)
+    public function generateMatches(TournamentModel $tournament, \DateInterval $matchDuration, \DateInterval $breakDuration, bool $setParticipantsToMatches = true)
     {
         /** @var \App\DAL\Repository\TournamentParticipantRepository */
         $participantsRepo = $this->entityManager->getRepository(\App\DAL\Entity\TournamentParticipant::class);
         $participants = $participantsRepo->findBy(['tournament' => AutoMapper::map($tournament, Tournament::class, trackEntity: false), 'approved' => true]);
 
-        $this->matchGenerator->init($participants, $tournament, $setParticipantsToMatches);
+        $this->matchGenerator->init($participants, $tournament, $matchDuration, $breakDuration, $setParticipantsToMatches);
         if ($tournament->getMatchingType(false) === MatchingType::Elimination){
             $this->matchGenerator->generateMatchesSingleElimination();
             return;
