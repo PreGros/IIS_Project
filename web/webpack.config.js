@@ -22,6 +22,7 @@ Encore
      */
     .addEntry('app', './assets/app.js')
     .addEntry('main', './assets/main.ts')
+    .addEntry('tournament_form', './assets/tournament_form.js')
 
     .enableTypeScriptLoader()
 

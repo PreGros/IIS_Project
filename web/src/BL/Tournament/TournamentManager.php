@@ -10,8 +10,10 @@ use App\BL\Util\StringUtil;
 use App\BL\Tournament\TournamentModel;
 use App\BL\Tournament\TournamentTableModel;
 use App\BL\Util\DataTableState;
+use App\DAL\Entity\MatchParticipant;
 use App\DAL\Entity\Team;
 use App\DAL\Entity\Tournament;
+use App\DAL\Entity\TournamentMatch;
 use App\DAL\Entity\TournamentParticipant;
 use App\DAL\Entity\TournamentType;
 use DateTime;
@@ -358,5 +360,15 @@ class TournamentManager
             $typesFormated[$type->getName()] = $type;
         }
         return $typesFormated;
+    }
+    
+    public function areTournamentMatchesGenerated(int $tournamentId) : bool
+    {
+        /** @var \App\DAL\Repository\TournamentMatchRepository */
+        $repo = $this->entityManager->getRepository(TournamentMatch::class);
+        
+        $match = $repo->findOneBy(['tournament' => $tournamentId]);
+
+        return $match !== null;
     }
 }

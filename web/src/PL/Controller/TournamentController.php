@@ -16,6 +16,7 @@ use App\BL\Tournament\TournamentTypeModel;
 use App\PL\DataTable\Tournament\TournamentDataTable;
 use App\PL\DataTable\Tournament\TournamentParticipantDataTable;
 use App\PL\Form\Tournament\TournamentEditFormType;
+use App\PL\Form\Tournament\TournamentMatchGenerationFormType;
 use App\PL\Form\Tournament\TournamentRegistrationFormType;
 use App\PL\Form\Tournament\TournamentTypeCreateFormType;
 use App\PL\Table\Tournament\TypesTable;
@@ -65,7 +66,6 @@ class TournamentController extends AbstractController
 
         /** @var \App\BL\User\UserModel */
         $user = $this->getUser();
-        $teams = $teamManager->getUserTeams($user?->getId());
 
         $participantName = null;
         $participantId = null;
@@ -87,13 +87,10 @@ class TournamentController extends AbstractController
             }
         }
 
-        $teamsFormated = [];
-        foreach ($teams as $team) {
-            $teamsFormated[$team->getName()] = $team->getId();
-        }
+        
 
         $form = $this->createForm(TournamentRegistrationFormType::class, options: [
-            'teams' => $teamsFormated
+            'teams' => $teamManager->getFormatedUserTeams($user?->getId())
         ]);
         $form->handleRequest($request);
 
@@ -101,6 +98,17 @@ class TournamentController extends AbstractController
             $tournamentManager->addTournamentParticipantTeam($id, $form->get('teams')->getData());
 
             $this->addFlash('success', 'Your team was successfully registered in this tournament. Now wait for approval');
+            return $this->redirectToRoute('tournament_info', ['id' => $id]);
+        }
+
+
+        $matchForm = $this->createForm(TournamentMatchGenerationFormType::class);
+        $matchForm->handleRequest($request);
+
+        if ($matchForm->isSubmitted() && $matchForm->isValid()){
+            //TODO: generate matches and redirect to matches info
+            // $tournamentManager->addTournamentParticipantTeam($id, $matchForm->get('teams')->getData());
+            // $this->addFlash('success', 'Your team was successfully registered in this tournament. Now wait for approval');
             return $this->redirectToRoute('tournament_info', ['id' => $id]);
         }
 
@@ -113,6 +121,7 @@ class TournamentController extends AbstractController
 
         return $this->renderForm('tournament/info.html.twig', [
             'form' => $form,
+            'matchForm' => $matchForm,
             'datatable' => $table,
             'tournament' => $tournamentModel,
             'participantType' => $tournamentModel->getParticipantType(false)->label(),
@@ -130,7 +139,9 @@ class TournamentController extends AbstractController
             'isRegistered' => $tournamentModel->getCurrentUserRegistrationState() !== null,
             'participantId' => $participantId,
             'participantName' => $participantName,
-            'canUnregister' => (($isLeader !== false) && $tournamentModel->canRegistrate() )
+            'canUnregister' => (($isLeader !== false) && $tournamentModel->canRegistrate() ),
+            'registrationEnded' => $tournamentModel->registrationEnded(),
+            'matchesGenerated' => $tournamentManager->areTournamentMatchesGenerated($id)
         ]);
     }
 

@@ -2,6 +2,7 @@
 
 namespace App\BL\Match;
 
+use App\BL\Team\TeamModel;
 use App\BL\Tournament\MatchingType;
 use App\BL\Tournament\TournamentModel;
 use Doctrine\ORM\EntityManagerInterface;
@@ -10,13 +11,13 @@ use Symfony\Component\Security\Core\Security;
 use App\BL\Util\AutoMapper;
 use App\DAL\Entity\Tournament;
 use App\BL\Tournament\TournamentManager;
+use App\BL\User\UserModel;
 
 class MatchManager
 {
     private EntityManagerInterface $entityManager;
     private Security $security;
     private MatchGenerator $matchGenerator;
-    private TournamentManager $tournamentManager;
 
     public function __construct(
         EntityManagerInterface $entityManager,
@@ -28,7 +29,6 @@ class MatchManager
         $this->entityManager = $entityManager;
         $this->security = $security;
         $this->matchGenerator = $matchGenerator;
-        $this->tournamentManager = $tournamentManager;
     }
 
     /**
@@ -39,7 +39,7 @@ class MatchManager
     {
         $layers = [];
         $layer = 0;
-        
+
         foreach ($matches as $node){
             if (in_array($node->getId(), isset($layers[$layer]) ? array_map(fn (MatchModel $m) => $m->getChildId(), $layers[$layer]) : [])){
                 if ($layer !== 0){
@@ -59,20 +59,34 @@ class MatchManager
         return $layers;
     }
 
-    public function getMatches(int $id)
+    public function getMatches(TournamentModel $tournament)
     {
-        $tournament = $this->tournamentManager->getTournament($id);
-
         /** @var \App\DAL\Repository\TournamentMatchRepository */
         $matchesRepo = $this->entityManager->getRepository(\App\DAL\Entity\TournamentMatch::class);
-        $matcheModels = $matchesRepo->findBy(['tournament' => $id]);
+        $entities = $matchesRepo->findAllWithParticipants($tournament->getId());
+        /** @var array<MatchModel> */
         $matches = [];
+        $matchIndex = -1;
+        $matchParticipantCount = 0;
+        for ($i = 0; $i < count($entities); $i++){
+            if ($entities[$i] instanceof \App\DAL\Entity\TournamentMatch){
+                /** @var MatchModel $match */
+                $match = AutoMapper::map($entities[$i], MatchModel::class, trackEntity: false);
+                $match->setChildId($entities[$i]->getChildMatch()?->getId());
+                $matches[++$matchIndex] = $match;
+                $matchParticipantCount = 0;
+                continue;
+            }
 
-        foreach ($matcheModels as $matchModel){
-            /** @var MatchModel */
-            $match = AutoMapper::map($matchModel, MatchModel::class, trackEntity: false);
-            $match->setChildId($matchModel->getChildMatch()?->getId());
-            $matches[] = $match;
+            if ($entities[$i] instanceof \App\DAL\Entity\MatchParticipant){
+                if ($matchParticipantCount === 0){
+                    $matches[$matchIndex]->setParticipant1($this->mapMatchParticipant($entities[$i]));
+                }
+                elseif ($matchParticipantCount === 1){
+                    $matches[$matchIndex]->setParticipant2($this->mapMatchParticipant($entities[$i]));
+                }
+                $matchParticipantCount++;
+            }
         }
 
         if ($tournament->getMatchingType(false) === MatchingType::Elimination){
@@ -80,6 +94,16 @@ class MatchManager
         }
 
         return [$matches];
+    }
+
+    private function mapMatchParticipant(\App\DAL\Entity\MatchParticipant $matchParticipant, bool $trackParticipant = false): MatchParticipantModel
+    {
+        /** @var MatchParticipantModel */
+        $matchP = AutoMapper::map($matchParticipant, MatchParticipantModel::class, trackEntity: $trackParticipant);
+        $tournamentP = $matchParticipant->getTournamentParticipant();
+        $team = $tournamentP?->getSignedUpTeam() !== null ? AutoMapper::map($tournamentP->getSignedUpTeam(), TeamModel::class, trackEntity: false) : null;
+        $user = $tournamentP?->getSignedUpUser() !== null ? AutoMapper::map($tournamentP->getSignedUpUser(), UserModel::class, trackEntity: false) : null;
+        return $matchP->setParticipant($team ?? $user ?? null);
     }
 
     public function generateMatches(TournamentModel $tournament, bool $setParticipantsToMatches = true)
@@ -95,5 +119,47 @@ class MatchManager
         }
 
         $this->matchGenerator->generateMatchesRoundRobin();
+    }
+
+    public function getMatch(int $id): MatchModel
+    {
+        /** @var \App\DAL\Repository\TournamentMatchRepository */
+        $matchesRepo = $this->entityManager->getRepository(\App\DAL\Entity\TournamentMatch::class);
+        $entities = $matchesRepo->findWithParticipants($id);
+        
+        /** @var MatchModel $match */
+        $match = AutoMapper::map($entities[0], MatchModel::class, trackEntity: false);
+        
+        $matchParticipantCount = 0;
+        foreach ($entities as $entity){
+            if ($entity instanceof \App\DAL\Entity\MatchParticipant){
+                if ($matchParticipantCount === 0){
+                    $match->setParticipant1($this->mapMatchParticipant($entity, true));
+                }
+                elseif ($matchParticipantCount === 1){
+                    $match->setParticipant2($this->mapMatchParticipant($entity, true));
+                }
+                $matchParticipantCount++;
+            }
+        }
+
+        return $match;
+    }
+
+    public function setMatchResult(MatchModel $match)
+    {
+        $participant1 = $match->getParticipant1() !== null ? AutoMapper::map($match->getParticipant1(), \App\DAL\Entity\MatchParticipant::class, trackEntity: false) : null;
+        $participant2 = $match->getParticipant2() !== null ? AutoMapper::map($match->getParticipant2(), \App\DAL\Entity\MatchParticipant::class, trackEntity: false) : null;
+    
+        if ($participant1 !== null){
+            $this->entityManager->persist($participant1);
+        }
+        if ($participant2 !== null){
+            $this->entityManager->persist($participant2);
+        }
+
+        if ($participant1 !== null || $participant2 !== null){
+            $this->entityManager->flush();
+        }
     }
 }

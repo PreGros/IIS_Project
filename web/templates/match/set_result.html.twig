@@ -1,0 +1,23 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Set match result{% endblock %}
+
+{% block body %}
+    {{ render_flash_messages() }}
+
+    <h1>Set match result</h1>
+
+    {{ form_start(form) }}
+        {% if use_points %}
+            {{ form_row(form.points_first) }}
+            {{ form_row(form.points_second) }}
+        {% else %}
+            {{ form_row(form.duration_first) }}
+            {{ form_row(form.duration_second) }}
+        {% endif %}
+        {{ form_row(form.submit, {
+            label: 'Submit'
+        }) }}
+    {{ form_end(form) }}
+
+{% endblock %}

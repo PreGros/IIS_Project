@@ -4,6 +4,8 @@ namespace App\BL\Tournament;
 
 class TournamentModel
 {
+    private int $id;
+
     private string $name;
 
     private ?string $description;
@@ -46,6 +48,11 @@ class TournamentModel
     // {
     //     $this->date = new \DateTime();
     // }
+
+    public function getId(): int
+    {
+        return $this->id;
+    }
 
     public function getName(): string
     {
@@ -243,5 +250,11 @@ class TournamentModel
     public function getTournamentTypeModel(): ?TournamentTypeModel
     {
         return $this->tournamentTypeModel;
+    }
+
+    public function registrationEnded(): bool
+    {
+        $now = new \DateTime;
+        return $now >= $this->registrationDateEnd;
     }
 }
