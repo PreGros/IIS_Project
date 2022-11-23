@@ -60,9 +60,19 @@ class MatchModel
         return $this;
     }
 
+    public function hasStarted() : bool
+    {
+        return $this->startTime < new \DateTime();
+    }
+
     public function hasEnded(): bool
     {
         return (new \DateTime())->getTimestamp() > ($this->startTime->getTimestamp() + (int)$this->duration->format('%s'));
+    }
+
+    public function childMatchStarted() : bool
+    {
+        return ($this->child === null) ? false : $this->child->getStartTime() < new \DateTime();
     }
 
     public function getParticipant1(): ?MatchParticipantModel
