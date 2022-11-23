@@ -37,6 +37,9 @@ class UserProvider implements UserProviderInterface, PasswordUpgraderInterface
     public function loadUserByIdentifier(string $identifier): UserInterface
     {
         $user = $this->repository->findByEmail($identifier);
+        if ($user === null){
+            throw new UserNotFoundException();
+        }
         return AutoMapper::map($user, UserModel::class);
     }
 
@@ -53,7 +56,7 @@ class UserProvider implements UserProviderInterface, PasswordUpgraderInterface
      */
     public function refreshUser(UserInterface $user): UserInterface
     {
-        if (!$user instanceof UserModel) {
+        if (!$user instanceof UserModel){
             throw new UnsupportedUserException(sprintf('Invalid user class "%s".', get_class($user)));
         }
 

@@ -31,7 +31,7 @@ class TournamentParticipant
         return $this->id;
     }
 
-    public function isApproved(): ?bool
+    public function getApproved(): ?bool
     {
         return $this->approved;
     }

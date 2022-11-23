@@ -148,7 +148,7 @@ class User
         return $this->id;
     }
 
-    public function isVerified(): bool
+    public function getIsVerified(): bool
     {
         return $this->isVerified;
     }
