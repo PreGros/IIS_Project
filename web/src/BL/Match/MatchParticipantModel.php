@@ -25,6 +25,18 @@ class MatchParticipantModel
             ($this->participant instanceof TeamModel ? $this->participant->getName() : '');
     }
 
+    public function isParticipantTeam(): ?bool
+    {
+        return 
+            $this->participant instanceof TeamModel ? true :
+            ($this->participant instanceof UserModel ? false : null);
+    }
+
+    public function getParticipantId(): int
+    {
+        return $this->participant->getId();
+    }
+
     public function setParticipant(null|UserModel|TeamModel $val): self
     {
         $this->participant = $val;

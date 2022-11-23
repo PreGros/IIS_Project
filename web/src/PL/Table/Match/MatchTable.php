@@ -24,7 +24,7 @@ class MatchTable extends BaseTable
         $this
             ->addColumn('startTime', 'Start time')
             ->addColumn('duration', 'Duration')
-            ->addColumn('participants', 'Participants')
+            ->addColumn('participants', 'Participants', true)
             ->addColumn('result', 'Result');
         
         if ($this->options['allModifiable']){
@@ -62,6 +62,20 @@ class MatchTable extends BaseTable
                     ':' .
                     ($match->getParticipant2()?->getResult() ?? 'Participant not entered')
             ];
+
+            $data['participants'] = $this->renderTwigStringColumn(
+                (
+                    '{% if not (row.participant1 is null) %}<a href="{{ row.participant1Url }}">{{ row.participant1 }}</a>{% else %}From previous match{% endif %}' .
+                    ' vs ' .
+                    '{% if not (row.participant2 is null) %}<a href="{{ row.participant2Url }}">{{ row.participant2 }}</a>{% else %}From previous match{% endif %}'
+                ),
+                [
+                    'participant1' => $match->getParticipant1()?->getParticipantName(),
+                    'participant2' => $match->getParticipant2()?->getParticipantName(),
+                    'participant1Url' => $this->router->generate($match->getParticipant1()?->isParticipantTeam() ? 'team_info' : 'user_info', ['id' => $match->getParticipant1()?->getParticipantId()]),
+                    'participant2Url' => $this->router->generate($match->getParticipant2()?->isParticipantTeam() ? 'team_info' : 'user_info', ['id' => $match->getParticipant2()?->getParticipantId()]),
+                ]
+            );
 
             if ($this->options['allModifiable']){
                 $data['action'] = $this->renderTwigStringColumn(
