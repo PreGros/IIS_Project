@@ -76,13 +76,24 @@ class MatchTable extends BaseTable
                     'participant2Url' => $this->router->generate($match->getParticipant2()?->isParticipantTeam() ? 'team_info' : 'user_info', ['id' => $match->getParticipant2()?->getParticipantId() ?? 0]),
                 ]
             );
-
+            
+            $disabledEdit = "<a class=\"btn btn-secondary disabled w-label\" title=\"Cannot edit, match has ended\">Edit</a>";
+            $disabledSetResult = "<a class=\"btn btn-primary disabled w-label\" title=\"Cannot set result, match does not ended\">Set result</a>";
+            $enabledEdit = "<a href=\"{{ row.edit }}\" class=\"btn btn-secondary\">Edit</a>";
+            $enabledSetResult = "<a href=\"{{ row.set_result }}\" class=\"btn btn-primary\">Set result</a>";
             if ($this->options['allModifiable']){
+                if ($match->childMatchStarted()){
+                    $buttons = '<a class="btn btn-secondary disabled w-label" title="Cannot edit, match has ended">Edit</a>' . ' ' . '<a class="btn btn-primary disabled w-label" title="Cannot set result, match does not ended">Set result</a>';
+                }
+                else if ($match->hasStarted()){
+                    $buttons = '<a href="{{ row.edit }}" class="btn btn-secondary">Edit</a>' . ' ' . '<a href="{{ row.set_result }}" class="btn btn-primary">Set result</a>';
+                }
+                else{
+                    $buttons = '<a href="{{ row.edit }}" class="btn btn-secondary">Edit</a>' . ' ' . '<a class="btn btn-primary disabled w-label" title="Cannot set result, match does not ended">Set result</a>';
+                }
+
                 $data['action'] = $this->renderTwigStringColumn(
-                    (!$match->hasEnded() ?
-                        '<a href="{{ row.edit }}" class="btn btn-secondary">Edit</a>' . ' ' . '<a class="btn btn-primary disabled w-label" title="Cannot set result, match does not ended">Set result</a>' :
-                        '<a class="btn btn-secondary disabled w-label" title="Cannot edit, match has ended">Edit</a>' . ' '. '<a href="{{ row.set_result }}" class="btn btn-primary">Set result</a>'
-                    ),
+                    $buttons,
                     [
                         'edit' => $this->router->generate('edit_match', ['tournamentId' => $this->options['tournamentId'], 'matchId' => $match->getId()]),
                         'set_result' => $this->router->generate('set_match_result', ['tournamentId' => $this->options['tournamentId'], 'matchId' => $match->getId()])
@@ -95,3 +106,8 @@ class MatchTable extends BaseTable
     }
 
 }
+
+// (!$match->hasEnded() ?
+//     '<a href="{{ row.edit }}" class="btn btn-secondary">Edit</a>' . ' ' . '<a class="btn btn-primary disabled w-label" title="Cannot set result, match does not ended">Set result</a>' :
+//     '<a class="btn btn-secondary disabled w-label" title="Cannot edit, match has ended">Edit</a>' . ' '. '<a href="{{ row.set_result }}" class="btn btn-primary">Set result</a>'
+// ),
