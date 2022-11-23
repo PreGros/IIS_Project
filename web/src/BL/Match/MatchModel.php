@@ -6,7 +6,7 @@ class MatchModel
 {
     private int $id;
 
-    private ?int $childId;
+    private ?MatchModel $child;
 
     private \DateInterval $duration;
 
@@ -27,14 +27,14 @@ class MatchModel
         return $this;
     }
 
-    public function getChildId(): ?int
+    public function getChild(): ?MatchModel
     {
-        return $this->childId;
+        return $this->child;
     }
 
-    public function setChildId(?int $val): self
+    public function setChild(?MatchModel $val): self
     {
-        $this->childId = $val;
+        $this->child = $val;
         return $this;
     }
 
