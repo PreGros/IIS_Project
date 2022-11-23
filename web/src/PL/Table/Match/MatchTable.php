@@ -86,7 +86,7 @@ class MatchTable extends BaseTable
                     $buttons = '<a class="btn btn-secondary disabled w-label" title="Cannot edit, match has ended">Edit</a>' . ' ' . '<a class="btn btn-primary disabled w-label" title="Cannot set result, match does not ended">Set result</a>';
                 }
                 else if ($match->hasStarted()){
-                    $buttons = '<a href="{{ row.edit }}" class="btn btn-secondary">Edit</a>' . ' ' . '<a href="{{ row.set_result }}" class="btn btn-primary">Set result</a>';
+                    $buttons = '<a class="btn btn-secondary disabled w-label" title="Cannot edit, match has ended">Edit</a>' . ' ' . '<a href="{{ row.set_result }}" class="btn btn-primary">Set result</a>';
                 }
                 else{
                     $buttons = '<a href="{{ row.edit }}" class="btn btn-secondary">Edit</a>' . ' ' . '<a class="btn btn-primary disabled w-label" title="Cannot set result, match does not ended">Set result</a>';
