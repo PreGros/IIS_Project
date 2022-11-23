@@ -315,6 +315,8 @@ window.addEventListener('load', () => {
                 }
             ],
             initComplete: function(settings, json) {
+                $("<label class='column-label'>Columns visibility</label>").insertBefore(".dt-buttons");
+
                 $(".buttons-columnVisibility").each((index, el) => {
                     var span = $(el, "span");
                     var value = $(span).text();

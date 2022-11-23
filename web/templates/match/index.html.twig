@@ -7,7 +7,13 @@
 
     <h1>Tournament matches</h1>
 
-    {% for table in tables %}
+    <br>
+
+    {% set count = tables|length %}
+    {% for key, table in tables %}
+        {% if count != 0 %}
+            <h3>Round {{ key + 1 }}</h3>
+        {% endif %}
         {{ table_render(table) }}
         <br>
         <hr>

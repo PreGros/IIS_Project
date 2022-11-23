@@ -14,20 +14,24 @@ use App\PL\Table\Match\MatchTable;
 class MatchController extends AbstractController
 {
     #[Route('/tournaments/{id<\d+>}/matches', name: 'matches')]
-    public function getMatches(int $id, MatchManager $matchManager, MatchTable $matchTable): Response
+    public function getMatchesAction(int $id, MatchManager $matchManager, MatchTable $matchTable, TournamentManager $tournamentManager): Response
     {
-        $matches = $matchManager->getMatches($id);
+        /** @var \App\BL\User\UserModel */
+        $user = $this->getUser();
+        $tournament = $tournamentManager->getTournament($id);
+        $matches = $matchManager->getMatches($tournament);
 
+        $allModifiable = $tournament->getCreatedById() === $user?->getId() || $this->isGranted('ROLE_ADMIN');
         $tables = [];
         foreach ($matches as $matchLevel){
-            $tables[] = (clone $matchTable)->init(['matches' => $matchLevel, 'canModify' => false]);
+            $tables[] = (clone $matchTable)->init(['matches' => $matchLevel, 'tournamentId' => $tournament->getId(), 'allModifiable' => $allModifiable]);
         }
 
         return $this->render('match/index.html.twig', ['tables' => $tables]);
     }
 
     #[Route('/tournaments/{id<\d+>}/generate-matches/{setParticipants<0|1>}', name: 'generate_matches')]
-    public function generateMatches(int $id, int $setParticipants, MatchManager $matchManager, TournamentManager $tournamentManager): Response
+    public function generateMatchesAction(int $id, int $setParticipants, MatchManager $matchManager, TournamentManager $tournamentManager): Response
     {
         $tournament = $tournamentManager->getTournament($id);
 
@@ -47,5 +51,35 @@ class MatchController extends AbstractController
         $matchManager->generateMatches($tournament, (bool)$setParticipants);
 
         return $this->redirectToRoute('matches', ['id' => $id]);
+    }
+    
+    #[Route('/tournaments/{tournamentId<\d+>}/matches/{matchId<\d+>}/edit', name: 'edit_match')]
+    public function editMatchAction(int $tournamentId, int $matchId, MatchManager $matchManager, TournamentManager $tournamentManager): Response
+    {
+        /** @var \App\BL\User\UserModel */
+        $user = $this->getUser();
+        $tournament = $tournamentManager->getTournament($tournamentId);
+        if ($tournament->getCreatedById() !== $user?->getId() && !$this->isGranted('ROLE_ADMIN')){
+            $this->addFlash('danger', 'Insufficient rights to edit match');
+            return $this->redirectToRoute('matches', ['id' => $tournamentId]);
+        }
+
+
+        return $this->redirectToRoute('matches', ['id' => $tournamentId]);
+    }
+
+    #[Route('/tournaments/{tournamentId<\d+>}/matches/{matchId<\d+>}/set-result', name: 'set_match_result')]
+    public function setMatchResultAction(int $tournamentId, int $matchId, MatchManager $matchManager, TournamentManager $tournamentManager): Response
+    {
+        /** @var \App\BL\User\UserModel */
+        $user = $this->getUser();
+        $tournament = $tournamentManager->getTournament($tournamentId);
+        if ($tournament->getCreatedById() !== $user?->getId() && !$this->isGranted('ROLE_ADMIN')){
+            $this->addFlash('danger', 'Insufficient rights to set result to the match');
+            return $this->redirectToRoute('matches', ['id' => $tournamentId]);
+        }
+
+        
+        return $this->redirectToRoute('matches', ['id' => $tournamentId]);
     }
 }

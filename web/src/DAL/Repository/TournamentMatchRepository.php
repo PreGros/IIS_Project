@@ -2,8 +2,14 @@
 
 namespace App\DAL\Repository;
 
+use App\DAL\Entity\MatchParticipant;
+use App\DAL\Entity\Team;
+use App\DAL\Entity\Tournament;
 use App\DAL\Entity\TournamentMatch;
+use App\DAL\Entity\TournamentParticipant;
+use App\DAL\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -37,6 +43,22 @@ class TournamentMatchRepository extends ServiceEntityRepository
         if ($flush) {
             $this->getEntityManager()->flush();
         }
+    }
+
+    public function findWithParticipants(int $tournamentId): array
+    {
+        return $this->getEntityManager()->createQueryBuilder()
+            ->select('m, p, tp, u, tm')
+            ->from(TournamentMatch::class, 'm')
+            ->leftJoin(MatchParticipant::class, 'p', Join::WITH, 'p.tournamentMatch = m')
+            ->leftJoin(TournamentParticipant::class, 'tp', Join::WITH, 'p.tournamentParticipant = tp')
+            ->leftJoin(User::class, 'u', Join::WITH, 'tp.signedUpUser = u')
+            ->leftJoin(Team::class, 'tm', Join::WITH, 'tp.signedUpTeam = tm')
+            ->where('IDENTITY(m.tournament) = :p_tournament_id')
+            ->setParameter('p_tournament_id', $tournamentId)
+            ->getQuery()
+            ->getResult();
+
     }
 
 //    /**

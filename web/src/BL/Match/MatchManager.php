@@ -2,6 +2,7 @@
 
 namespace App\BL\Match;
 
+use App\BL\Team\TeamModel;
 use App\BL\Tournament\MatchingType;
 use App\BL\Tournament\TournamentModel;
 use Doctrine\ORM\EntityManagerInterface;
@@ -10,6 +11,7 @@ use Symfony\Component\Security\Core\Security;
 use App\BL\Util\AutoMapper;
 use App\DAL\Entity\Tournament;
 use App\BL\Tournament\TournamentManager;
+use App\BL\User\UserModel;
 
 class MatchManager
 {
@@ -59,20 +61,34 @@ class MatchManager
         return $layers;
     }
 
-    public function getMatches(int $id)
+    public function getMatches(TournamentModel $tournament)
     {
-        $tournament = $this->tournamentManager->getTournament($id);
-
         /** @var \App\DAL\Repository\TournamentMatchRepository */
         $matchesRepo = $this->entityManager->getRepository(\App\DAL\Entity\TournamentMatch::class);
-        $matcheModels = $matchesRepo->findBy(['tournament' => $id]);
+        $entities = $matchesRepo->findWithParticipants($tournament->getId());
+        /** @var array<MatchModel> */
         $matches = [];
+        $matchIndex = -1;
+        $matchParticipantCount = 0;
+        for ($i = 0; $i < count($entities); $i++){
+            if ($entities[$i] instanceof \App\DAL\Entity\TournamentMatch){
+                /** @var MatchModel $match */
+                $match = AutoMapper::map($entities[$i], MatchModel::class, trackEntity: false);
+                $match->setChildId($entities[$i]->getChildMatch()?->getId());
+                $matches[++$matchIndex] = $match;
+                $matchParticipantCount = 0;
+                continue;
+            }
 
-        foreach ($matcheModels as $matchModel){
-            /** @var MatchModel */
-            $match = AutoMapper::map($matchModel, MatchModel::class, trackEntity: false);
-            $match->setChildId($matchModel->getChildMatch()?->getId());
-            $matches[] = $match;
+            if ($entities[$i] instanceof \App\DAL\Entity\MatchParticipant){
+                if ($matchParticipantCount === 0){
+                    $matches[$matchIndex]->setParticipant1($this->mapMatchParticipant($entities[$i]));
+                }
+                elseif ($matchParticipantCount === 1){
+                    $matches[$matchIndex]->setParticipant2($this->mapMatchParticipant($entities[$i]));
+                }
+                $matchParticipantCount++;
+            }
         }
 
         if ($tournament->getMatchingType(false) === MatchingType::Elimination){
@@ -80,6 +96,16 @@ class MatchManager
         }
 
         return [$matches];
+    }
+
+    private function mapMatchParticipant(\App\DAL\Entity\MatchParticipant $matchParticipant): MatchParticipantModel
+    {
+        /** @var MatchParticipantModel */
+        $matchP = AutoMapper::map($matchParticipant, MatchParticipantModel::class, trackEntity: false);
+        $tournamentP = $matchParticipant->getTournamentParticipant();
+        $team = $tournamentP?->getSignedUpTeam() !== null ? AutoMapper::map($tournamentP->getSignedUpTeam(), TeamModel::class, trackEntity: false) : null;
+        $user = $tournamentP?->getSignedUpUser() !== null ? AutoMapper::map($tournamentP->getSignedUpUser(), UserModel::class, trackEntity: false) : null;
+        return $matchP->setParticipant($team ?? $user ?? null);
     }
 
     public function generateMatches(TournamentModel $tournament, bool $setParticipantsToMatches = true)
