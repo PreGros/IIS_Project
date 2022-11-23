@@ -21,11 +21,11 @@ class MatchParticipant
     private ?\DateInterval $completionTime = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: "CASCADE")]
     private ?TournamentMatch $tournamentMatch = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: "CASCADE")]
     private ?TournamentParticipant $tournamentParticipant = null;
 
     public function getId(): ?int

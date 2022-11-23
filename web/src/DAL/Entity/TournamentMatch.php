@@ -23,11 +23,11 @@ class TournamentMatch
     private ?\DateTimeInterface $startTime = null;
 
     #[ORM\ManyToOne(inversedBy: 'tournamentMatches', targetEntity: self::class)]
-    #[ORM\JoinColumn]
+    #[ORM\JoinColumn(onDelete: "CASCADE")]
     private ?self $childMatch = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: "CASCADE")]
     private ?Tournament $tournament = null;
 
     #[ORM\OneToMany(targetEntity: TournamentMatch::class, mappedBy: 'childMatch', cascade: ['persist'])]

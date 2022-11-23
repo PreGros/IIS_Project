@@ -23,7 +23,7 @@ class TournamentParticipant
     private ?User $signedUpUser = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: "CASCADE")]
     private ?Tournament $tournament = null;
 
     public function getId(): ?int
