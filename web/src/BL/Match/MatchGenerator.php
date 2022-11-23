@@ -24,6 +24,12 @@ class MatchGenerator
 
     private bool $setParticipantsToMatches = true;
 
+    private \DateTime $startDate;
+
+    private \DateInterval $matchDuration;
+
+    private \DateInterval $breakDuration;
+
     public function __construct(EntityManagerInterface $entityManager)
     {
         $this->entityManager = $entityManager;
@@ -35,6 +41,8 @@ class MatchGenerator
     public function init(
         array $participants,
         TournamentModel $tournamentModel,
+        \DateInterval $matchDuration,
+        \DateInterval $breakDuration,
         bool $setParticipantsToMatches = true
     )
     {
@@ -42,6 +50,16 @@ class MatchGenerator
         $this->tournament = AutoMapper::map($tournamentModel, Tournament::class, trackEntity: false);
         $this->setParticipantsToMatches = $setParticipantsToMatches;
         $this->countOfParticipants = count($participants);
+        $this->matchDuration = $matchDuration;
+        $this->breakDuration = $breakDuration;
+        /** first tournament will start at time specified in tournament */
+        $this->startDate = \DateTime::createFromInterface($tournamentModel->getDate())->sub($matchDuration)->sub($breakDuration);
+    }
+
+    private function getNextStartDate(): \DateTime
+    {
+       $this->startDate->add($this->matchDuration)->add($this->breakDuration);
+       return clone $this->startDate;
     }
 
     public function generateMatchesRoundRobin()
@@ -149,8 +167,8 @@ class MatchGenerator
     {
         $match = new TournamentMatch();
         $match
-            ->setDuration(new \DateInterval("PT{$first}M{$second}S"))
-            ->setStartTime(new \DateTime())
+            ->setDuration($this->matchDuration)
+            ->setStartTime($this->getNextStartDate())
             ->setTournament($this->tournament);
 
         if (!$this->setParticipantsToMatches){
@@ -177,8 +195,8 @@ class MatchGenerator
             $match->addTournamentMatch($matches[$second - $this->countOfParticipants]);
         }
         $match
-            ->setDuration(new \DateInterval("PT{$first}M{$second}S"))
-            ->setStartTime(new \DateTime())
+            ->setDuration($this->matchDuration)
+            ->setStartTime($this->getNextStartDate())
             ->setTournament($this->tournament);
 
         if (!$this->setParticipantsToMatches){

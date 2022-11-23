@@ -50,7 +50,7 @@ class MatchController extends AbstractController
             return $this->redirectToRoute('tournament_info', ['id' => $id]);
         }
 
-        $matchManager->generateMatches($tournament, (bool)$setParticipants);
+        $matchManager->generateMatches($tournament, new \DateInterval('PT30M'), new \DateInterval('PT5M'), (bool)$setParticipants);
 
         return $this->redirectToRoute('matches', ['id' => $id]);
     }
