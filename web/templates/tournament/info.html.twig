@@ -95,7 +95,7 @@
                         {{ form_row(matchForm.duration) }}
                     {{ form_end(matchForm) }}
                 {% else %}
-                    <a href="{{ path('tournaments') }}" type="button" class="btn btn-primary">Matches info</a>
+                    <a href="{{ path('matches', redirectParam) }}" type="button" class="btn btn-primary">Matches info</a>
                 {% endif %}
             {% endif %}
 
@@ -111,11 +111,11 @@
                         {{ form_end(form) }}
                     {% else %}
                         <p>Register yourself</p>
-                        <a href="{{ path('tournament_register', registerRedirectParam) }}" type="button" class="btn btn-success">Register</a>
+                        <a href="{{ path('tournament_register', redirectParam) }}" type="button" class="btn btn-success">Register</a>
                     {% endif %}
                 {% else %}
                     <p>You are registered as <a href="{{ path(participantIsTeam ? 'team_info' : 'user_info', {'id': participantId ?? 0}) }}">{{ participantName }}</a></p>
-                    <a href="{{ path('tournament_unregister', unregisterRedirectParam) }}" type="button" class="btn btn-danger {% if canUnregister %}" {% else %} disabled" aria-disabled="true" {% endif %}>Unregister</a>
+                    <a href="{{ path('tournament_unregister', redirectParam) }}" type="button" class="btn btn-danger {% if canUnregister %}" {% else %} disabled" aria-disabled="true" {% endif %}>Unregister</a>
                 {% endif %}
             {% endif %}
 
