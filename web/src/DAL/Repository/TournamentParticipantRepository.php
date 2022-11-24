@@ -61,7 +61,7 @@ class TournamentParticipantRepository extends ServiceEntityRepository
     }
 
     /**
-     * @return Paginator<array<<TournnamentParticipant|int>>
+     * @return Paginator<array<<TournamentParticipant|int>>
      */
     public function findTableData(?int $currUserId, int $limit, int $start, string $order, bool $ascending, string $search, int $tournamentId): Paginator
     {
@@ -121,6 +121,32 @@ class TournamentParticipantRepository extends ServiceEntityRepository
             ->getQuery()
             ->getOneOrNullResult();
     }
+
+    /**
+     * @return array<TournamentParticipant|User|Team>
+     */
+    public function findNonAssignParticipants(int $tournamentId, int $includeParticipantId = 0): array
+    {
+        return $this->getEntityManager()->createQueryBuilder()
+            ->select('tp, u, t')
+            ->from(TournamentParticipant::class, 'tp')
+            ->leftJoin(User::class, 'u', Join::WITH, 'tp.signedUpUser = u')
+            ->leftJoin(Team::class, 't', Join::WITH, 'tp.signedUpTeam = t')
+            ->where('NOT EXISTS(' . 
+                $this->createQueryBuilder('p')
+                    ->innerJoin(MatchParticipant::class, 'mp', Join::WITH, 'mp.tournamentParticipant = p')
+                    ->where('p.id = tp.id')
+                    ->andWhere('p.id != :p_includeParticipantId')
+                    ->getDQL()
+            . ')')
+            ->andWhere('IDENTITY(tp.tournament) = :p_tournamentId')
+            ->setParameter('p_includeParticipantId', $includeParticipantId)
+            ->setParameter('p_tournamentId', $tournamentId)
+            ->getQuery()
+            ->getResult();
+    }
+
+
 //    /**
 //     * @return TournamentParticipant[] Returns an array of TournamentParticipant objects
 //     */

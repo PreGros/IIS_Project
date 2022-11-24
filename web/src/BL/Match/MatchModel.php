@@ -111,19 +111,22 @@ class MatchModel
         return !empty($this->previousMatches);
     }
 
+    public function getPreviousMatchesCount(): int
+    {
+        return count($this->previousMatches);
+    }
+
     public function hasPreviousMatch(int $matchId): bool
     {
         return $this->getPreviousMatch($matchId) !== null;
     }
 
-    public function isWinnerOfPreviousFirstParticipant(MatchModel $match): bool
+    public function isWinnerFirstParticipant(MatchModel $match): bool
     {
-        $key = array_key_first($this->previousMatches);
-        return $key === $match->getId() && 
+        return
         (
-            $this->getParticipant1() === null ||
-            $this->getParticipant1()->getParticipantId() === $match->getParticipant1()?->getParticipantId() ||
-            $this->getParticipant1()->getParticipantId() === $match->getParticipant2()?->getParticipantId()
+            $this->getParticipant1()?->getParticipantId() === $match->getParticipant1()?->getParticipantId() ||
+            $this->getParticipant1()?->getParticipantId() === $match->getParticipant2()?->getParticipantId()
         );
     }
 

@@ -11,11 +11,13 @@ use Symfony\Component\Security\Core\Security;
 use App\BL\Util\AutoMapper;
 use App\DAL\Entity\Tournament;
 use App\BL\Tournament\TournamentManager;
+use App\BL\Tournament\TournamentParticipantModel;
 use App\BL\Tournament\WinCondition;
 use App\BL\User\UserModel;
 use App\BL\Util\DateTimeUtil;
 use App\DAL\Entity\MatchParticipant;
 use App\DAL\Entity\TournamentMatch;
+use App\DAL\Entity\TournamentParticipant;
 
 class MatchManager
 {
@@ -113,7 +115,9 @@ class MatchManager
         $tournamentP = $matchParticipant->getTournamentParticipant();
         $team = $tournamentP?->getSignedUpTeam() !== null ? AutoMapper::map($tournamentP->getSignedUpTeam(), TeamModel::class, trackEntity: false) : null;
         $user = $tournamentP?->getSignedUpUser() !== null ? AutoMapper::map($tournamentP->getSignedUpUser(), UserModel::class, trackEntity: false) : null;
-        return $matchP->setParticipant($team ?? $user ?? null);
+        return $matchP
+            ->setTournamentPartId($tournamentP->getId())
+            ->setParticipant($team ?? $user ?? null);
     }
 
     public function generateMatches(TournamentModel $tournament, \DateInterval $matchDuration, \DateInterval $breakDuration, bool $setParticipantsToMatches = true)
@@ -140,26 +144,14 @@ class MatchManager
         $match = AutoMapper::map($entities[0], MatchModel::class);
         $match->setChild($entities[0]->getChildMatch() !== null ? AutoMapper::map($entities[0]->getChildMatch(), MatchModel::class, trackEntity: false) : null);
         
-        $matchC = 0;
         $matchParticipantCount = 0;
         foreach ($entities as $entity){
             if ($entity instanceof \App\DAL\Entity\MatchParticipant){
-                $m = match($matchC) {
-                    0 => $match,
-                    1 => $match->getFirstPreviousMatch(),
-                    2 => $match->getLastPreviousMatch(),
-                    default => null
-                };
-
-                if ($m === null){
-                    continue;
-                }
-
                 if ($matchParticipantCount === 0){
-                    $m->setParticipant1($this->mapMatchParticipant($entity, true));
+                    $match->setParticipant1($this->mapMatchParticipant($entity, true));
                 }
                 elseif ($matchParticipantCount === 1){
-                    $m->setParticipant2($this->mapMatchParticipant($entity, true));
+                    $match->setParticipant2($this->mapMatchParticipant($entity, true));
                 }
                 $matchParticipantCount++;
                 continue;
@@ -167,19 +159,74 @@ class MatchManager
 
             if ($entity instanceof \App\DAL\Entity\TournamentMatch && $entity->getId() !== $match->getId()){
                 $match->addPreviousMatch(AutoMapper::map($entity, MatchModel::class));
-                $matchC++;
-                $matchParticipantCount = 0;
             }
         }
         return $match;
     }
 
-    public function editMatch(MatchModel $match)
+    public function checkParticpants(MatchModel $match, ?int $firstParticipant, ?int $secondParticipant): ?string
     {
-        $matchEntity = AutoMapper::map($match, TournamentMatch::class, trackEntity: false);
+        $bothDisabled = $match->getPreviousMatchesCount() === 2;
+        $disableEnable = $match->getPreviousMatchesCount() > 0;
+        $firstDisabled = $disableEnable && $match->getParticipant1() === null;
 
+        if ($firstParticipant !== $match->getParticipant1()?->getTournamentPartId() && $disableEnable && ($bothDisabled || $firstDisabled)){
+            return 'Cannot change first participant - first participant is a winner of previous match';
+        }
+
+        if ($secondParticipant !== $match->getParticipant2()?->getTournamentPartId() && $disableEnable && ($bothDisabled || !$firstDisabled)){
+            return 'Cannot change second participant - second participant is a winner of previous match';
+        }
+
+        if ($firstParticipant !== null && $firstParticipant === $secondParticipant){
+            return 'Participants cannot be same';
+        }
+        return null;
+    }
+
+    public function editMatch(MatchModel $match, ?int $firstParticipant, ?int $secondParticipant)
+    {
+        /** @var TournamentMatch */
+        $matchEntity = AutoMapper::map($match, TournamentMatch::class, trackEntity: false);
         $this->entityManager->persist($matchEntity);
+
+        $this->updateOrCreateMatchParticipant(
+            $match->getParticipant1(),
+            $matchEntity,
+            $firstParticipant !== null ? $this->entityManager->getReference(\App\DAL\Entity\TournamentParticipant::class, $firstParticipant) : null
+        );
+
+        $this->updateOrCreateMatchParticipant(
+            $match->getParticipant2(),
+            $matchEntity,
+            $secondParticipant !== null ? $this->entityManager->getReference(\App\DAL\Entity\TournamentParticipant::class, $secondParticipant) : null
+        );
+
         $this->entityManager->flush();
+    }
+
+    private function updateOrCreateMatchParticipant(?MatchParticipantModel $matchPart, TournamentMatch $matchEntity, ?TournamentParticipant $tournamentPart)
+    {
+        if ($tournamentPart === null){
+            if ($matchPart !== null){
+                $this->entityManager->remove(AutoMapper::map($matchPart, MatchParticipant::class, trackEntity: false));
+            }
+            return;
+        }
+
+        if ($matchPart !== null){
+            /** @var MatchParticipant */
+            $matchPart = AutoMapper::map($this->resetMatch($matchPart), MatchParticipant::class, trackEntity: false);
+            $matchPart->setTournamentParticipant($tournamentPart);
+        }
+        else{
+            $matchPart = new MatchParticipant();
+            $matchPart
+                ->setTournamentMatch($matchEntity)
+                ->setTournamentParticipant($tournamentPart);
+        }
+        
+        $this->entityManager->persist($matchPart);
     }
 
     public function setMatchResult(MatchModel $match, TournamentModel $tournament)
@@ -187,6 +234,10 @@ class MatchManager
         $participant1 = $match->getParticipant1() !== null ? AutoMapper::map($match->getParticipant1(), MatchParticipant::class, trackEntity: false) : null;
         $participant2 = $match->getParticipant2() !== null ? AutoMapper::map($match->getParticipant2(), MatchParticipant::class, trackEntity: false) : null;
     
+        if ($participant1 === null && $participant2 === null){
+            return;
+        }
+
         if ($participant1 !== null){
             $this->entityManager->persist($participant1);
         }
@@ -201,9 +252,7 @@ class MatchManager
             $this->checkSingleEliminationWinConditionAndSetResult($match, $tournament, $participant1?->getId(), $participant2?->getId());
         }
 
-        if ($participant1 !== null || $participant2 !== null){
-            $this->entityManager->flush();
-        }
+        $this->entityManager->flush();
     }
 
     private function checkRoundRobinWinCondition()
@@ -251,12 +300,11 @@ class MatchManager
         $nextMatchEntity = AutoMapper::map($nextMatch, TournamentMatch::class, trackEntity: false);
         /** @var MatchParticipant */
         $winnerOfMatch = AutoMapper::map($firstWin ? $match->getParticipant1() : $match->getParticipant2(), MatchParticipant::class, trackEntity: false);
-        
         if (!$nextMatch->hasPreviousMatch($match->getId())){
             return;
         }
         
-        $nextMatchPart = $nextMatch->isWinnerOfPreviousFirstParticipant($match) ? $nextMatch->getParticipant1() : $nextMatch->getParticipant2();
+        $nextMatchPart = $nextMatch->isWinnerFirstParticipant($match) ? $nextMatch->getParticipant1() : $nextMatch->getParticipant2();
         $matchPart = null;
 
         if ($nextMatchPart !== null){
@@ -278,5 +326,41 @@ class MatchManager
         return $matchParticipant
             ->setPoints(null)
             ->setCompletionTime(null);
+    }
+
+    /**
+     * @return \Traversable<TournamentParticipantModel>
+     */
+    public function getTournamentParticipants(int $tournamentId, int $includeParticipantId = 0)
+    {   
+        /** @var \App\DAL\Repository\TournamentParticipantRepository */
+        $repo = $this->entityManager->getRepository(\App\DAL\Entity\TournamentParticipant::class);
+
+        $entities = $repo->findNonAssignParticipants($tournamentId, $includeParticipantId);
+
+        for ($i = 0; $i < count($entities); $i++){
+            /** @var TournamentParticipantModel $model */
+            $model = AutoMapper::map($entities[$i++], TournamentParticipantModel::class);
+            $userEntity = $entities[$i++];
+            $user = $userEntity === null ? null : AutoMapper::map($userEntity, UserModel::class, trackEntity: false);
+            $teamEntity = $entities[$i];
+            $team = $teamEntity === null ? null : AutoMapper::map($teamEntity, TeamModel::class, trackEntity: false);
+            $model->setParticipant($user ?? $team);
+            yield $model;
+        }
+    }
+
+    /**
+     * @return array<TournamentParticipantModel>
+     */
+    public function getFormatedTournamentParticipants(int $tournamentId, ?int $includeParticipantId = null): array
+    {
+        $participants = [];
+        foreach ($this->getTournamentParticipants($tournamentId, $includeParticipantId ?? 0) as $participant){
+            if (($name = $participant->getParticipantName()) !== ''){
+                $participants[$name] = $participant->getId();
+            }
+        }
+        return $participants;
     }
 }

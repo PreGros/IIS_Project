@@ -68,13 +68,18 @@ class MatchController extends AbstractController
         }
 
         $match = $matchManager->getMatch($matchId);
-        $form = $this->createForm(MatchEditFormType::class, $match);
+        $form = $this->createForm(MatchEditFormType::class, $match, ['match' => $match, 'tournament_id' => $tournament->getId()]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()){
-            $matchManager->editMatch($match);
-            $this->addFlash('success', 'Match was edited');
-            return $this->redirectToRoute('matches', ['id' => $tournamentId]);
+            $firstPart = $form->get('first_participant')->getData();
+            $secondPart = $form->get('second_participant')->getData();
+            if (($msg = $matchManager->checkParticpants($match, $firstPart, $secondPart)) === null){
+                $matchManager->editMatch($match, $firstPart, $secondPart);
+                $this->addFlash('success', 'Match was edited');
+                return $this->redirectToRoute('matches', ['id' => $tournamentId]);
+            }
+            $this->addFlash('danger', $msg);
         }
 
         return $this->renderForm('match/edit.html.twig', ['form' => $form]);
