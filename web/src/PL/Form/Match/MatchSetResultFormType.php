@@ -42,7 +42,7 @@ class MatchSetResultFormType extends AbstractType
                     'getter' => fn (MatchModel $match, FormInterface $form): ?int
                         => ($match->getParticipant1()?->getCompletionTime() !== null) ? DateTimeUtil::dateIntervalToSeconds($match->getParticipant1()->getCompletionTime()) : null,
                     'setter' => function (MatchModel $match, int $duration_first, FormInterface $form): void {
-                        $match->getParticipant1()?->setCompletionTime(new \DateInterval("PT{$duration_first}S"));
+                        $match->getParticipant1()?->setCompletionTime(DateTimeUtil::secondsToDateInterval($duration_first));
                     },
                     'widget' => 'single_text',
                     'input' => 'timestamp',
@@ -55,7 +55,7 @@ class MatchSetResultFormType extends AbstractType
                     'getter' => fn (MatchModel $match, FormInterface $form): ?int
                         => ($match->getParticipant2()?->getCompletionTime() !== null) ? DateTimeUtil::dateIntervalToSeconds($match->getParticipant2()->getCompletionTime()) : null,
                     'setter' => function (MatchModel $match, int $duration_second, FormInterface $form): void {
-                        $match->getParticipant2()?->setCompletionTime(new \DateInterval("PT{$duration_second}S"));
+                        $match->getParticipant2()?->setCompletionTime(DateTimeUtil::secondsToDateInterval($duration_second));
                     },
                     'widget' => 'single_text',
                     'input' => 'timestamp',

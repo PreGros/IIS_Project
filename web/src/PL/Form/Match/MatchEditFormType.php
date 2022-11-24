@@ -28,7 +28,7 @@ class MatchEditFormType extends AbstractType
                 'label' => 'Duration - Warning collisions with other matches are not checked',
                 'getter' => fn (MatchModel $match, FormInterface $form): int => DateTimeUtil::dateIntervalToSeconds($match->getDuration()),
                 'setter' => function (MatchModel $match, int $duration, FormInterface $form): void {
-                    $match->setDuration(new \DateInterval("PT{$duration}S"));
+                    $match->setDuration(DateTimeUtil::secondsToDateInterval($duration));
                 },
                 'widget' => 'single_text',
                 'input' => 'timestamp',

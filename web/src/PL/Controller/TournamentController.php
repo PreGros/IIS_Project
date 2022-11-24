@@ -14,6 +14,7 @@ use App\PL\Form\Tournament\TournamentCreateFormType;
 use App\BL\Tournament\TournamentManager;
 use App\BL\Tournament\TournamentModel;
 use App\BL\Tournament\TournamentTypeModel;
+use App\BL\Util\DateTimeUtil;
 use App\PL\DataTable\Tournament\TournamentDataTable;
 use App\PL\DataTable\Tournament\TournamentParticipantDataTable;
 use App\PL\Form\Tournament\TournamentEditFormType;
@@ -109,8 +110,7 @@ class TournamentController extends AbstractController
 
         if ($matchForm->isSubmitted() && $matchForm->isValid()){
             //$matchManager->generateMatches($tournamentModel, new \DateInterval('PT30M'), new \DateInterval('PT5M'), (bool)$setParticipants);
-            dump(new \DateInterval("PT". $matchForm->get('duration')->getData() ."S"));
-            $matchManager->generateMatches($tournamentModel, new \DateInterval("PT". $matchForm->get('duration')->getData() ."S"), new \DateInterval('PT5M'), (bool)1);
+            $matchManager->generateMatches($tournamentModel, DateTimeUtil::secondsToDateInterval($matchForm->get('duration')->getData()), new \DateInterval('PT5M'), (bool)1);
             return $this->redirectToRoute('matches', ['id' => $id]);
         }
 
