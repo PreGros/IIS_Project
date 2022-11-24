@@ -111,7 +111,7 @@ class TournamentController extends AbstractController
 
         if ($matchForm->isSubmitted() && $matchForm->isValid()){
             //$matchManager->generateMatches($tournamentModel, new \DateInterval('PT30M'), new \DateInterval('PT5M'), (bool)$setParticipants);
-            $matchManager->generateMatches($tournamentModel, DateTimeUtil::secondsToDateInterval($matchForm->get('duration')->getData()), new \DateInterval('PT5M'), (bool)1);
+            $matchManager->generateMatches($tournamentModel, $matchForm->get('duration')->getData(), new \DateInterval('PT5M'), (bool)1);
             return $this->redirectToRoute('matches', ['id' => $id]);
         }
 
@@ -182,7 +182,7 @@ class TournamentController extends AbstractController
         return $this->redirectToRoute('tournaments');
     }
 
-    #[Route('/tournaments/{id<\d+>}/<a class="btn btn-secondary disabled w-label" title="Cannot edit, match has ended">Edit</a>', name: 'tournament_edit')]
+    #[Route('/tournaments/{id<\d+>}/edit', name: 'tournament_edit')]
     public function editAction(int $id, Request $request, TournamentManager $tournamentManager): Response
     {
         $tournament = $tournamentManager->getTournament($id);/** @var \App\BL\User\UserModel */

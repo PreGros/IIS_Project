@@ -5,10 +5,10 @@ namespace App\PL\Form\Match;
 use App\BL\Match\MatchModel;
 use App\BL\Util\DateTimeUtil;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\DateIntervalType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\TimeType;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -37,31 +37,39 @@ class MatchSetResultFormType extends AbstractType
         }
         else{
             $builder
-                ->add('duration_first', TimeType::class, [
+                ->add('duration_first', DateIntervalType::class, [
                     'label' => 'Points for ' . $match->getParticipant1()?->getParticipantName() ?? 'Participant was not entered',
-                    'getter' => fn (MatchModel $match, FormInterface $form): ?int
-                        => ($match->getParticipant1()?->getCompletionTime() !== null) ? DateTimeUtil::dateIntervalToSeconds($match->getParticipant1()->getCompletionTime()) : null,
-                    'setter' => function (MatchModel $match, int $duration_first, FormInterface $form): void {
-                        $match->getParticipant1()?->setCompletionTime(DateTimeUtil::secondsToDateInterval($duration_first));
+                    'getter' => fn (MatchModel $match, FormInterface $form): ?\DateInterval => $match->getParticipant1()?->getCompletionTime(),
+                    'setter' => function (MatchModel $match, \DateInterval $duration_first, FormInterface $form): void {
+                        $match->getParticipant1()?->setCompletionTime($duration_first);
                     },
-                    'widget' => 'single_text',
-                    'input' => 'timestamp',
-                    'html5' => true,
-                    'with_minutes' => true,
-                    'with_seconds' => true
+                    'widget' => 'integer',
+                    'attr' => ['class' => 'date-interval row'],
+                    'data' => new \DateInterval('PT0S'),
+                    'with_minutes'  => true,
+                    'with_seconds'  => true,
+                    'with_hours' => true,
+                    'with_days' => false,
+                    'with_months' => false,
+                    'with_years' => false,
+                    'input' => 'dateinterval'
                 ])
-                ->add('duration_second', TimeType::class, [
+                ->add('duration_second', DateIntervalType::class, [
                     'label' => 'Points for ' . $match->getParticipant2()?->getParticipantName() ?? 'Participant was not entered',
-                    'getter' => fn (MatchModel $match, FormInterface $form): ?int
-                        => ($match->getParticipant2()?->getCompletionTime() !== null) ? DateTimeUtil::dateIntervalToSeconds($match->getParticipant2()->getCompletionTime()) : null,
-                    'setter' => function (MatchModel $match, int $duration_second, FormInterface $form): void {
-                        $match->getParticipant2()?->setCompletionTime(DateTimeUtil::secondsToDateInterval($duration_second));
+                    'getter' => fn (MatchModel $match, FormInterface $form): ?\DateInterval => $match->getParticipant2()?->getCompletionTime(),
+                    'setter' => function (MatchModel $match, \DateInterval $duration_second, FormInterface $form): void {
+                        $match->getParticipant2()?->setCompletionTime($duration_second);
                     },
-                    'widget' => 'single_text',
-                    'input' => 'timestamp',
-                    'html5' => true,
-                    'with_minutes' => true,
-                    'with_seconds' => true
+                    'widget' => 'integer',
+                    'attr' => ['class' => 'date-interval row'],
+                    'data' => new \DateInterval('PT0S'),
+                    'with_minutes'  => true,
+                    'with_seconds'  => true,
+                    'with_hours' => true,
+                    'with_days' => false,
+                    'with_months' => false,
+                    'with_years' => false,
+                    'input' => 'dateinterval'
                 ]);
         }
 

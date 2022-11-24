@@ -286,11 +286,16 @@ class TournamentManager
     public function checkTeamMemberCount(string &$errMessage, TournamentModel $tournament, ?int $numberA, ?int $numberB, ParticipantType $participantType) : bool
     {
         /** if max number is not defined than it is set to minimum number (minimum = maximum) */
-        if ($numberA === NULL){
-            $tournament->setMinTeamMemberCount(0);
-            $numberA = 0;
+        if ($participantType === ParticipantType::Users){
+            return true;
         }
-        if ($numberB === NULL && $participantType === ParticipantType::Teams){
+
+        if ($numberA === null){
+            $tournament->setMinTeamMemberCount(1);
+            $numberA = 1;
+        }
+        
+        if ($numberB === null){
             $errMessage = "Maximum team member count needs to be specified!";
             return false;
         }

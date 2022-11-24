@@ -15,7 +15,6 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
-use Symfony\Component\Form\Extension\Core\Type\TimeType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class TournamentMatchGenerationFormType extends AbstractType
@@ -23,21 +22,31 @@ class TournamentMatchGenerationFormType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('duration', TimeType::class, [
+            ->add('duration', DateIntervalType::class, [
                 'label' => 'Match duration',
-                'widget' => 'single_text',
-                'html5' => true,
+                'widget' => 'integer',
+                'attr' => ['class' => 'date-interval row'],
+                'data' => new \DateInterval('PT30M'),
                 'with_minutes'  => true,
                 'with_seconds'  => true,
-                'input' => 'timestamp'
+                'with_hours' => true,
+                'with_days' => false,
+                'with_months' => false,
+                'with_years' => false,
+                'input' => 'dateinterval'
             ])
-            ->add('break', TimeType::class, [
+            ->add('break', DateIntervalType::class, [
                 'label' => 'Break duration',
-                'widget' => 'single_text',
-                'html5' => true,
+                'widget' => 'integer',
+                'attr' => ['class' => 'date-interval row'],
+                'data' => new \DateInterval('PT5M'),
                 'with_minutes'  => true,
                 'with_seconds'  => true,
-                'input' => 'timestamp'
+                'with_hours' => true,
+                'with_days' => false,
+                'with_months' => false,
+                'with_years' => false,
+                'input' => 'dateinterval'
             ])
             ->add('submit', SubmitType::class, [
                 'label' => 'Generate Matches'
