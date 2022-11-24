@@ -257,7 +257,7 @@ class MatchManager
 
     private function checkRoundRobinWinCondition()
     {
-
+        
     }
 
     private function participant1Win(MatchModel $match, WinCondition $cond): bool

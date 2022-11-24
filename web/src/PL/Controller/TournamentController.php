@@ -147,7 +147,7 @@ class TournamentController extends AbstractController
             'canUnregister' => (($isLeader !== false) && $tournamentModel->canRegistrate() ),
             'registrationEnded' => $tournamentModel->registrationEnded(),
             'matchesGenerated' => $tournamentManager->areTournamentMatchesGenerated($id),
-            'canGenerateMatches' => ($tournamentModel->getCreatedById() == $user->getId() || $this->isGranted('ROLE_ADMIN'))
+            'canGenerateMatches' => ($tournamentModel->getCreatedById() === $user?->getId() || $this->isGranted('ROLE_ADMIN'))
         ]);
     }
 
