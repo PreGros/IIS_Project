@@ -69,6 +69,7 @@ class TournamentParticipantRepository extends ServiceEntityRepository
 
         $queryBuilder
             ->select('p participant')
+            ->addSelect('CASE WHEN (u.id IS NOT NULL) THEN u.isDeactivated ELSE tm.isDeactivated END as deactivatedP')
             ->addSelect('CASE WHEN (IDENTITY(t.createdBy) = :p_user_id ) THEN 1 ELSE 0 END as createdByCurrUser')
             ->from(TournamentParticipant::class, 'p')
             ->innerJoin(Tournament::class, 't', Join::WITH, 't.id = :p_tournament_id AND t = p.tournament')

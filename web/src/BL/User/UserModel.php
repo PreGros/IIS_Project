@@ -25,6 +25,8 @@ class UserModel implements UserInterface, PasswordAuthenticatedUserInterface
 
     private bool $isVerified = false;
 
+    private bool $isDeactivated = false;
+
     public function getId(): ?int
     {
         return $this->id ?? null;
@@ -141,5 +143,15 @@ class UserModel implements UserInterface, PasswordAuthenticatedUserInterface
     public function isCurrentUser(?int $id) : bool
     {
         return $this->id === $id;
+    }
+
+    public function getIsDeactivated(): bool
+    {
+        return $this->isDeactivated;
+    }
+
+    public function setIsDeactivated(bool $isDeactivated)
+    {
+        $this->isDeactivated = $isDeactivated;
     }
 }

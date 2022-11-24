@@ -59,6 +59,12 @@ class TeamController extends AbstractController
         }
 
         $team = $teamManager->getTeam($id);
+
+        if ($team->getIsDeactivated()){
+            $this->addFlash('danger', 'Cannot edit - team was deactivated!');
+            return $this->redirectToRoute('teams');
+        }
+
         $form = $this->createForm(TeamEditFormType::class, $team);
         $form->handleRequest($request);
 
@@ -78,7 +84,7 @@ class TeamController extends AbstractController
         return $this->json(['results' => iterator_to_array($teamManager->getPeople($id, $query))]);
     }
 
-    #[Route('/teams/{id<\d+>}/delete', name: 'team_delete')]
+    #[Route('/teams/{id<\d+>}/deactivate', name: 'team_deactivate')]
     public function deleteAction(int $id, TeamManager $teamManager): Response
     {
         if (!$this->isGranted('ROLE_ADMIN') && !$teamManager->isCurrentUserLeader($id)){
@@ -86,7 +92,8 @@ class TeamController extends AbstractController
             return $this->redirectToRoute('teams');
         }
 
-        $teamManager->deleteTeam($id);
+        $this->addFlash('warning', 'Team deactivated');
+        $teamManager->deactivateTeam($id);
         return $this->redirectToRoute('teams');
     }
 
@@ -119,9 +126,11 @@ class TeamController extends AbstractController
 
         $teamModel = $teamManager->getTeam($id);
         return $this->renderForm('team/info.html.twig', [
+            'id' => $id,
             'team' => $teamModel,
             'membersForm' => $form,
             'canModify' => $canModify,
+            'deactivated' => $teamModel->getIsDeactivated(),
             'table' => $table->init(['teamId' => $id, 'canModify' => $canModify])
         ]);
 

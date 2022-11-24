@@ -247,7 +247,9 @@ class TeamManager
         $teams = $this->getUserTeams($userId);
         $teamsFormated = [];
         foreach ($teams as $team) {
-            $teamsFormated[$team->getName()] = $team->getId();
+            if (!$team->getIsDeactivated()){
+                $teamsFormated[$team->getName()] = $team->getId();
+            }
         }
         return $teamsFormated;
     }
@@ -302,5 +304,19 @@ class TeamManager
         return true;
     }
 
+    public function deactivateTeam(int $id)
+    {
+        $repo = $this->entityManager->getRepository(Team::class);
 
+        /** @var TeamModel */
+        $teamModel = AutoMapper::map($repo->find($id), TeamModel::class);
+
+        $teamModel->setIsDeactivated(TRUE);
+
+        /** @var Team */
+        $team = AutoMapper::map($teamModel, Team::class, trackEntity: false);
+
+        $this->entityManager->persist($team);
+        $this->entityManager->flush();
+    }
 }

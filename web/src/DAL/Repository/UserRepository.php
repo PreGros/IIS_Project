@@ -59,8 +59,11 @@ class UserRepository extends ServiceEntityRepository
         $queryBuilder
             ->select('u')
             ->from(User::class, 'u')
-            ->where('u.email LIKE :p_search')
-            ->orWhere('u.nickname LIKE :p_search');
+            ->where($queryBuilder->expr()->orX(
+                'u.email LIKE :p_search',
+                'u.nickname LIKE :p_search'  
+            ))
+            ->andWhere('u.isDeactivated = 0');
 
         if ($order !== ''){
             $queryBuilder

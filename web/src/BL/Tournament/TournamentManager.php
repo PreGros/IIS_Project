@@ -154,9 +154,9 @@ class TournamentManager
     public function updateType(TournamentTypeModel $tournamentTypeModel)
     {
         /** @var TournamenType */
-        $user = AutoMapper::map($tournamentTypeModel, TournamentType::class, trackEntity: false);
+        $type = AutoMapper::map($tournamentTypeModel, TournamentType::class, trackEntity: false);
 
-        $this->entityManager->persist($user);
+        $this->entityManager->persist($type);
         $this->entityManager->flush();
     }
 
@@ -362,6 +362,7 @@ class TournamentManager
             /** @var TournamentParticipantTableModel */
             $tournamentParticipantModel = AutoMapper::map($participant, TournamentParticipantTableModel::class, trackEntity: false);
             $tournamentParticipantModel->setCreatedByCurrentUser((bool)$entity['createdByCurrUser']);
+            $tournamentParticipantModel->setDeactivatedParticipant((bool)$entity['deactivatedP']);
             $tournamentParticipantModel->setIsTeam($participant->getSignedUpTeam()!==null);
             $tournamentParticipantModel->setIdOfParticipant($tournamentParticipantModel->getIsTeam() ? $participant->getSignedUpTeam()->getId() : $participant->getSignedUpUser()->getId());
             $tournamentParticipantModel->setNameOfParticipant($tournamentParticipantModel->getIsTeam() ? $participant->getSignedUpTeam()->getName() : $participant->getSignedUpUser()->getNickname() );
@@ -420,5 +421,24 @@ class TournamentManager
 
         $this->entityManager->persist($tournamentEntity);
         $this->entityManager->flush();
+    }
+
+    public function checkUserDeactivated(int $idParticipant, bool $isTeam) : bool
+    {
+        if ($isTeam){
+            return true; // TODO doplnit participant isDeactivated pro team
+        }
+        else{
+            /** @var \App\DAL\Repository\UserRepository */
+            $repo = $this->entityManager->getRepository(\App\DAL\Entity\User::class);
+            /** cannot get member by reference, so find by ids is performed */
+            $user = $repo->findOneBy(['id' => $idParticipant]);
+
+            if ($user->getIsDeactivated()){
+                return true;
+            }
+        }
+
+        return false;
     }
 }

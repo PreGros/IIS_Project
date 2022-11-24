@@ -58,7 +58,7 @@ class UserDataTable
                 ' {% endif %}' .
                 '{% if row.canModerate %}<a href="{% if row.isAdmin %} {{ row.demoteURL }} {% else %} {{ row.promoteURL }} {% endif %}" class="btn btn-secondary">{% if row.isAdmin %} Demote {% else %} Promote {% endif %}</a>' .
                 ' ' .
-                '<a href="{{ row.deleteURL }}" class="btn btn-danger" onclick="return confirm(\'Are you sure?\')">Delete</a>{% endif %}'
+                '<a href="{{ row.deactivateURL }}" class="btn btn-danger" onclick="return confirm(\'Are you sure?\')">Deactivate</a>{% endif %}'
         ]);
             
         return $dataTable->createAdapter(DataTableAdapter::class, [
@@ -80,7 +80,7 @@ class UserDataTable
                 'isAdmin' => $user->haveRole('ROLE_ADMIN'),
                 'demoteURL' => $this->router->generate('user_demote', ['id' => $user->getId()]),
                 'promoteURL' => $this->router->generate('user_promote', ['id' => $user->getId()]),
-                'deleteURL' => $this->router->generate('user_delete', ['id' => $user->getId()]),
+                'deactivateURL' => $this->router->generate('user_deactivate', ['id' => $user->getId()]),
                 'editUser' => $this->router->generate('user_edit', ['id' => $user->getId()]),
                 'canEdit' => $user->isCurrentUser($currUser?->getId()) || $this->allModifiable,
                 'canModerate' => $this->allModifiable

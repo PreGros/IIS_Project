@@ -118,13 +118,21 @@ class UserManager
         return AutoMapper::map($user, \App\BL\User\UserModel::class, trackEntity: true);
     }
 
-    public function deleteUser(int $userId)
+    public function deactivateUser(int $id)
     {
-        /** @var \App\DAL\Repository\UserRepository */
         $repo = $this->entityManager->getRepository(User::class);
-        $user = $this->entityManager->getReference(User::class, $userId);
 
-        $repo->remove($user, true);
+        /** @var UserModel */
+        $userModel = AutoMapper::map($repo->find($id), UserModel::class);
+
+        $userModel->setPassword("");
+        $userModel->setIsDeactivated(true);
+
+        /** @var User */
+        $user = AutoMapper::map($userModel, User::class, trackEntity: false);
+        
+        $this->entityManager->persist($user);
+        $this->entityManager->flush();
     }
 
     public function addRole(string $roleName, int $userId)

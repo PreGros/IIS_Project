@@ -9,11 +9,18 @@
 
     {{ render_flash_messages() }}
 
+    {% if deactivated %}
+        <h2 style="font-size:30px;color:red;">DEACTIVATED</h2>
+    {% else %}
+        <a href="{{ path('team_edit', { 'id': id }) }}" class="btn btn-primary">Edit team informations</a>
+    {% endif %}
+
+
     <br></br>
 
     <h1>Members</h1>
 
-    {% if canModify %}
+    {% if canModify and not deactivated %}
         <h3>Add member</h3>
 
         {{ form_start(membersForm) }}

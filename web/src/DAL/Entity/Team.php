@@ -21,6 +21,9 @@ class Team
     #[ORM\Column(length: 500, nullable: true)]
     private ?string $imagePath = null;
 
+    #[ORM\Column(type: 'boolean')]
+    private bool $isDeactivated = false;
+
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $leader = null;
@@ -101,6 +104,18 @@ class Team
             }
         }
 
+        return $this;
+    }
+
+    public function getIsDeactivated() : bool
+    {
+        return $this->isDeactivated;
+    }
+
+    public function setIsDeactivated(bool $isDeactivated) : self
+    {
+        $this->isDeactivated = $isDeactivated;
+        
         return $this;
     }
 }

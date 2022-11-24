@@ -40,10 +40,16 @@ class UserController extends AbstractController
         return $this->redirectToRoute('users');
     }
 
-    #[Route('/users/{id<\d+>}/delete', name: 'user_delete')]
+    #[Route('/users/{id<\d+>}/deactivate', name: 'user_deactivate')]
     public function deleteUser(int $id, UserManager $userManager): Response
     {
-        $userManager->deleteUser($id);
+        if (!$this->isGranted('ROLE_ADMIN')){
+            $this->addFlash('danger', 'Insufficient rights to deactivate user');
+            return $this->redirectToRoute('users');
+        }
+
+        $userManager->deactivateUser($id);
+        $this->addFlash('warning', 'User deactivated');
         return $this->redirectToRoute('users');
     }
 
@@ -56,9 +62,10 @@ class UserController extends AbstractController
         $user = $this->getUser();
 
         
-
+        dump($user->getIsDeactivated());
         return $this->render('user/info.html.twig', [
             'canEdit' => $user?->isCurrentUser($id) || $this->isGranted('ROLE_ADMIN'),
+            'deactivated' => $userModel->getIsDeactivated(),
             'user' => $userModel,
             'id' => $id
         ]);
@@ -72,6 +79,13 @@ class UserController extends AbstractController
 
         if (!$this->isGranted('ROLE_ADMIN') && !$userModel->isCurrentUser($id)){
             $this->addFlash('danger', 'Insufficient rights to edit user');
+            return $this->redirectToRoute('users');
+        }
+
+        $userModel = $userManager->getUser($id);
+        if ($userModel->getIsDeactivated())
+        {
+            $this->addFlash('danger', 'This user was deactivated');
             return $this->redirectToRoute('users');
         }
 
@@ -99,6 +113,13 @@ class UserController extends AbstractController
 
         if (!$this->isGranted('ROLE_ADMIN') && !$userModel->isCurrentUser($id)){
             $this->addFlash('danger', 'Insufficient rights to edit user');
+            return $this->redirectToRoute('users');
+        }
+
+        $userModel = $userManager->getUser($id);
+        if ($userModel->getIsDeactivated())
+        {
+            $this->addFlash('danger', 'This user was deactivated');
             return $this->redirectToRoute('users');
         }
 

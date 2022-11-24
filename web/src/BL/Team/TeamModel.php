@@ -14,6 +14,8 @@ class TeamModel
 
     private ?File $image = null;
 
+    private bool $isDeactivated = false;
+
     public function getId(): int
     {
         return $this->id;
@@ -52,5 +54,17 @@ class TeamModel
     public function setImage(?File $val)
     {
         $this->image = $val;
+    }
+
+    public function getIsDeactivated() : bool
+    {
+        return $this->isDeactivated;
+    }
+
+    public function setIsDeactivated(bool $isDeactivated) : self
+    {
+        $this->isDeactivated = $isDeactivated;
+        
+        return $this;
     }
 }

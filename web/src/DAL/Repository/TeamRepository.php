@@ -61,6 +61,7 @@ class TeamRepository extends ServiceEntityRepository
                 ->andWhere('IDENTITY(m.user) = u.id')
                 ->getDQL() . ')')
             ->andWhere('u.nickname like :query')
+            ->andWhere('u.isDeactivated = 0')
             ->setParameter('teamId', $teamId)
             ->setParameter('query', '%' . $query . '%')
             ->setMaxResults($limit)
@@ -135,9 +136,12 @@ class TeamRepository extends ServiceEntityRepository
             ->leftJoin(\App\DAL\Entity\Member::class, 'm', Expr\Join::WITH, 'm.team = t')
             ->groupBy('t')
             ->addGroupBy('l')
-            ->having('t.name LIKE :p_search')
-            ->orHaving('l.nickname LIKE :p_search')
-            ->orHaving('memberCount = :p_search_count');
+            ->having($queryBuilder->expr()->orX(
+                't.name LIKE :p_search',
+                'l.nickname LIKE :p_search',
+                'memberCount = :p_search_count'
+            ))
+            ->andHaving('t.isDeactivated = 0');
 
         if ($order !== ''){
             $queryBuilder
