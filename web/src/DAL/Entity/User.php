@@ -40,6 +40,9 @@ class User
     #[ORM\Column(type: 'boolean')]
     private bool $isVerified = false;
 
+    #[ORM\Column(type: 'boolean')]
+    private bool $isDeactivated = false;
+
     public function getEmail(): ?string
     {
         return $this->email;
@@ -157,6 +160,18 @@ class User
     {
         $this->isVerified = $isVerified;
 
+        return $this;
+    }
+
+    public function getIsDeactivated() : bool
+    {
+        return $this->isDeactivated;
+    }
+
+    public function setIsDeactivated(bool $isDeactivated) : self
+    {
+        $this->isDeactivated = $isDeactivated;
+        
         return $this;
     }
 }

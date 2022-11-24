@@ -106,12 +106,15 @@ class TournamentController extends AbstractController
 
 
         // GENERATE MATCHES
-        $matchForm = $this->createForm(TournamentMatchGenerationFormType::class);
+        $matchForm = $this->createForm(TournamentMatchGenerationFormType::class, options: [
+            'disabled' => !$tournamentModel->getApproved(),
+            'titleDisabled' => $tournamentModel->getApproved() ? "" : "This tournament is not approved"
+        ]);
         $matchForm->handleRequest($request);
 
         if ($matchForm->isSubmitted() && $matchForm->isValid()){
             //$matchManager->generateMatches($tournamentModel, new \DateInterval('PT30M'), new \DateInterval('PT5M'), (bool)$setParticipants);
-            $matchManager->generateMatches($tournamentModel, $matchForm->get('duration')->getData(), new \DateInterval('PT5M'), (bool)1);
+            $matchManager->generateMatches($tournamentModel, $matchForm->get('duration')->getData(), $matchForm->get('break')->getData(), $matchForm->get('setParticipants')->getData());
             return $this->redirectToRoute('matches', ['id' => $id]);
         }
 
@@ -143,7 +146,8 @@ class TournamentController extends AbstractController
             'participantName' => $participantName,
             'canUnregister' => (($isLeader !== false) && $tournamentModel->canRegistrate() ),
             'registrationEnded' => $tournamentModel->registrationEnded(),
-            'matchesGenerated' => $tournamentManager->areTournamentMatchesGenerated($id)
+            'matchesGenerated' => $tournamentManager->areTournamentMatchesGenerated($id),
+            'canGenerateMatches' => ($tournamentModel->getCreatedById() == $user->getId() || $this->isGranted('ROLE_ADMIN'))
         ]);
     }
 
@@ -190,6 +194,12 @@ class TournamentController extends AbstractController
 
         if ($user?->getId() === null || (!$this->isGranted('ROLE_ADMIN') && $tournament?->getCreatedById() !== $user?->getId())){
             $this->addFlash('danger', 'Insufficient rights to edit tournament');
+            return $this->redirectToRoute('tournaments');
+        }
+
+        if ($tournament->getApproved())
+        {
+            $this->addFlash('danger', 'Approved tournaments cannot be edited');
             return $this->redirectToRoute('tournaments');
         }
 

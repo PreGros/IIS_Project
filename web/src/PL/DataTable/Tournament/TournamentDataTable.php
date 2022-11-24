@@ -85,8 +85,10 @@ class TournamentDataTable
                 'orderable' => false,
                 'template' => 
                     '{% if row.modifiable %}' .
-                        '<a href="{{ row.edit }}" class="btn btn-secondary">Edit</a>' .
-                        ' ' .
+                        '{% if not row.approved %}' .
+                            '<a href="{{ row.edit }}" class="btn btn-secondary">Edit</a>' .
+                            ' ' .   
+                        '{% endif %}' .
                         '<a href="{{ row.delete }}" class="btn btn-danger" onclick="return confirm(\'U sure?\')">Delete</a>'.
                     '{% endif %}'
             ]);
@@ -116,7 +118,8 @@ class TournamentDataTable
                 'approveURL' => $this->router->generate('user_approve', ['id' => $data->getId()]),
                 'disapproveURL' => $this->router->generate('user_disapprove', ['id' => $data->getId()]),
                 'modifiable' => ($this->isAdmin || $data->getCreatedByCurrentUser()),
-                'type' => $data->getTournamentTypeName()
+                'type' => $data->getTournamentTypeName(),
+                'approved' => $data->getApproved()
             ];
         }
         return $tableData;

@@ -90,12 +90,18 @@
                 <hr>
                 <h3>Matches</h3>
 
-                {% if not matchesGenerated %}
+                {% if canGenerateMatches and (not matchesGenerated) %}
                     {{ form_start(matchForm) }}
                         {{ form_row(matchForm.duration) }}
                     {{ form_end(matchForm) }}
                 {% else %}
-                    <a href="{{ path('matches', redirectParam) }}" type="button" class="btn btn-primary">Matches info</a>
+                    {% if not matchesGenerated %}
+                        <span title="Matches were not generated yet">
+                    {% endif %}
+                        <a href="{{ path('matches', redirectParam) }}" type="button" class="btn btn-primary{% if matchesGenerated %}" {% else %} disabled" aria-disabled="true" {% endif %}>Matches info</a>
+                    {% if not matchesGenerated %}
+                        </span>
+                    {% endif %}
                 {% endif %}
             {% endif %}
 

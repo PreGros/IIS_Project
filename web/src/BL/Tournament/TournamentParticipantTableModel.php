@@ -17,6 +17,8 @@ class TournamentParticipantTableModel
 
     private bool $createdByCurrentUser;
 
+    private bool $deactivatedParticipant;
+
     public function getId(): int
     {
         return $this->id;
@@ -75,5 +77,15 @@ class TournamentParticipantTableModel
     public function setCreatedByCurrentUser(bool $val)
     {
         $this->createdByCurrentUser = $val;
+    }
+
+    public function getDeactivatedParticipant(): bool
+    {
+        return $this->deactivatedParticipant;
+    }
+
+    public function setDeactivatedParticipant(bool $val)
+    {
+        $this->deactivatedParticipant = $val;
     }
 }

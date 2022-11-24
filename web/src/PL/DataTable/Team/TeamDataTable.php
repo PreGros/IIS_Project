@@ -55,7 +55,7 @@ class TeamDataTable
                     '{% if row.modifiable %}' .
                     '<a href="{{ row.edit }}" class="btn btn-secondary">Edit</a>' .
                     ' ' .
-                    '<a href="{{ row.delete }}" class="btn btn-danger" onclick="return confirm(\'U sure?\')">Delete</a>' .
+                    '<a href="{{ row.deactivate }}" class="btn btn-danger" onclick="return confirm(\'U sure?\')">Deactivate</a>' .
                     ' ' .
                     '{% endif %}'.
                     '<a href="{{ row.info }}" class="btn btn-primary">Info</a>'
@@ -71,7 +71,7 @@ class TeamDataTable
         $tableData = [];
         foreach ($this->teamManager->getTeams($state) as $data){
             $tableData[] = [
-                'delete' => $this->router->generate('team_delete', ['id' => $data->getId()]),
+                'deactivate' => $this->router->generate('team_deactivate', ['id' => $data->getId()]),
                 'edit' => $this->router->generate('team_edit', ['id' => $data->getId()]),
                 'name' => $data->getName(),
                 'info' => $this->router->generate('team_info', ['id' => $data->getId()]),

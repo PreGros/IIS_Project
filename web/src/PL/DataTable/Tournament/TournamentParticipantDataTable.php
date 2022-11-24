@@ -51,7 +51,7 @@ class TournamentParticipantDataTable
                 'template' =>
                     '<i class="bi {% if row.isApproved %} bi-check-lg {% else %} bi-x-lg {% endif %}"></i>'.
                     ' ' .
-                    '{% if row.canApprove %}<a href="{% if row.isApproved %}{{ row.disapproveURL }}{% else %}{{ row.approveURL }}{% endif %}" class="btn btn-secondary">{% if row.isApproved %}Disapprove{% else %}Approve{% endif %}</a>{% endif %}'
+                    '{% if row.canApprove %}<a href="{% if row.isApproved %}{{ row.disapproveURL }}{% else %}{{ row.approveURL }}{% endif %}" class="btn btn-secondary {% if not row.deactivated %}" {% else %}disabled" aria-disabled="true" {% endif %}">{% if row.isApproved %}Disapprove{% else %}Approve{% endif %}</a>{% endif %}'
             ]);
 
 
@@ -70,6 +70,9 @@ class TournamentParticipantDataTable
                 'displayName' => $data->getNameOfParticipant(),
                 'isApproved' => $data->getApproved(),
                 'canApprove' => $data->getCreatedByCurrentUser() || $this->isAdmin,
+                //'deactivated' => $this->tournamentManager->checkUserDeactivated($data->getIdOfParticipant(), $data->getIsTeam()),
+                'deactivated' => $data->getDeactivatedParticipant(),
+                'deactivatedT' => $data->getDeactivatedParticipant(),
                 'approveURL' => $this->router->generate('participant_approve', ['tId' => $this->tournamentId, 'pId' => $data->getId()]),
                 'disapproveURL' => $this->router->generate('participant_disapprove', ['tId' => $this->tournamentId, 'pId' => $data->getId()])
             ];
