@@ -7,6 +7,7 @@ use App\BL\Tournament\ParticipantType;
 use App\BL\Tournament\TournamentModel;
 use App\BL\Tournament\WinCondition;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateIntervalType;
 use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
@@ -48,8 +49,18 @@ class TournamentMatchGenerationFormType extends AbstractType
                 'with_years' => false,
                 'input' => 'dateinterval'
             ])
+            ->add('setParticipants', CheckboxType::class, [
+                'label' => 'Automatically add participants to matches',
+                'data' => true,
+                'required' => false
+            ])
             ->add('submit', SubmitType::class, [
-                'label' => 'Generate Matches'
+                'label' => 'Generate Matches',
+                'disabled' => $options['disabled'],
+                'attr' => [
+                    'title' => $options['titleDisabled'],
+                    'class' => 'w-label btn-primary'
+                    ]
             ])
         ;
     }
@@ -57,7 +68,8 @@ class TournamentMatchGenerationFormType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'duration' => \DateInterval::class
+            'duration' => \DateInterval::class,
+            'titleDisabled' => ""
         ]);
     }
 }
