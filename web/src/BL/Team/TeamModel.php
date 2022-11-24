@@ -12,6 +12,8 @@ class TeamModel
 
     private string $imagePath;
 
+    private int $membersCount;
+
     private ?File $image = null;
 
     private bool $isDeactivated = false;
@@ -65,6 +67,17 @@ class TeamModel
     {
         $this->isDeactivated = $isDeactivated;
         
+        return $this;
+    }
+
+    public function getMembersCount(): int
+    {
+        return $this->membersCount;
+    }
+
+    public function setMembersCount(int $val): self
+    {
+        $this->membersCount = $val;
         return $this;
     }
 }

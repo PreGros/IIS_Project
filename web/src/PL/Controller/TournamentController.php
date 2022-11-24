@@ -98,10 +98,13 @@ class TournamentController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()){
-            $tournamentManager->addTournamentParticipantTeam($id, $form->get('teams')->getData());
+            if ($tournamentManager->checkTeamMemberCountInTournament($tournamentModel->getMaxTeamMemberCount(), $tournamentModel->getMinTeamMemberCount(), $form->get('teams')->getData())){
+                $tournamentManager->addTournamentParticipantTeam($id, $form->get('teams')->getData());
 
-            $this->addFlash('success', 'Your team was successfully registered in this tournament. Now wait for approval');
-            return $this->redirectToRoute('tournament_info', ['id' => $id]);
+                $this->addFlash('success', 'Your team was successfully registered in this tournament. Now wait for approval');
+                return $this->redirectToRoute('tournament_info', ['id' => $id]);
+            }
+            $this->addFlash('danger', 'This team does not meet team member count requirements stated in this tournament!');
         }
 
 

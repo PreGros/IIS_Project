@@ -167,6 +167,22 @@ class TeamRepository extends ServiceEntityRepository
         return new Paginator($query, false);
     }
 
+    public function findTeamWithCount(int $idTeam)
+    {
+        $queryBuilder = $this->getEntityManager()->createQueryBuilder();
+
+        return $queryBuilder
+            ->select('count(m.user) memberCount, t team')
+            ->from(Team::class, 't')
+            ->leftJoin(\App\DAL\Entity\Member::class, 'm', Expr\Join::WITH, 'm.team = t')
+            ->groupBy('t')
+            ->Having('t.isDeactivated = 0')
+            ->andHaving('t.id = :p_team_id')
+            ->setParameter('p_team_id', $idTeam)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
 //    /**
 //     * @return Team[] Returns an array of Team objects
 //     */
