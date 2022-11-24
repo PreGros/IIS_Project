@@ -18,6 +18,8 @@ class MatchModel
 
     private ?MatchParticipantModel $participant2;
 
+    private array $previousMatches = [];
+
     public function getId(): int
     {
         return $this->id;
@@ -97,5 +99,46 @@ class MatchModel
     {
         $this->participant2 = $val;
         return $this;
+    }
+
+    public function addPreviousMatch(MatchModel $match)
+    {
+        $this->previousMatches[$match->getId()] = $match;
+    }
+
+    public function hasPreviousMatches(): bool
+    {
+        return !empty($this->previousMatches);
+    }
+
+    public function hasPreviousMatch(int $matchId): bool
+    {
+        return $this->getPreviousMatch($matchId) !== null;
+    }
+
+    public function isWinnerOfPreviousFirstParticipant(MatchModel $match): bool
+    {
+        $key = array_key_first($this->previousMatches);
+        return $key === $match->getId() && 
+        (
+            $this->getParticipant1() === null ||
+            $this->getParticipant1()->getParticipantId() === $match->getParticipant1()?->getParticipantId() ||
+            $this->getParticipant1()->getParticipantId() === $match->getParticipant2()?->getParticipantId()
+        );
+    }
+
+    public function getPreviousMatch(int $matchId): ?MatchModel
+    {
+        return $this->previousMatches[$matchId] ?? null;
+    }
+
+    public function getFirstPreviousMatch(): ?MatchModel
+    {
+        return $this->previousMatches[array_key_first($this->previousMatches)] ?? null;
+    }
+
+    public function getLastPreviousMatch(): ?MatchModel
+    {
+        return $this->previousMatches[array_key_last($this->previousMatches)] ?? null;
     }
 }

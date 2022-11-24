@@ -65,12 +65,13 @@ class TournamentMatchRepository extends ServiceEntityRepository
     public function findWithParticipants(int $matchId): array
     {
         return $this->getEntityManager()->createQueryBuilder()
-            ->select('m, p, tp, u, tm')
+            ->select('m, p, tp, u, tm, pm')
             ->from(TournamentMatch::class, 'm')
             ->leftJoin(MatchParticipant::class, 'p', Join::WITH, 'p.tournamentMatch = m')
             ->leftJoin(TournamentParticipant::class, 'tp', Join::WITH, 'p.tournamentParticipant = tp')
             ->leftJoin(User::class, 'u', Join::WITH, 'tp.signedUpUser = u')
             ->leftJoin(Team::class, 'tm', Join::WITH, 'tp.signedUpTeam = tm')
+            ->leftJoin(TournamentMatch::class, 'pm', Join::WITH, 'pm.childMatch = m')
             ->where('m.id = :p_match_id')
             ->setParameter('p_match_id', $matchId)
             ->getQuery()

@@ -50,7 +50,7 @@ i.bi-person-circle {
     padding-right: 5px;
 }
 
-.btn.disabled.w-label {
+.btn.disabled.w-label, .btn:disabled.w-label  {
     pointer-events: auto;
     cursor: default;
 }

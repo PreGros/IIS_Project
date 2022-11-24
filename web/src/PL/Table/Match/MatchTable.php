@@ -52,7 +52,7 @@ class MatchTable extends BaseTable
             $data = [
                 'startTime' => $match->getStartTime()->format('j. n. Y G:i'),
                 'duration' => $match->getDuration()->format('%H:%I:%S'),
-                'result' => !$match->hasEnded() ?
+                'result' => !$match->hasStarted() ?
                     'Not finished' :
                     ($match->getParticipant1()?->getResult() ?? 'Participant not entered') .
                     ':' .
@@ -75,13 +75,13 @@ class MatchTable extends BaseTable
             
             if ($this->options['allModifiable']){
                 if ($match->childMatchStarted()){
-                    $buttons = '<a class="btn btn-secondary disabled w-label" title="Cannot edit, match has ended">Edit</a>' . ' ' . '<a class="btn btn-primary disabled w-label" title="Cannot set result, match does not ended">Set result</a>';
+                    $buttons = '<a class="btn btn-secondary disabled w-label" title="Cannot edit, match has ended">Edit</a>' . ' ' . '<a class="btn btn-primary disabled w-label" title="Cannot set result, child match has started">Set result</a>';
                 }
                 else if ($match->hasStarted()){
-                    $buttons = '<a class="btn btn-secondary disabled w-label" title="Cannot edit, match has ended">Edit</a>' . ' ' . '<a href="{{ row.set_result }}" class="btn btn-primary">Set result</a>';
+                    $buttons = '<a class="btn btn-secondary disabled w-label" title="Cannot edit, match has started">Edit</a>' . ' ' . '<a href="{{ row.set_result }}" class="btn btn-primary">Set result</a>';
                 }
                 else{
-                    $buttons = '<a href="{{ row.edit }}" class="btn btn-secondary">Edit</a>' . ' ' . '<a class="btn btn-primary disabled w-label" title="Cannot set result, match does not ended">Set result</a>';
+                    $buttons = '<a href="{{ row.edit }}" class="btn btn-secondary">Edit</a>' . ' ' . '<a class="btn btn-primary disabled w-label" title="Cannot set result, match does not started">Set result</a>';
                 }
 
                 $data['action'] = $this->renderTwigStringColumn(

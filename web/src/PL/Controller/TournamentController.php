@@ -106,12 +106,15 @@ class TournamentController extends AbstractController
 
 
         // GENERATE MATCHES
-        $matchForm = $this->createForm(TournamentMatchGenerationFormType::class);
+        $matchForm = $this->createForm(TournamentMatchGenerationFormType::class, options: [
+            'disabled' => !$tournamentModel->getApproved(),
+            'titleDisabled' => $tournamentModel->getApproved() ? "" : "This tournament is not approved"
+        ]);
         $matchForm->handleRequest($request);
 
         if ($matchForm->isSubmitted() && $matchForm->isValid()){
             //$matchManager->generateMatches($tournamentModel, new \DateInterval('PT30M'), new \DateInterval('PT5M'), (bool)$setParticipants);
-            $matchManager->generateMatches($tournamentModel, DateTimeUtil::secondsToDateInterval($matchForm->get('duration')->getData()), new \DateInterval('PT5M'), (bool)1);
+            $matchManager->generateMatches($tournamentModel, $matchForm->get('duration')->getData(), $matchForm->get('break')->getData(), $matchForm->get('setParticipants')->getData());
             return $this->redirectToRoute('matches', ['id' => $id]);
         }
 
@@ -143,7 +146,8 @@ class TournamentController extends AbstractController
             'participantName' => $participantName,
             'canUnregister' => (($isLeader !== false) && $tournamentModel->canRegistrate() ),
             'registrationEnded' => $tournamentModel->registrationEnded(),
-            'matchesGenerated' => $tournamentManager->areTournamentMatchesGenerated($id)
+            'matchesGenerated' => $tournamentManager->areTournamentMatchesGenerated($id),
+            'canGenerateMatches' => ($tournamentModel->getCreatedById() == $user->getId() || $this->isGranted('ROLE_ADMIN'))
         ]);
     }
 
@@ -182,7 +186,7 @@ class TournamentController extends AbstractController
         return $this->redirectToRoute('tournaments');
     }
 
-    #[Route('/tournaments/{id<\d+>}/<a class="btn btn-secondary disabled w-label" title="Cannot edit, match has ended">Edit</a>', name: 'tournament_edit')]
+    #[Route('/tournaments/{id<\d+>}/edit', name: 'tournament_edit')]
     public function editAction(int $id, Request $request, TournamentManager $tournamentManager): Response
     {
         $tournament = $tournamentManager->getTournament($id);/** @var \App\BL\User\UserModel */

@@ -291,6 +291,7 @@ function deparam(params, coerce) {
 }
 
 window.addEventListener('load', () => {
+    fixDateIntervals();
     $('[name^="table"], [name$="table"]').each((index, element) => {
         $(element).html('<div class="dt-loading"><div id="dt_processing" class="dataTables_processing card" style="display: block;">Loading...<div><div></div><div></div><div></div><div></div></div></div></div>')
         $(element).initDataTables($(element).data('settings'), {
@@ -400,3 +401,23 @@ window.addEventListener('load', () => {
     //     table.row('.selected').remove().draw(false);
     // });
 });
+
+function fixDateIntervals(){
+    $('.date-interval').each((i, el) => {
+        $('div.col-auto').each((i, el) => {
+            el.classList.remove('col-auto');
+            el.classList.add('col-4');
+        });
+        $('input[name*=hours]').each((i, el) => {
+            el.setAttribute('min', '0');
+        });
+        $('input[name*=minutes]').each((i, el) => {
+            el.setAttribute('min', '0');
+            el.setAttribute('max', '59');
+        });
+        $('input[name*=seconds]').each((i, el) => {
+            el.setAttribute('min', '0');
+            el.setAttribute('max', '59');
+        });
+    });
+}

@@ -47,6 +47,9 @@ class MatchManager
         $layer = 0;
 
         foreach ($matches as $node){
+            if ($node->getChild()?->getId() !== null){
+                $matches[$node->getChild()?->getId()]->addPreviousMatch($node);
+            }
             if (in_array($node->getId(), isset($layers[$layer]) ? array_map(fn (MatchModel $m) => $m->getChild()?->getId(), $layers[$layer]) : [])){
                 if ($layer !== 0){
                     $children = array_map(fn (MatchModel $m) => $m->getChild()?->getId(), $layers[$layer - 1]);
@@ -72,14 +75,15 @@ class MatchManager
         $entities = $matchesRepo->findAllWithParticipants($tournament->getId());
         /** @var array<MatchModel> */
         $matches = [];
-        $matchIndex = -1;
+        $matchIndex = 0;
         $matchParticipantCount = 0;
         for ($i = 0; $i < count($entities); $i++){
             if ($entities[$i] instanceof \App\DAL\Entity\TournamentMatch){
                 /** @var MatchModel $match */
                 $match = AutoMapper::map($entities[$i], MatchModel::class, trackEntity: false);
                 $match->setChild($entities[$i]->getChildMatch() !== null ? AutoMapper::map($entities[$i]->getChildMatch(), MatchModel::class, trackEntity: false) : null);
-                $matches[++$matchIndex] = $match;
+                $matchIndex = $match->getId();
+                $matches[$matchIndex] = $match;
                 $matchParticipantCount = 0;
                 continue;
             }
@@ -132,24 +136,41 @@ class MatchManager
         /** @var \App\DAL\Repository\TournamentMatchRepository */
         $matchesRepo = $this->entityManager->getRepository(\App\DAL\Entity\TournamentMatch::class);
         $entities = $matchesRepo->findWithParticipants($id);
-
         /** @var MatchModel $match */
         $match = AutoMapper::map($entities[0], MatchModel::class);
         $match->setChild($entities[0]->getChildMatch() !== null ? AutoMapper::map($entities[0]->getChildMatch(), MatchModel::class, trackEntity: false) : null);
         
+        $matchC = 0;
         $matchParticipantCount = 0;
         foreach ($entities as $entity){
             if ($entity instanceof \App\DAL\Entity\MatchParticipant){
+                $m = match($matchC) {
+                    0 => $match,
+                    1 => $match->getFirstPreviousMatch(),
+                    2 => $match->getLastPreviousMatch(),
+                    default => null
+                };
+
+                if ($m === null){
+                    continue;
+                }
+
                 if ($matchParticipantCount === 0){
-                    $match->setParticipant1($this->mapMatchParticipant($entity, true));
+                    $m->setParticipant1($this->mapMatchParticipant($entity, true));
                 }
                 elseif ($matchParticipantCount === 1){
-                    $match->setParticipant2($this->mapMatchParticipant($entity, true));
+                    $m->setParticipant2($this->mapMatchParticipant($entity, true));
                 }
                 $matchParticipantCount++;
+                continue;
+            }
+
+            if ($entity instanceof \App\DAL\Entity\TournamentMatch && $entity->getId() !== $match->getId()){
+                $match->addPreviousMatch(AutoMapper::map($entity, MatchModel::class));
+                $matchC++;
+                $matchParticipantCount = 0;
             }
         }
-
         return $match;
     }
 
@@ -177,7 +198,7 @@ class MatchManager
 
         }
         elseif ($tournament->getMatchingType(false) === MatchingType::Elimination){
-            $this->checkSingleEliminationWinCondition($match, $tournament, $participant1?->getId(), $participant2?->getId());
+            $this->checkSingleEliminationWinConditionAndSetResult($match, $tournament, $participant1?->getId(), $participant2?->getId());
         }
 
         if ($participant1 !== null || $participant2 !== null){
@@ -212,7 +233,7 @@ class MatchManager
         }
     }
 
-    private function checkSingleEliminationWinCondition(MatchModel $match, TournamentModel $tournament, ?int $matchParticipant1Id, ?int $matchParticipant2Id)
+    private function checkSingleEliminationWinConditionAndSetResult(MatchModel $match, TournamentModel $tournament, ?int $matchParticipant1Id, ?int $matchParticipant2Id)
     {
         $firstWin = $this->participant1Win($match, $tournament->getWinCondition(false));
 
@@ -231,38 +252,25 @@ class MatchManager
         /** @var MatchParticipant */
         $winnerOfMatch = AutoMapper::map($firstWin ? $match->getParticipant1() : $match->getParticipant2(), MatchParticipant::class, trackEntity: false);
         
-        $matchPart1Id = $match->getParticipant1()?->getParticipantId();
-        $matchPart2Id = $match->getParticipant2()?->getParticipantId();
-        $nextMatchPart1Id = $nextMatch->getParticipant1()?->getParticipantId();
-        $nextMatchPart2Id = $nextMatch->getParticipant2()?->getParticipantId();
+        if (!$nextMatch->hasPreviousMatch($match->getId())){
+            return;
+        }
         
-        if ($nextMatchPart1Id !== null && ($nextMatchPart1Id === $matchPart1Id || $nextMatchPart1Id === $matchPart2Id)){
-            /** @var MatchParticipant */
-            $matchPart = AutoMapper::map($this->resetMatch($nextMatch->getParticipant1()), MatchParticipant::class, trackEntity: false);
+        $nextMatchPart = $nextMatch->isWinnerOfPreviousFirstParticipant($match) ? $nextMatch->getParticipant1() : $nextMatch->getParticipant2();
+        $matchPart = null;
+
+        if ($nextMatchPart !== null){
+            $matchPart = AutoMapper::map($this->resetMatch($nextMatchPart), MatchParticipant::class, trackEntity: false);
             $matchPart->setTournamentParticipant($winnerOfMatch->getTournamentParticipant());
-            $this->entityManager->persist($matchPart);
-            return;
         }
-
-        if ($nextMatchPart2Id !== null && ($nextMatchPart2Id === $matchPart1Id || $nextMatchPart2Id === $matchPart2Id)){
-            /** @var MatchParticipant */
-            $matchPart = AutoMapper::map($this->resetMatch($nextMatch->getParticipant2()), MatchParticipant::class, trackEntity: false);
-            $matchPart->setTournamentParticipant($winnerOfMatch->getTournamentParticipant());
-            $this->entityManager->persist($matchPart);
-            return;
+        else{
+            $matchPart = new MatchParticipant();
+            $matchPart
+                ->setTournamentMatch($nextMatchEntity)
+                ->setTournamentParticipant($winnerOfMatch->getTournamentParticipant());
         }
-
-        if ($nextMatchPart1Id !== null && $nextMatchPart2Id !== null){
-            return;
-        }
-
-        /** create new entity for next match */
-        $nextMatchPart = new MatchParticipant();
-        $nextMatchPart
-            ->setTournamentMatch($nextMatchEntity)
-            ->setTournamentParticipant($winnerOfMatch->getTournamentParticipant());
-
-        $this->entityManager->persist($nextMatchPart);
+        
+        $this->entityManager->persist($matchPart);
     }
 
     private function resetMatch(MatchParticipantModel $matchParticipant): MatchParticipantModel
