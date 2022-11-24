@@ -91,7 +91,7 @@ class TournamentManager
         }
     }
 
-    public function getTournament(int $id): TournamentModel
+    public function getTournament(int $id): ?TournamentModel
     {
         /** @var \App\DAL\Repository\TournamentRepository */
         $repo = $this->entityManager->getRepository(Tournament::class);
@@ -99,6 +99,10 @@ class TournamentManager
         /** @var \App\BL\User\UserModel */
         $user = $this->security->getUser();
         $tournament = $repo->findInfo($id, $user?->getId());
+
+        if ($tournament === null){
+            return null;
+        }
 
         /** @var \App\BL\Tournament\TournamentModel */
         $tournamentModel = AutoMapper::map($tournament['tournament'], \App\BL\Tournament\TournamentModel::class, trackEntity: true);

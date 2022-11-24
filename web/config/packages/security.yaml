@@ -40,6 +40,9 @@ security:
     # Note: Only the *first* access control that matches will be used
     access_control:
         - { path: '^/teams/create', roles: IS_AUTHENTICATED_FULLY }
+        - { path: '^/tournaments/\d+/(register|unregister)', roles: IS_AUTHENTICATED_FULLY }
+        - { path: '^/tournaments/create', roles: IS_AUTHENTICATED_FULLY }
+        - { path: '^/tournaments/\d+/(edit|delete)', roles: IS_AUTHENTICATED_FULLY }
         - { path: '^/teams/\d+/(edit|delete)', roles: IS_AUTHENTICATED_FULLY }
         - { path: '^/users/\d+/(delete|promote|demote)', roles: ROLE_ADMIN }
         - { path: '^/tournaments/types', roles: ROLE_ADMIN }
