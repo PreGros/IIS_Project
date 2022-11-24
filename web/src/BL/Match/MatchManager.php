@@ -13,6 +13,7 @@ use App\DAL\Entity\Tournament;
 use App\BL\Tournament\TournamentManager;
 use App\BL\Tournament\WinCondition;
 use App\BL\User\UserModel;
+use App\BL\Util\DateTimeUtil;
 use App\DAL\Entity\MatchParticipant;
 use App\DAL\Entity\TournamentMatch;
 
@@ -152,6 +153,14 @@ class MatchManager
         return $match;
     }
 
+    public function editMatch(MatchModel $match)
+    {
+        $matchEntity = AutoMapper::map($match, TournamentMatch::class, trackEntity: false);
+
+        $this->entityManager->persist($matchEntity);
+        $this->entityManager->flush();
+    }
+
     public function setMatchResult(MatchModel $match, TournamentModel $tournament)
     {
         $participant1 = $match->getParticipant1() !== null ? AutoMapper::map($match->getParticipant1(), MatchParticipant::class, trackEntity: false) : null;
@@ -190,14 +199,14 @@ class MatchManager
                 return ($match->getParticipant1()?->getPoints() ?? PHP_INT_MAX) < ($match->getParticipant2()?->getPoints() ?? PHP_INT_MAX);
             case WinCondition::MaxTime:
                 return
-                    ($match->getParticipant1()?->getCompletionTime() === null ? 0 : (int)$match->getParticipant1()?->getCompletionTime()?->format('%s'))
+                    ($match->getParticipant1()?->getCompletionTime() === null ? 0 : DateTimeUtil::dateIntervalToSeconds($match->getParticipant1()->getCompletionTime()))
                     >
-                    ($match->getParticipant2()?->getCompletionTime() === null ? 0 : (int)$match->getParticipant2()?->getCompletionTime()?->format('%s'));
+                    ($match->getParticipant2()?->getCompletionTime() === null ? 0 : DateTimeUtil::dateIntervalToSeconds($match->getParticipant2()->getCompletionTime()));
             case WinCondition::MinTime:
                 return
-                    ($match->getParticipant1()?->getCompletionTime() === null ? PHP_INT_MAX : (int)$match->getParticipant1()?->getCompletionTime()?->format('%s'))
+                    ($match->getParticipant1()?->getCompletionTime() === null ? PHP_INT_MAX : DateTimeUtil::dateIntervalToSeconds($match->getParticipant1()->getCompletionTime()))
                     <
-                    ($match->getParticipant2()?->getCompletionTime() === null ? PHP_INT_MAX : (int)$match->getParticipant2()?->getCompletionTime()?->format('%s'));
+                    ($match->getParticipant2()?->getCompletionTime() === null ? PHP_INT_MAX : DateTimeUtil::dateIntervalToSeconds($match->getParticipant2()->getCompletionTime()));
             default:
                 throw new \InvalidArgumentException();
         }

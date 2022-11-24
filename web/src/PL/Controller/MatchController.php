@@ -10,6 +10,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use App\BL\Match\MatchManager;
 use App\BL\Tournament\TournamentManager;
 use App\BL\Tournament\WinCondition;
+use App\PL\Form\Match\MatchEditFormType;
 use App\PL\Form\Match\MatchSetResultFormType;
 use App\PL\Table\Match\MatchTable;
 
@@ -56,7 +57,7 @@ class MatchController extends AbstractController
     // }
     
     #[Route('/tournaments/{tournamentId<\d+>}/matches/{matchId<\d+>}/edit', name: 'edit_match')]
-    public function editMatchAction(int $tournamentId, int $matchId, MatchManager $matchManager, TournamentManager $tournamentManager): Response
+    public function editMatchAction(int $tournamentId, int $matchId, Request $request, MatchManager $matchManager, TournamentManager $tournamentManager): Response
     {
         /** @var \App\BL\User\UserModel */
         $user = $this->getUser();
@@ -66,8 +67,17 @@ class MatchController extends AbstractController
             return $this->redirectToRoute('matches', ['id' => $tournamentId]);
         }
 
+        $match = $matchManager->getMatch($matchId);
+        $form = $this->createForm(MatchEditFormType::class, $match);
+        $form->handleRequest($request);
 
-        return $this->redirectToRoute('matches', ['id' => $tournamentId]);
+        if ($form->isSubmitted() && $form->isValid()){
+            $matchManager->setMatchResult($match, $tournament);
+            $this->addFlash('success', 'Match was edited');
+            return $this->redirectToRoute('matches', ['id' => $tournamentId]);
+        }
+
+        return $this->renderForm('match/edit.html.twig', ['form' => $form]);
     }
 
     #[Route('/tournaments/{tournamentId<\d+>}/matches/{matchId<\d+>}/set-result', name: 'set_match_result')]
@@ -88,7 +98,7 @@ class MatchController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()){
             $matchManager->setMatchResult($match, $tournament);
-            $this->addFlash('success', 'Result was set');
+            $this->addFlash('success', 'Result for a match was set');
             return $this->redirectToRoute('matches', ['id' => $tournamentId]);
         }
 

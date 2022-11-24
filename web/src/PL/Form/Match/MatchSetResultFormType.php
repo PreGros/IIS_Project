@@ -3,6 +3,7 @@
 namespace App\PL\Form\Match;
 
 use App\BL\Match\MatchModel;
+use App\BL\Util\DateTimeUtil;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -39,7 +40,7 @@ class MatchSetResultFormType extends AbstractType
                 ->add('duration_first', TimeType::class, [
                     'label' => 'Points for ' . $match->getParticipant1()?->getParticipantName() ?? 'Participant was not entered',
                     'getter' => fn (MatchModel $match, FormInterface $form): ?int
-                        => ($match->getParticipant1()?->getCompletionTime() !== null) ? (int)$match->getParticipant1()->getCompletionTime()->format('%s') : null,
+                        => ($match->getParticipant1()?->getCompletionTime() !== null) ? DateTimeUtil::dateIntervalToSeconds($match->getParticipant1()->getCompletionTime()) : null,
                     'setter' => function (MatchModel $match, int $duration_first, FormInterface $form): void {
                         $match->getParticipant1()?->setCompletionTime(new \DateInterval("PT{$duration_first}S"));
                     },
@@ -52,7 +53,7 @@ class MatchSetResultFormType extends AbstractType
                 ->add('duration_second', TimeType::class, [
                     'label' => 'Points for ' . $match->getParticipant2()?->getParticipantName() ?? 'Participant was not entered',
                     'getter' => fn (MatchModel $match, FormInterface $form): ?int
-                        => ($match->getParticipant2()?->getCompletionTime() !== null) ? (int)$match->getParticipant2()->getCompletionTime()->format('%s') : null,
+                        => ($match->getParticipant2()?->getCompletionTime() !== null) ? DateTimeUtil::dateIntervalToSeconds($match->getParticipant2()->getCompletionTime()) : null,
                     'setter' => function (MatchModel $match, int $duration_second, FormInterface $form): void {
                         $match->getParticipant2()?->setCompletionTime(new \DateInterval("PT{$duration_second}S"));
                     },

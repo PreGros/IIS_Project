@@ -159,7 +159,7 @@ class TournamentController extends AbstractController
     {
         /** @var \App\BL\User\UserModel */
         $currUser = $this->getUser();
-        $tournamentManager->removeTournamentParticipant($id,$currUser->getId());
+        $tournamentManager->removeTournamentParticipant($id, $currUser->getId());
         // $this->addFlash('success', 'You were successfully unregistered from this tournament');
         return $this->redirectToRoute('tournament_info', ['id' => $id]);
     }
@@ -167,6 +167,15 @@ class TournamentController extends AbstractController
     #[Route('/tournaments/{id<\d+>}/delete', name: 'tournament_delete')]
     public function deleteAction(int $id, TournamentManager $tournamentManager): Response
     {
+        $tournament = $tournamentManager->getTournament($id);
+        /** @var \App\BL\User\UserModel */
+        $user = $this->getUser();
+
+        if ($user?->getId() === null || (!$this->isGranted('ROLE_ADMIN') && $tournament?->getCreatedById() !== $user?->getId())){
+            $this->addFlash('danger', 'Insufficient rights to delete tournament');
+            return $this->redirectToRoute('tournaments');
+        }
+
         $tournamentManager->deleteTournament($id);
         $this->addFlash('success', 'Tournament was deleted');
         return $this->redirectToRoute('tournaments');
@@ -175,7 +184,14 @@ class TournamentController extends AbstractController
     #[Route('/tournaments/{id<\d+>}/edit', name: 'tournament_edit')]
     public function editAction(int $id, Request $request, TournamentManager $tournamentManager): Response
     {
-        $tournament = $tournamentManager->getTournament($id);
+        $tournament = $tournamentManager->getTournament($id);/** @var \App\BL\User\UserModel */
+        $user = $this->getUser();
+
+        if ($user?->getId() === null || (!$this->isGranted('ROLE_ADMIN') && $tournament?->getCreatedById() !== $user?->getId())){
+            $this->addFlash('danger', 'Insufficient rights to edit tournament');
+            return $this->redirectToRoute('tournaments');
+        }
+
         $form = $this->createForm(TournamentEditFormType::class, $tournament);
         $form->handleRequest($request);
         $errMessage = "";
