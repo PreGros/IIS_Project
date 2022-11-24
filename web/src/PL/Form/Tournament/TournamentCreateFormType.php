@@ -49,7 +49,7 @@ class TournamentCreateFormType extends AbstractType
             ->add('minTeamMemberCount', IntegerType::class, [
                 'required' => false,
                 'attr' => [
-                    'min' => 0
+                    'min' => 1
                 ]
             ])
             ->add('maxParticipantCount', IntegerType::class, [
@@ -59,7 +59,7 @@ class TournamentCreateFormType extends AbstractType
             ])
             ->add('minParticipantCount', IntegerType::class, [
                 'attr' => [
-                    'min' => 0
+                    'min' => 1
                 ]
             ])
             ->add('date', DateTimeType::class, [

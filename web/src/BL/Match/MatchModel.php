@@ -2,6 +2,8 @@
 
 namespace App\BL\Match;
 
+use App\BL\Util\DateTimeUtil;
+
 class MatchModel
 {
     private int $id;
@@ -67,7 +69,7 @@ class MatchModel
 
     public function hasEnded(): bool
     {
-        return (new \DateTime())->getTimestamp() > ($this->startTime->getTimestamp() + (int)$this->duration->format('%s'));
+        return (new \DateTime())->getTimestamp() > ($this->startTime->getTimestamp() + DateTimeUtil::dateIntervalToSeconds($this->duration));
     }
 
     public function childMatchStarted() : bool

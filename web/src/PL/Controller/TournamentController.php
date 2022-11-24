@@ -2,6 +2,7 @@
 
 namespace App\PL\Controller;
 
+use App\BL\Match\MatchManager;
 use App\BL\Team\TeamManager;
 use App\BL\Tournament\ParticipantType;
 use Symfony\Component\HttpFoundation\Response;
@@ -13,6 +14,7 @@ use App\PL\Form\Tournament\TournamentCreateFormType;
 use App\BL\Tournament\TournamentManager;
 use App\BL\Tournament\TournamentModel;
 use App\BL\Tournament\TournamentTypeModel;
+use App\BL\Util\DateTimeUtil;
 use App\PL\DataTable\Tournament\TournamentDataTable;
 use App\PL\DataTable\Tournament\TournamentParticipantDataTable;
 use App\PL\Form\Tournament\TournamentEditFormType;
@@ -61,7 +63,7 @@ class TournamentController extends AbstractController
     }
 
     #[Route('/tournaments/{id<\d+>}', name: 'tournament_info')]
-    public function getTournamentInfo(int $id, Request $request, TournamentManager $tournamentManager, TeamManager $teamManager, TournamentParticipantDataTable $dataTable): Response
+    public function getTournamentInfo(int $id, Request $request, TournamentManager $tournamentManager, TeamManager $teamManager,  MatchManager $matchManager, TournamentParticipantDataTable $dataTable): Response
     {
         $tournamentModel = $tournamentManager->getTournament($id);
 
@@ -89,7 +91,7 @@ class TournamentController extends AbstractController
         }
 
         
-
+        // REGISTER TEAM
         $form = $this->createForm(TournamentRegistrationFormType::class, options: [
             'teams' => $teamManager->getFormatedUserTeams($user?->getId())
         ]);
@@ -103,14 +105,14 @@ class TournamentController extends AbstractController
         }
 
 
+        // GENERATE MATCHES
         $matchForm = $this->createForm(TournamentMatchGenerationFormType::class);
         $matchForm->handleRequest($request);
 
         if ($matchForm->isSubmitted() && $matchForm->isValid()){
-            //TODO: generate matches and redirect to matches info
-            // $tournamentManager->addTournamentParticipantTeam($id, $matchForm->get('teams')->getData());
-            // $this->addFlash('success', 'Your team was successfully registered in this tournament. Now wait for approval');
-            return $this->redirectToRoute('tournament_info', ['id' => $id]);
+            //$matchManager->generateMatches($tournamentModel, new \DateInterval('PT30M'), new \DateInterval('PT5M'), (bool)$setParticipants);
+            $matchManager->generateMatches($tournamentModel, DateTimeUtil::secondsToDateInterval($matchForm->get('duration')->getData()), new \DateInterval('PT5M'), (bool)1);
+            return $this->redirectToRoute('matches', ['id' => $id]);
         }
 
 
@@ -135,8 +137,7 @@ class TournamentController extends AbstractController
             'params' => ['id' => $tournamentModel->getCreatedById()],
             'showRegistrate' => (($tournamentModel->canRegistrate()) || ($tournamentModel->getCurrentUserRegistrationState() !== null)) && $user !== null,
             'participantIsTeam' => ($tournamentModel->getParticipantType(false) == ParticipantType::Teams),
-            'registerRedirectParam' => ['id' => $id],
-            'unregisterRedirectParam' => ['id' => $id],
+            'redirectParam' => ['id' => $id],
             'isRegistered' => $tournamentModel->getCurrentUserRegistrationState() !== null,
             'participantId' => $participantId,
             'participantName' => $participantName,
@@ -159,7 +160,7 @@ class TournamentController extends AbstractController
     {
         /** @var \App\BL\User\UserModel */
         $currUser = $this->getUser();
-        $tournamentManager->removeTournamentParticipant($id,$currUser->getId());
+        $tournamentManager->removeTournamentParticipant($id, $currUser->getId());
         // $this->addFlash('success', 'You were successfully unregistered from this tournament');
         return $this->redirectToRoute('tournament_info', ['id' => $id]);
     }
@@ -167,6 +168,15 @@ class TournamentController extends AbstractController
     #[Route('/tournaments/{id<\d+>}/delete', name: 'tournament_delete')]
     public function deleteAction(int $id, TournamentManager $tournamentManager): Response
     {
+        $tournament = $tournamentManager->getTournament($id);
+        /** @var \App\BL\User\UserModel */
+        $user = $this->getUser();
+
+        if ($user?->getId() === null || (!$this->isGranted('ROLE_ADMIN') && $tournament?->getCreatedById() !== $user?->getId())){
+            $this->addFlash('danger', 'Insufficient rights to delete tournament');
+            return $this->redirectToRoute('tournaments');
+        }
+
         $tournamentManager->deleteTournament($id);
         $this->addFlash('success', 'Tournament was deleted');
         return $this->redirectToRoute('tournaments');
@@ -175,7 +185,14 @@ class TournamentController extends AbstractController
     #[Route('/tournaments/{id<\d+>}/<a class="btn btn-secondary disabled w-label" title="Cannot edit, match has ended">Edit</a>', name: 'tournament_edit')]
     public function editAction(int $id, Request $request, TournamentManager $tournamentManager): Response
     {
-        $tournament = $tournamentManager->getTournament($id);
+        $tournament = $tournamentManager->getTournament($id);/** @var \App\BL\User\UserModel */
+        $user = $this->getUser();
+
+        if ($user?->getId() === null || (!$this->isGranted('ROLE_ADMIN') && $tournament?->getCreatedById() !== $user?->getId())){
+            $this->addFlash('danger', 'Insufficient rights to edit tournament');
+            return $this->redirectToRoute('tournaments');
+        }
+
         $form = $this->createForm(TournamentEditFormType::class, $tournament);
         $form->handleRequest($request);
         $errMessage = "";

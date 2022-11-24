@@ -52,10 +52,6 @@ class MatchTable extends BaseTable
             $data = [
                 'startTime' => $match->getStartTime()->format('j. n. Y G:i'),
                 'duration' => $match->getDuration()->format('%H:%I:%S'),
-                'participants' => 
-                    ($match->getParticipant1()?->getParticipantName() ?? 'From previous match') .
-                    ' vs ' .
-                    ($match->getParticipant2()?->getParticipantName() ?? 'From previous match'),
                 'result' => !$match->hasEnded() ?
                     'Not finished' :
                     ($match->getParticipant1()?->getResult() ?? 'Participant not entered') .
@@ -77,10 +73,6 @@ class MatchTable extends BaseTable
                 ]
             );
             
-            $disabledEdit = "<a class=\"btn btn-secondary disabled w-label\" title=\"Cannot edit, match has ended\">Edit</a>";
-            $disabledSetResult = "<a class=\"btn btn-primary disabled w-label\" title=\"Cannot set result, match does not ended\">Set result</a>";
-            $enabledEdit = "<a href=\"{{ row.edit }}\" class=\"btn btn-secondary\">Edit</a>";
-            $enabledSetResult = "<a href=\"{{ row.set_result }}\" class=\"btn btn-primary\">Set result</a>";
             if ($this->options['allModifiable']){
                 if ($match->childMatchStarted()){
                     $buttons = '<a class="btn btn-secondary disabled w-label" title="Cannot edit, match has ended">Edit</a>' . ' ' . '<a class="btn btn-primary disabled w-label" title="Cannot set result, match does not ended">Set result</a>';
