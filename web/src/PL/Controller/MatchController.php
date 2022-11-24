@@ -32,28 +32,28 @@ class MatchController extends AbstractController
         return $this->render('match/index.html.twig', ['tables' => $tables]);
     }
 
-    #[Route('/tournaments/{id<\d+>}/generate-matches/{setParticipants<0|1>}', name: 'generate_matches')]
-    public function generateMatchesAction(int $id, int $setParticipants, MatchManager $matchManager, TournamentManager $tournamentManager): Response
-    {
-        $tournament = $tournamentManager->getTournament($id);
+    // #[Route('/tournaments/{id<\d+>}/generate-matches/{setParticipants<0|1>}', name: 'generate_matches')]
+    // public function generateMatchesAction(int $id, int $setParticipants, MatchManager $matchManager, TournamentManager $tournamentManager): Response
+    // {
+    //     $tournament = $tournamentManager->getTournament($id);
 
-        /** @var \App\BL\User\UserModel */
-        $user = $this->getUser();
+    //     /** @var \App\BL\User\UserModel */
+    //     $user = $this->getUser();
 
-        if (!$this->isGranted('ROLE_ADMIN') && $tournament->getCreatedById() !== $user?->getId()){
-            $this->addFlash('danger', 'Insufficient rights to generate matches');
-            return $this->redirectToRoute('tournament_info', ['id' => $id]);
-        }
+    //     if (!$this->isGranted('ROLE_ADMIN') && $tournament->getCreatedById() !== $user?->getId()){
+    //         $this->addFlash('danger', 'Insufficient rights to generate matches');
+    //         return $this->redirectToRoute('tournament_info', ['id' => $id]);
+    //     }
 
-        if (!$tournament->getApproved()){
-            $this->addFlash('danger', 'Cannot generate matches, tournament is not approved');
-            return $this->redirectToRoute('tournament_info', ['id' => $id]);
-        }
+    //     if (!$tournament->getApproved()){
+    //         $this->addFlash('danger', 'Cannot generate matches, tournament is not approved');
+    //         return $this->redirectToRoute('tournament_info', ['id' => $id]);
+    //     }
 
-        $matchManager->generateMatches($tournament, new \DateInterval('PT30M'), new \DateInterval('PT5M'), (bool)$setParticipants);
+    //     $matchManager->generateMatches($tournament, new \DateInterval('PT30M'), new \DateInterval('PT5M'), (bool)$setParticipants);
 
-        return $this->redirectToRoute('matches', ['id' => $id]);
-    }
+    //     return $this->redirectToRoute('matches', ['id' => $id]);
+    // }
     
     #[Route('/tournaments/{tournamentId<\d+>}/matches/{matchId<\d+>}/edit', name: 'edit_match')]
     public function editMatchAction(int $tournamentId, int $matchId, MatchManager $matchManager, TournamentManager $tournamentManager): Response

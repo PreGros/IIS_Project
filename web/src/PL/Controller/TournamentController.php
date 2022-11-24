@@ -2,6 +2,7 @@
 
 namespace App\PL\Controller;
 
+use App\BL\Match\MatchManager;
 use App\BL\Team\TeamManager;
 use App\BL\Tournament\ParticipantType;
 use Symfony\Component\HttpFoundation\Response;
@@ -60,7 +61,7 @@ class TournamentController extends AbstractController
     }
 
     #[Route('/tournaments/{id<\d+>}', name: 'tournament_info')]
-    public function getTournamentInfo(int $id, Request $request, TournamentManager $tournamentManager, TeamManager $teamManager, TournamentParticipantDataTable $dataTable): Response
+    public function getTournamentInfo(int $id, Request $request, TournamentManager $tournamentManager, TeamManager $teamManager,  MatchManager $matchManager, TournamentParticipantDataTable $dataTable): Response
     {
         $tournamentModel = $tournamentManager->getTournament($id);
 
@@ -88,7 +89,7 @@ class TournamentController extends AbstractController
         }
 
         
-
+        // REGISTER TEAM
         $form = $this->createForm(TournamentRegistrationFormType::class, options: [
             'teams' => $teamManager->getFormatedUserTeams($user?->getId())
         ]);
@@ -102,14 +103,15 @@ class TournamentController extends AbstractController
         }
 
 
+        // GENERATE MATCHES
         $matchForm = $this->createForm(TournamentMatchGenerationFormType::class);
         $matchForm->handleRequest($request);
 
         if ($matchForm->isSubmitted() && $matchForm->isValid()){
-            //TODO: generate matches and redirect to matches info
-            // $tournamentManager->addTournamentParticipantTeam($id, $matchForm->get('teams')->getData());
-            // $this->addFlash('success', 'Your team was successfully registered in this tournament. Now wait for approval');
-            return $this->redirectToRoute('tournament_info', ['id' => $id]);
+            //$matchManager->generateMatches($tournamentModel, new \DateInterval('PT30M'), new \DateInterval('PT5M'), (bool)$setParticipants);
+            dump(new \DateInterval("PT". $matchForm->get('duration')->getData() ."S"));
+            $matchManager->generateMatches($tournamentModel, new \DateInterval("PT". $matchForm->get('duration')->getData() ."S"), new \DateInterval('PT5M'), (bool)1);
+            return $this->redirectToRoute('matches', ['id' => $id]);
         }
 
 
@@ -134,8 +136,7 @@ class TournamentController extends AbstractController
             'params' => ['id' => $tournamentModel->getCreatedById()],
             'showRegistrate' => (($tournamentModel->canRegistrate()) || ($tournamentModel->getCurrentUserRegistrationState() !== null)) && $user !== null,
             'participantIsTeam' => ($tournamentModel->getParticipantType(false) == ParticipantType::Teams),
-            'registerRedirectParam' => ['id' => $id],
-            'unregisterRedirectParam' => ['id' => $id],
+            'redirectParam' => ['id' => $id],
             'isRegistered' => $tournamentModel->getCurrentUserRegistrationState() !== null,
             'participantId' => $participantId,
             'participantName' => $participantName,
