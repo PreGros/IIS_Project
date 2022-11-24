@@ -197,6 +197,12 @@ class TournamentController extends AbstractController
             return $this->redirectToRoute('tournaments');
         }
 
+        if ($tournament->getApproved())
+        {
+            $this->addFlash('danger', 'Approved tournaments cannot be edited');
+            return $this->redirectToRoute('tournaments');
+        }
+
         $form = $this->createForm(TournamentEditFormType::class, $tournament);
         $form->handleRequest($request);
         $errMessage = "";
