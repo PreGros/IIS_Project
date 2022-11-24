@@ -1,0 +1,24 @@
+{% extends 'base.html.twig' %}
+
+{% block javascripts %}
+    {{ encore_entry_script_tags('tournament_form') }}
+{% endblock %}
+
+{% block title %}Edit type{% endblock %}
+
+{% block body %}
+    {{ render_flash_messages() }}
+
+    <h1>Edit type</h1>
+
+    {{ form_start(formEditType) }}
+        <div class="col-md-6">
+            {{ form_row(formEditType.name) }}
+            <div class="text-center">
+                {{ form_row(formEditType.submit, {
+                    label: 'Submit'
+                }) }}
+            </div>
+        </div>
+    {{ form_end(formEditType) }}
+{% endblock %}

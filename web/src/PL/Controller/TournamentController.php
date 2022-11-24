@@ -19,6 +19,7 @@ use App\PL\Form\Tournament\TournamentEditFormType;
 use App\PL\Form\Tournament\TournamentMatchGenerationFormType;
 use App\PL\Form\Tournament\TournamentRegistrationFormType;
 use App\PL\Form\Tournament\TournamentTypeCreateFormType;
+use App\PL\Form\Tournament\TournamentTypeEditFormType;
 use App\PL\Table\Tournament\TypesTable;
 
 class TournamentController extends AbstractController
@@ -171,7 +172,7 @@ class TournamentController extends AbstractController
         return $this->redirectToRoute('tournaments');
     }
 
-    #[Route('/tournaments/{id<\d+>}/edit', name: 'tournament_edit')]
+    #[Route('/tournaments/{id<\d+>}/<a class="btn btn-secondary disabled w-label" title="Cannot edit, match has ended">Edit</a>', name: 'tournament_edit')]
     public function editAction(int $id, Request $request, TournamentManager $tournamentManager): Response
     {
         $tournament = $tournamentManager->getTournament($id);
@@ -215,12 +216,26 @@ class TournamentController extends AbstractController
         return $this->renderForm('tournament/types.html.twig', ['tournamentTypeForm' => $form, 'table' => $typesTable->init()]);
     }
 
-    #[Route('/tournaments/types/{id<\d+>}/delete', name: 'tournament_type_delete')]
-    public function deleteTypeAction(int $id, TournamentManager $tournamentManager): Response
+    #[Route('/tournaments/types/{id<\d+>}/edit', name: 'tournament_type_edit')]
+    public function editTypeAction(int $id, TournamentManager $tournamentManager, Request $request): Response
     {
-        $tournamentManager->deleteTournamentType($id);   
-        $this->addFlash('success', 'Tournament type was deleted');
-        return $this->redirectToRoute('tournament_types');
+        if (!$this->isGranted('ROLE_ADMIN')){
+            $this->addFlash('danger', 'Insufficient rights to edit team');
+            return $this->redirectToRoute('teams');
+        }
+
+        $type = $tournamentManager->getTournamentType($id);
+        $form = $this->createForm(TournamentTypeEditFormType::class, $type);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()){
+            $tournamentManager->updateType($type);  
+
+            $this->addFlash('success', 'Successfuly edited');
+            return $this->redirectToRoute('tournament_types');
+        }
+
+        return $this->renderForm('tournament/editType.html.twig', ['formEditType' => $form]);
     }
 
     #[Route('/tournaments/{id<\d+>}/approve', name: 'user_approve')]

@@ -38,8 +38,8 @@ class TypesTable extends BaseTable
             yield [
                 'name' => $type->getName(),
                 'action' =>
-                    $this->renderTwigStringColumn('<a href="{{ row.url }}" class="btn btn-danger" onclick="return confirm(\'Are you sure?\')">Delete</a>', [
-                        'url' => $this->router->generate('tournament_type_delete', ['id' => $type->getId()])
+                    $this->renderTwigStringColumn('<a href="{{ row.url }}" class="btn btn-primary">Edit name</a>', [
+                        'url' => $this->router->generate('tournament_type_edit', ['id' => $type->getId()])
                     ])
             ];
         }

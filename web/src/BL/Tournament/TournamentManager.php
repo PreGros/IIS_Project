@@ -109,6 +109,14 @@ class TournamentManager
         return $tournamentModel;
     }
 
+    public function getTournamentType(int $id) : TournamentTypeModel
+    {
+        /** @var \App\DAL\Repository\TournamentTypeRepository */
+        $repo = $this->entityManager->getRepository(TournamentType::class);
+
+        return AutoMapper::map($repo->find($id), TournamentTypeModel::class);
+    }
+
     public function deleteTournament(int $id)
     {
         /** @var \App\DAL\Repository\TournamentRepository */
@@ -139,13 +147,13 @@ class TournamentManager
         }
     }
 
-    public function deleteTournamentType(int $id)
+    public function updateType(TournamentTypeModel $tournamentTypeModel)
     {
-        /** @var \App\DAL\Repository\TournamentTypeRepository */
-        $repo = $this->entityManager->getRepository(TournamentType::class);
+        /** @var TournamenType */
+        $user = AutoMapper::map($tournamentTypeModel, TournamentType::class, trackEntity: false);
 
-        $type = $this->entityManager->getReference(TournamentType::class, $id);
-        $repo->remove($type, true);
+        $this->entityManager->persist($user);
+        $this->entityManager->flush();
     }
 
     public function createTournamentType(TournamentTypeModel $typeModel)
