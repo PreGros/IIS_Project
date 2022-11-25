@@ -25,6 +25,10 @@ class TournamentParticipantDataTable
 
     private bool $isAdmin;
 
+    private bool $maxAchieved;
+
+    private bool $matchesGenerated;
+
     public function __construct(DataTableFactory $dataTableFactory, UrlGeneratorInterface $router, TournamentManager $tournamentManager)
     {
         $this->factory = $dataTableFactory;
@@ -32,10 +36,12 @@ class TournamentParticipantDataTable
         $this->tournamentManager = $tournamentManager;
     }
 
-    public function create(int $tournamentId, bool $isAdmin): DataTable
+    public function create(int $tournamentId, bool $isAdmin, bool $maxAchieved, bool $matchesGenerated): DataTable
     {
         $this->tournamentId = $tournamentId;
         $this->isAdmin = $isAdmin;
+        $this->maxAchieved = $maxAchieved;
+        $this->matchesGenerated = $matchesGenerated;
 
         $dataTable = $this->factory->create()
             ->add('name', TwigStringColumn::class, [
@@ -49,9 +55,13 @@ class TournamentParticipantDataTable
                 'searchable' => false,
                 'orderable' => true,
                 'template' =>
-                    '<i class="bi {% if row.isApproved %} bi-check-lg {% else %} bi-x-lg {% endif %}"></i>'.
+                    '<i class="bi {% if row.isApproved %} bi-check-lg {% else %} bi-x-lg {% endif %}" title="{% if row.isApproved %}Approved{% else %}Not Approved{% endif %}"></i>'.
                     ' ' .
-                    '{% if row.canApprove %}<a href="{% if row.isApproved %}{{ row.disapproveURL }}{% else %}{{ row.approveURL }}{% endif %}" class="btn btn-secondary {% if not row.deactivated %}" {% else %}disabled" aria-disabled="true" {% endif %}">{% if row.isApproved %}Disapprove{% else %}Approve{% endif %}</a>{% endif %}'
+                    '{% if row.canApprove %}' .
+                    ($matchesGenerated ? '<span title="Tournament already started">' : ($maxAchieved ? '<span title="Maximum number of participants already achieved">' : '')) .
+                        '<a href="{% if row.isApproved %}{{ row.disapproveURL }}{% else %}{{ row.approveURL }}{% endif %}" class="btn btn-secondary {% if not row.deactivated %}" {% else %}disabled" aria-disabled="true" {% endif %}">{% if row.isApproved %}Disapprove{% else %}Approve{% endif %}</a>' .
+                    (($maxAchieved || $matchesGenerated)? '</span>' : '') .
+                    '{% endif %}'
             ]);
 
 
@@ -71,8 +81,7 @@ class TournamentParticipantDataTable
                 'isApproved' => $data->getApproved(),
                 'canApprove' => $data->getCreatedByCurrentUser() || $this->isAdmin,
                 //'deactivated' => $this->tournamentManager->checkUserDeactivated($data->getIdOfParticipant(), $data->getIsTeam()),
-                'deactivated' => $data->getDeactivatedParticipant(),
-                'deactivatedT' => $data->getDeactivatedParticipant(),
+                'deactivated' => $data->getDeactivatedParticipant() || ($this->maxAchieved && !$data->getApproved()) || $this->matchesGenerated,
                 'approveURL' => $this->router->generate('participant_approve', ['tId' => $this->tournamentId, 'pId' => $data->getId()]),
                 'disapproveURL' => $this->router->generate('participant_disapprove', ['tId' => $this->tournamentId, 'pId' => $data->getId()])
             ];

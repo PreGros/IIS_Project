@@ -92,8 +92,11 @@ class TeamManager
     {
         /** @var \App\DAL\Repository\TeamRepository */
         $repo = $this->entityManager->getRepository(Team::class);
+        $entity = $repo->findTeamWithCount($id);
         /** @var TeamModel */
-        $teamModel = AutoMapper::map($repo->find($id), TeamModel::class);
+        $teamModel = AutoMapper::map($entity['team'], TeamModel::class);
+        /** memberCount == members + leader (1) */
+        $teamModel->setMembersCount($entity['memberCount'] + 1);
         return $teamModel;
     }
 

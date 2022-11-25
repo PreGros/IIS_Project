@@ -235,6 +235,21 @@ class TournamentManager
         $this->entityManager->flush();
     }
 
+    public function checkTeamMemberCountInTournament(int $tournamentMaxCount, int $tournamentMinCount, int $id) : bool
+    {
+        /** @var \App\DAL\Repository\TeamRepository */
+        $repo = $this->entityManager->getRepository(Team::class);
+        $entity = $repo->findTeamWithCount($id);
+
+        /** +1 because of a leader */
+        $teamMembers = $entity['memberCount'] + 1;
+        if (($teamMembers > $tournamentMaxCount) || ($teamMembers < $tournamentMinCount)){
+            return false;
+        }
+
+        return true;
+    }
+
     public function removeTournamentParticipant(int $tournamentId, int $currUserId){
         /** @var \App\DAL\Repository\TournamentParticipantRepository */
         $repo = $this->entityManager->getRepository(TournamentParticipant::class);
@@ -445,5 +460,13 @@ class TournamentManager
         }
 
         return false;
+    }
+
+    public function getApprovedCountOfParticipantsInTournament(int $tournamentId): ?int
+    {
+        /** @var \App\DAL\Repository\TournamentParticipantRepository */
+        $repo = $this->entityManager->getRepository(TournamentParticipant::class);
+        
+        return $repo->findParticipantCount($tournamentId);
     }
 }

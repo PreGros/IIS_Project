@@ -107,7 +107,7 @@ class TeamController extends AbstractController
 
         $teamManager->deleteMember($teamId, $memberId);
         $this->addFlash('success', 'Member was deleted');
-        return $this->redirectToRoute('team_members', ['id' => $teamId]);
+        return $this->redirectToRoute('team_info', ['id' => $teamId]);
     }
 
     #[Route('/teams/{id<\d+>}/info', name: 'team_info')]
@@ -121,7 +121,7 @@ class TeamController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()){
             $teamManager->addMembers(explode(' ', $form->get('members')->getData()), $id);
             $this->addFlash('success', 'New members were added');
-            return $this->redirectToRoute('team_members', ['id' => $id]);
+            return $this->redirectToRoute('team_info', ['id' => $id]);
         }
 
         $teamModel = $teamManager->getTeam($id);
