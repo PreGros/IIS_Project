@@ -78,7 +78,7 @@ class TournamentParticipantDataTable
                 'isApproved' => $data->getApproved(),
                 'canApprove' => $data->getCreatedByCurrentUser() || $this->isAdmin,
                 //'deactivated' => $this->tournamentManager->checkUserDeactivated($data->getIdOfParticipant(), $data->getIsTeam()),
-                'deactivated' => $data->getDeactivatedParticipant() || $this->maxAchieved,
+                'deactivated' => $data->getDeactivatedParticipant() || ($this->maxAchieved && !$data->getApproved()),
                 'approveURL' => $this->router->generate('participant_approve', ['tId' => $this->tournamentId, 'pId' => $data->getId()]),
                 'disapproveURL' => $this->router->generate('participant_disapprove', ['tId' => $this->tournamentId, 'pId' => $data->getId()])
             ];
