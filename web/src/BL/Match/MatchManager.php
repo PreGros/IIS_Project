@@ -50,7 +50,7 @@ class MatchManager
 
         foreach ($matches as $node){
             if ($node->getChild()?->getId() !== null){
-                $matches[$node->getChild()?->getId()]->addPreviousMatch($node);
+                ($matches[$node->getChild()?->getId()] ?? null)?->addPreviousMatch($node);
             }
             if (in_array($node->getId(), isset($layers[$layer]) ? array_map(fn (MatchModel $m) => $m->getChild()?->getId(), $layers[$layer]) : [])){
                 if ($layer !== 0){
@@ -70,11 +70,11 @@ class MatchManager
         return $layers;
     }
 
-    public function getMatches(TournamentModel $tournament)
+    public function getMatches(TournamentModel $tournament, ?int $participantId = null)
     {
         /** @var \App\DAL\Repository\TournamentMatchRepository */
         $matchesRepo = $this->entityManager->getRepository(\App\DAL\Entity\TournamentMatch::class);
-        $entities = $matchesRepo->findAllWithParticipants($tournament->getId());
+        $entities = $matchesRepo->findAllWithParticipants($tournament->getId(), $participantId);
         /** @var array<MatchModel> */
         $matches = [];
         $matchIndex = 0;
