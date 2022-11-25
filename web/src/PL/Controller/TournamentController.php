@@ -106,20 +106,20 @@ class TournamentController extends AbstractController
 
 
         // GENERATE MATCHES
+        $approvedParticipantCnt = $tournamentManager->getApprovedCountOfParticipantsInTournament($id);
         $matchForm = $this->createForm(TournamentMatchGenerationFormType::class, options: [
-            'disabled' => !$tournamentModel->getApproved(),
-            'titleDisabled' => $tournamentModel->getApproved() ? "" : "This tournament is not approved"
+            'disabled' => (!$tournamentModel->getApproved()) || ($approvedParticipantCnt < $tournamentModel->getMinParticipantCount() ) ,
+            'titleDisabled' => $tournamentModel->getApproved() ? ($approvedParticipantCnt < $tournamentModel->getMinParticipantCount() ? "Must have at least {$tournamentModel->getMinParticipantCount()} approved participants" : "") : "This tournament is not approved"
         ]);
         $matchForm->handleRequest($request);
 
         if ($matchForm->isSubmitted() && $matchForm->isValid()){
-            //$matchManager->generateMatches($tournamentModel, new \DateInterval('PT30M'), new \DateInterval('PT5M'), (bool)$setParticipants);
             $matchManager->generateMatches($tournamentModel, $matchForm->get('duration')->getData(), $matchForm->get('break')->getData(), $matchForm->get('setParticipants')->getData());
             return $this->redirectToRoute('matches', ['id' => $id]);
         }
 
 
-        $table = $dataTable->create($id, $this->isGranted('ROLE_ADMIN'))->handleRequest($request);
+        $table = $dataTable->create($id, $this->isGranted('ROLE_ADMIN'), $approvedParticipantCnt >= $tournamentModel->getMaxParticipantCount())->handleRequest($request);
 
         if ($table->isCallback()){
             return $table->getResponse();
@@ -147,7 +147,7 @@ class TournamentController extends AbstractController
             'canUnregister' => (($isLeader !== false) && $tournamentModel->canRegistrate() ),
             'registrationEnded' => $tournamentModel->registrationEnded(),
             'matchesGenerated' => $tournamentManager->areTournamentMatchesGenerated($id),
-            'canGenerateMatches' => ($tournamentModel->getCreatedById() == $user->getId() || $this->isGranted('ROLE_ADMIN'))
+            'canGenerateMatches' => ($tournamentModel->getCreatedById() == $user->getId() || $this->isGranted('ROLE_ADMIN')),
         ]);
     }
 

@@ -446,4 +446,12 @@ class TournamentManager
 
         return false;
     }
+
+    public function getApprovedCountOfParticipantsInTournament(int $tournamentId): ?int
+    {
+        /** @var \App\DAL\Repository\TournamentParticipantRepository */
+        $repo = $this->entityManager->getRepository(TournamentParticipant::class);
+        
+        return $repo->findParticipantCount($tournamentId);
+    }
 }

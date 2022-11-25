@@ -25,6 +25,8 @@ class TournamentParticipantDataTable
 
     private bool $isAdmin;
 
+    private bool $maxAchieved;
+
     public function __construct(DataTableFactory $dataTableFactory, UrlGeneratorInterface $router, TournamentManager $tournamentManager)
     {
         $this->factory = $dataTableFactory;
@@ -32,10 +34,11 @@ class TournamentParticipantDataTable
         $this->tournamentManager = $tournamentManager;
     }
 
-    public function create(int $tournamentId, bool $isAdmin): DataTable
+    public function create(int $tournamentId, bool $isAdmin, bool $maxAchieved): DataTable
     {
         $this->tournamentId = $tournamentId;
         $this->isAdmin = $isAdmin;
+        $this->maxAchieved = $maxAchieved;
 
         $dataTable = $this->factory->create()
             ->add('name', TwigStringColumn::class, [
@@ -51,7 +54,11 @@ class TournamentParticipantDataTable
                 'template' =>
                     '<i class="bi {% if row.isApproved %} bi-check-lg {% else %} bi-x-lg {% endif %}"></i>'.
                     ' ' .
-                    '{% if row.canApprove %}<a href="{% if row.isApproved %}{{ row.disapproveURL }}{% else %}{{ row.approveURL }}{% endif %}" class="btn btn-secondary {% if not row.deactivated %}" {% else %}disabled" aria-disabled="true" {% endif %}">{% if row.isApproved %}Disapprove{% else %}Approve{% endif %}</a>{% endif %}'
+                    '{% if row.canApprove %}' .
+                    ($maxAchieved ? '<span title="Maximum number of participants already achieved">' : '') .
+                        '<a href="{% if row.isApproved %}{{ row.disapproveURL }}{% else %}{{ row.approveURL }}{% endif %}" class="btn btn-secondary {% if not row.deactivated %}" {% else %}disabled" aria-disabled="true" {% endif %}">{% if row.isApproved %}Disapprove{% else %}Approve{% endif %}</a>' .
+                    ($maxAchieved ? '</span>' : '') .
+                    '{% endif %}'
             ]);
 
 
@@ -71,8 +78,7 @@ class TournamentParticipantDataTable
                 'isApproved' => $data->getApproved(),
                 'canApprove' => $data->getCreatedByCurrentUser() || $this->isAdmin,
                 //'deactivated' => $this->tournamentManager->checkUserDeactivated($data->getIdOfParticipant(), $data->getIsTeam()),
-                'deactivated' => $data->getDeactivatedParticipant(),
-                'deactivatedT' => $data->getDeactivatedParticipant(),
+                'deactivated' => $data->getDeactivatedParticipant() || $this->maxAchieved,
                 'approveURL' => $this->router->generate('participant_approve', ['tId' => $this->tournamentId, 'pId' => $data->getId()]),
                 'disapproveURL' => $this->router->generate('participant_disapprove', ['tId' => $this->tournamentId, 'pId' => $data->getId()])
             ];
