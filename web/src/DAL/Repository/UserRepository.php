@@ -2,8 +2,11 @@
 
 namespace App\DAL\Repository;
 
+use App\DAL\Entity\Tournament;
+use App\DAL\Entity\TournamentParticipant;
 use App\DAL\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -85,6 +88,22 @@ class UserRepository extends ServiceEntityRepository
             ->getQuery();
 
         return new Paginator($query, false);
+    }
+
+    public function findStatistics(int $id): array
+    {   
+        $queryBuilder = $this->getEntityManager()->createQueryBuilder();
+
+        return $queryBuilder
+            ->select('COUNT(t.id) as tournamentCount, SUM(case WHEN t.winner = tp THEN 1 ELSE 0 END) as wonTournaments')
+            ->from(Tournament::class, 't')
+            ->innerJoin(TournamentParticipant::class, 'tp', Join::WITH, 'tp.tournament = t AND tp.signedUpUser = :id')
+            ->setParameter('id', $id)
+            ->getQuery()
+            ->getSingleResult();
+
+//         SELECT COUNT(t.id), sum(case when t.winner_id = tp.id then 1 else 0 end) FROM tournament as t
+// INNER JOIN tournament_participant as tp on tp.tournament_id = t.id and tp.signed_up_user_id = 1
     }
 
 //    /**

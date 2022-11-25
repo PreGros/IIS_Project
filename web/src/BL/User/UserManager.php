@@ -230,4 +230,12 @@ class UserManager
 
         return true;
     }
+
+    public function getUsersStatistics(int $id)
+    {
+        /** @var \App\DAL\Repository\UserRepository */
+        $repo = $this->entityManager->getRepository(\App\DAL\Entity\User::class);
+        $statistics = $repo->findStatistics($id);
+        return Automapper::map($statistics, UserStatisticsModel::class, trackEntity: false);
+    }
 }

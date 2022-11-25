@@ -131,9 +131,8 @@ class TeamController extends AbstractController
             'membersForm' => $form,
             'canModify' => $canModify,
             'deactivated' => $teamModel->getIsDeactivated(),
+            'statistics' => $teamManager->getTeamStatistics($id),
             'table' => $table->init(['teamId' => $id, 'canModify' => $canModify])
         ]);
-
-        // return $this->render('team/info.html.twig', ['team' => $teamModel]);
     }
 }

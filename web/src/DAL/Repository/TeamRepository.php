@@ -3,6 +3,8 @@
 namespace App\DAL\Repository;
 
 use App\DAL\Entity\Team;
+use App\DAL\Entity\Tournament;
+use App\DAL\Entity\TournamentParticipant;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\ORM\Query\Expr;
@@ -181,6 +183,19 @@ class TeamRepository extends ServiceEntityRepository
             ->setParameter('p_team_id', $idTeam)
             ->getQuery()
             ->getOneOrNullResult();
+    }
+
+    public function findStatistics(int $id): array
+    {   
+        $queryBuilder = $this->getEntityManager()->createQueryBuilder();
+
+        return $queryBuilder
+            ->select('COUNT(t.id) as tournamentCount, SUM(case WHEN t.winner = tp THEN 1 ELSE 0 END) as wonTournaments')
+            ->from(Tournament::class, 't')
+            ->innerJoin(TournamentParticipant::class, 'tp', Expr\Join::WITH, 'tp.tournament = t AND tp.signedUpTeam = :id')
+            ->setParameter('id', $id)
+            ->getQuery()
+            ->getSingleResult();
     }
 
 //    /**
