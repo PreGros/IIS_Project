@@ -58,3 +58,21 @@ i.bi-person-circle {
 .column-label{
     display: block;
 }
+
+.highlight {
+    animation-name: highlight-tr;
+    animation-duration: 2s;
+  }
+  
+@keyframes highlight-tr {
+50%  {background-color: #cff4fc;}
+}
+
+.anchor-higher:before{
+    content: '';
+    display: block;
+    position: relative;
+    width: 0;
+    height: 5em;
+    margin-top: -5em
+}

@@ -422,3 +422,11 @@ function fixDateIntervals(){
         });
     });
 }
+
+$('.ref').on('click', function () {
+    var href = $(this).attr('href');
+    $(href).parent().parent().removeClass('highlight');
+    setTimeout(function() {
+        $(href).parent().parent().addClass('highlight');
+    }, 5);
+});

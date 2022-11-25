@@ -19,6 +19,7 @@ class MatchTable extends BaseTable
 
     public function init(array $options = []): self
     {
+        $options['showRefs'] ??= false;
         parent::init($options);
 
         $this
@@ -40,9 +41,11 @@ class MatchTable extends BaseTable
             ->setDefault('allModifiable', false)
             ->setDefault('tournamentId', 0)
             ->setDefault('matches', [])
+            ->setDefault('showRefs', false)
             ->setAllowedTypes('allModifiable', 'bool')
             ->setAllowedTypes('tournamentId', 'int')
-            ->setAllowedTypes('matches', 'array');
+            ->setAllowedTypes('matches', 'array')
+            ->setAllowedTypes('showRefs', 'bool');
     }
 
     protected function setData(): \Traversable
@@ -62,15 +65,18 @@ class MatchTable extends BaseTable
             $previousMatchCount = $match->getPreviousMatchesCount();
             $data['participants'] = $this->renderTwigStringColumn(
                 (
-                    '{% if not (row.participant1 is null) %}<a href="{{ row.participant1Url }}">{{ row.participant1 }}</a>{% elseif row.part1HavePrevMatch %}From previous match{% else %}Was not entered{% endif %}' .
+                    '<span class="anchor-higher" id="{{ row.id }}">{% if not (row.participant1 is null) %}<a href="{{ row.participant1Url }}">{{ row.participant1 }}</a>{% elseif not (row.part1HavePrevMatch is null) %}' .
+                    ($this->options['showRefs'] ? '<a class="ref" href="#{{ row.part1HavePrevMatch }}">From previous match</a>' : 'From previous match') . '{% else %}Was not entered{% endif %}' .
                     ' vs ' .
-                    '{% if not (row.participant2 is null) %}<a href="{{ row.participant2Url }}">{{ row.participant2 }}</a>{% elseif row.part2HavePrevMatch %}From previous match{% else %}Was not entered{% endif %}'
+                    '{% if not (row.participant2 is null) %}<a href="{{ row.participant2Url }}">{{ row.participant2 }}</a>{% elseif not (row.part2HavePrevMatch is null) %}' . 
+                    ($this->options['showRefs'] ? '<a class="ref" href="#{{ row.part2HavePrevMatch }}">From previous match</a>' : 'From previous match') . '{% else %}Was not entered{% endif %}</span>'
                 ),
                 [
+                    'id' => $match->getId(),
                     'participant1' => $match->getParticipant1()?->getParticipantName(),
                     'participant2' => $match->getParticipant2()?->getParticipantName(),
-                    'part1HavePrevMatch' => $previousMatchCount === 2 || ($previousMatchCount === 1 && $match->getParticipant1() === null),
-                    'part2HavePrevMatch' => $previousMatchCount === 2 || ($previousMatchCount === 1 && $match->getParticipant1() !== null),
+                    'part1HavePrevMatch' => $previousMatchCount === 2 || ($previousMatchCount === 1 && $match->getParticipant1() === null) ? $match->getFirstPreviousMatch()?->getId() ?? 0 : null,
+                    'part2HavePrevMatch' => $previousMatchCount === 2 || ($previousMatchCount === 1 && $match->getParticipant1() !== null) ? $match->getLastPreviousMatch()?->getId() ?? 0 : null,
                     'participant1Url' => $this->router->generate($match->getParticipant1()?->isParticipantTeam() ? 'team_info' : 'user_info', ['id' => $match->getParticipant1()?->getParticipantId() ?? 0]),
                     'participant2Url' => $this->router->generate($match->getParticipant2()?->isParticipantTeam() ? 'team_info' : 'user_info', ['id' => $match->getParticipant2()?->getParticipantId() ?? 0]),
                 ]

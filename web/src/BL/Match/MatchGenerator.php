@@ -46,6 +46,8 @@ class MatchGenerator
         bool $setParticipantsToMatches = true
     )
     {
+        /** randomize participants order */
+        shuffle($participants);
         $this->participants = $participants;
         $this->tournament = AutoMapper::map($tournamentModel, Tournament::class, trackEntity: false);
         $this->setParticipantsToMatches = $setParticipantsToMatches;

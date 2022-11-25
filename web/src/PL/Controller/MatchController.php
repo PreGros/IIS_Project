@@ -27,7 +27,7 @@ class MatchController extends AbstractController
         $allModifiable = $tournament->getCreatedById() === $user?->getId() || $this->isGranted('ROLE_ADMIN');
         $tables = [];
         foreach ($matches as $matchLevel){
-            $tables[] = (clone $matchTable)->init(['matches' => $matchLevel, 'tournamentId' => $tournament->getId(), 'allModifiable' => $allModifiable]);
+            $tables[] = (clone $matchTable)->init(['matches' => $matchLevel, 'tournamentId' => $tournament->getId(), 'allModifiable' => $allModifiable, 'showRefs' => true]);
         }
 
         return $this->render('match/index.html.twig', ['tables' => $tables]);
