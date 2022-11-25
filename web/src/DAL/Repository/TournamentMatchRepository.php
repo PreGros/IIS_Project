@@ -2,6 +2,7 @@
 
 namespace App\DAL\Repository;
 
+use App\BL\Tournament\WinCondition;
 use App\DAL\Entity\MatchParticipant;
 use App\DAL\Entity\Team;
 use App\DAL\Entity\Tournament;
@@ -22,6 +23,8 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class TournamentMatchRepository extends ServiceEntityRepository
 {
+    private const TIME_FORMAT = '+P%yY%mM%dDT%kH%iM%sS';
+
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, TournamentMatch::class);
@@ -99,6 +102,91 @@ class TournamentMatchRepository extends ServiceEntityRepository
             ->setParameter('p_match_id', $matchId)
             ->getQuery()
             ->getResult();
+    }
+
+    public function findMatchesWithoutResult(int $tournamentId, int $matchParticipantCount): array
+    {
+        $queryBuilder = $this->getEntityManager()->createQueryBuilder();
+
+        return $queryBuilder
+            ->select('m.id')
+            ->from(TournamentMatch::class, 'm')
+            ->leftJoin(MatchParticipant::class, 'p', Join::WITH, $queryBuilder->expr()->andX(
+                    'p.tournamentMatch = m',
+                    $queryBuilder->expr()->orX(
+                        'p.points IS NOT NULL',
+                        'p.completionTime IS NOT NULL'
+                    )
+                )
+            )
+            ->where('IDENTITY(m.tournament) = :p_tournamentId')
+            ->groupBy('m')
+            ->having('COUNT(p) < :p_matchParticipantCount')
+            ->setParameter('p_tournamentId', $tournamentId)
+            ->setParameter('p_matchParticipantCount', $matchParticipantCount)
+            ->getQuery()
+            ->getSingleColumnResult();
+    }
+
+    public function findTournamentWinner(int $tournamentId, ?bool $pointsGrater, ?bool $timeGrater)
+    {
+        $queryBuilder = $this->getEntityManager()->createQueryBuilder();
+
+        return $queryBuilder
+            ->select('tp')
+            ->from(TournamentParticipant::class, 'tp')
+            ->innerJoin(MatchParticipant::class, 'p', Join::WITH, 'p.tournamentParticipant = tp')
+            ->where('IDENTITY(tp.tournament) = :p_tournamentId')
+            ->groupBy('tp')
+            ->having($queryBuilder->expr()->andX(
+                ':p_pointsGrater = 1',
+                'SUM(p.points) >= ALL (' .  $this->getSumPointsQuery('pp1', $tournamentId) .')'
+            ))
+            ->orHaving($queryBuilder->expr()->andX(
+                ':p_pointsGrater = 0',
+                'SUM(p.points) <= ALL (' .  $this->getSumPointsQuery('pp2', $tournamentId) .')'
+            ))
+            ->orHaving($queryBuilder->expr()->andX(
+                ':p_timeGrater = 1',
+                'SUM(TIMETOSEC(STRTODATE(p.completionTime, \'' . self::TIME_FORMAT . '\'))) >= ALL (' .  $this->getSumDurationQuery('pd1', $tournamentId) .')'
+            ))
+            ->orHaving($queryBuilder->expr()->andX(
+                ':p_timeGrater = 0',
+                'SUM(TIMETOSEC(STRTODATE(p.completionTime, \'' . self::TIME_FORMAT . '\'))) <= ALL (' .  $this->getSumDurationQuery('pd2', $tournamentId) .')'
+            ))
+            ->setParameter('p_tournamentId', $tournamentId)
+            ->setParameter('p_pointsGrater', $pointsGrater)
+            ->setParameter('p_timeGrater', $timeGrater)
+            ->getQuery()
+            ->getResult();
+    }
+
+    private function getSumPointsQuery(string $alias, int $tournamentId): string
+    {
+        $queryBuilder = $this->getEntityManager()->createQueryBuilder();
+
+        return $queryBuilder
+            ->select('SUM(' . $alias . '.points)')
+            ->from(TournamentParticipant::class, 't' . $alias)
+            ->innerJoin(MatchParticipant::class, $alias, Join::WITH, $alias . '.tournamentParticipant = t' . $alias)
+            ->where('IDENTITY(t' . $alias . '.tournament) = :p_tournamentId')
+            ->groupBy('t' . $alias . '.id')
+            ->setParameter('p_tournamentId', $tournamentId)
+            ->getDQL();
+    }
+
+    private function getSumDurationQuery(string $alias, int $tournamentId): string
+    {
+        $queryBuilder = $this->getEntityManager()->createQueryBuilder();
+
+        return $queryBuilder
+            ->select('SUM(TIMETOSEC(STRTODATE(' . $alias . '.completionTime, \'' . self::TIME_FORMAT . '\')))')
+            ->from(TournamentParticipant::class, 't' . $alias)
+            ->innerJoin(MatchParticipant::class, $alias, Join::WITH, $alias . '.tournamentParticipant = t' . $alias)
+            ->where('IDENTITY(t' . $alias . '.tournament) = :p_tournamentId')
+            ->groupBy('t' . $alias . '.id')
+            ->setParameter('p_tournamentId', $tournamentId)
+            ->getDQL();
     }
 
 //    /**
