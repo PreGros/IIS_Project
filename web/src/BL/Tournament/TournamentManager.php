@@ -416,16 +416,16 @@ class TournamentManager
         return $match !== null;
     }
 
-    public function setWinner(TournamentModel $tournament, int $matchParticipantId)
+    public function setWinner(TournamentModel $tournament, int $participantId, bool $flush = false)
     {
-        /** @var \App\DAL\Repository\TournamentParticipantRepository */
-        $repo = $this->entityManager->getRepository(\App\DAL\Entity\TournamentParticipant::class);
         /** @var Tournament */
         $tournamentEntity = AutoMapper::map($tournament, \App\DAL\Entity\Tournament::class, trackEntity: false);
-        $tournamentEntity->setWinner($repo->findOneByMatchParticipant($matchParticipantId));
+        $tournamentEntity->setWinner($this->entityManager->getReference(TournamentParticipant::class, $participantId));
 
         $this->entityManager->persist($tournamentEntity);
-        $this->entityManager->flush();
+        if ($flush){
+            $this->entityManager->flush();
+        }
     }
 
     public function checkUserDeactivated(int $idParticipant, bool $isTeam) : bool

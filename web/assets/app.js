@@ -410,6 +410,7 @@ function fixDateIntervals(){
         });
         $('input[name*=hours]').each((i, el) => {
             el.setAttribute('min', '0');
+            el.setAttribute('max', '23');
         });
         $('input[name*=minutes]').each((i, el) => {
             el.setAttribute('min', '0');
