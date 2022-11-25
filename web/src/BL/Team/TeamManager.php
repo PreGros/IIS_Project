@@ -322,4 +322,12 @@ class TeamManager
         $this->entityManager->persist($team);
         $this->entityManager->flush();
     }
+
+    public function getTeamStatistics(int $id)
+    {
+        /** @var \App\DAL\Repository\TeamRepository */
+        $repo = $this->entityManager->getRepository(\App\DAL\Entity\Team::class);
+        $statistics = $repo->findStatistics($id);
+        return Automapper::map($statistics, TeamStatisticsModel::class, trackEntity: false);
+    }
 }

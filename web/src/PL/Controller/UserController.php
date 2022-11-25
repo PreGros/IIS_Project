@@ -60,13 +60,12 @@ class UserController extends AbstractController
 
         /** @var \App\BL\User\UserModel */
         $user = $this->getUser();
-
         
-        dump($user->getIsDeactivated());
         return $this->render('user/info.html.twig', [
             'canEdit' => $user?->isCurrentUser($id) || $this->isGranted('ROLE_ADMIN'),
             'deactivated' => $userModel->getIsDeactivated(),
             'user' => $userModel,
+            'userStatistics' => $userManager->getUsersStatistics($id),
             'id' => $id
         ]);
     }

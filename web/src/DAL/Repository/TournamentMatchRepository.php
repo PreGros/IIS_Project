@@ -48,19 +48,40 @@ class TournamentMatchRepository extends ServiceEntityRepository
         }
     }
 
-    public function findAllWithParticipants(int $tournamentId): array
+    public function findAllWithParticipants(int $tournamentId, ?int $participantId = null): array
     {
-        return $this->getEntityManager()->createQueryBuilder()
+        $queryBuilder = $this->getEntityManager()->createQueryBuilder()
             ->select('m, p, tp, u, tm')
             ->from(TournamentMatch::class, 'm')
             ->leftJoin(MatchParticipant::class, 'p', Join::WITH, 'p.tournamentMatch = m')
             ->leftJoin(TournamentParticipant::class, 'tp', Join::WITH, 'p.tournamentParticipant = tp')
             ->leftJoin(User::class, 'u', Join::WITH, 'tp.signedUpUser = u')
             ->leftJoin(Team::class, 'tm', Join::WITH, 'tp.signedUpTeam = tm')
-            ->where('IDENTITY(m.tournament) = :p_tournament_id')
+            ->where('IDENTITY(m.tournament) = :p_tournament_id');
+        
+        if ($participantId !== null){
+            $queryBuilder = $queryBuilder->andWhere('m.id IN (' .
+                $this->getEntityManager()->createQueryBuilder()
+                ->select('tour_match.id')
+                ->from(TournamentMatch::class, 'tour_match')
+                ->leftJoin(MatchParticipant::class, 'match_p', Join::WITH, 'match_p.tournamentMatch = tour_match')
+                ->leftJoin(TournamentParticipant::class, 'tour_p', Join::WITH, 'match_p.tournamentParticipant = tour_p')
+                ->where('(CASE WHEN tour_p.signedUpUser IS NOT NULL THEN IDENTITY(tour_p.signedUpUser) ELSE IDENTITY(tour_p.signedUpTeam) END) = :p_participant_id')
+                ->getDQL() .
+                ')'
+            );
+        }
+
+        $queryBuilder = $queryBuilder    
             ->orderBy('m.id')
             ->addOrderBy('p.id')
-            ->setParameter('p_tournament_id', $tournamentId)
+            ->setParameter('p_tournament_id', $tournamentId);
+
+        if ($participantId !== null){
+            $queryBuilder = $queryBuilder->setParameter('p_participant_id', $participantId);
+        }
+
+        return $queryBuilder
             ->getQuery()
             ->getResult();
     }
