@@ -8,6 +8,8 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 use App\BL\Match\MatchManager;
+use App\BL\Team\TeamManager;
+use App\BL\Tournament\ParticipantType;
 use App\BL\Tournament\TournamentManager;
 use App\BL\Tournament\WinCondition;
 use App\PL\Form\Match\MatchEditFormType;
@@ -28,6 +30,43 @@ class MatchController extends AbstractController
         $tables = [];
         foreach ($matches as $matchLevel){
             $tables[] = (clone $matchTable)->init(['matches' => $matchLevel, 'tournamentId' => $tournament->getId(), 'allModifiable' => $allModifiable]);
+        }
+
+        return $this->render('match/index.html.twig', ['tables' => $tables]);
+    }
+
+    #[Route('/tournaments/{id<\d+>}/my/matches', name: 'user_matches')]
+    public function getUserMatchesAction(int $id, MatchManager $matchManager, MatchTable $matchTable, TournamentManager $tournamentManager, TeamManager $teamManager): Response
+    {
+        /** @var \App\BL\User\UserModel */
+        $user = $this->getUser();
+        $tournamentModel = $tournamentManager->getTournament($id);
+
+        $participantId = null;
+        if($tournamentModel->getCurrentUserRegistrationState() !== null){
+            // registered and approved
+            if($tournamentModel->getParticipantType(false) == ParticipantType::Teams){
+                // team
+                $ret = $teamManager->getRegisteredTeamParticipant($id, $user->getId());
+                $participantId = $ret[1];
+            }
+            else{
+                // user
+                $participantId = $user->getId();
+            }
+        }
+        else{
+            $this->addFlash('danger', 'You are not registered in this tournament');
+            return $this->redirectToRoute('tournament_info', ['id' => $id]);
+        }
+
+        
+        $matches = $matchManager->getMatches($tournamentModel, $participantId);
+
+        $allModifiable = $tournamentModel->getCreatedById() === $user?->getId() || $this->isGranted('ROLE_ADMIN');
+        $tables = [];
+        foreach ($matches as $matchLevel){
+            $tables[] = (clone $matchTable)->init(['matches' => $matchLevel, 'tournamentId' => $tournamentModel->getId(), 'allModifiable' => false]);
         }
 
         return $this->render('match/index.html.twig', ['tables' => $tables]);

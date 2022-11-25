@@ -15,8 +15,10 @@
             <h3>Round {{ key + 1 }}</h3>
         {% endif %}
         {{ table_render(table) }}
-        <br>
-        <hr>
+        {% if key != count - 1 %}
+            <br>
+            <hr>
+        {% endif %}
     {% endfor %}
     
 {% endblock %}

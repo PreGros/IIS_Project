@@ -50,7 +50,7 @@ class MatchManager
 
         foreach ($matches as $node){
             if ($node->getChild()?->getId() !== null){
-                $matches[$node->getChild()?->getId()]->addPreviousMatch($node);
+                ($matches[$node->getChild()?->getId()] ?? null)?->addPreviousMatch($node);
             }
             if (in_array($node->getId(), isset($layers[$layer]) ? array_map(fn (MatchModel $m) => $m->getChild()?->getId(), $layers[$layer]) : [])){
                 if ($layer !== 0){
@@ -70,11 +70,11 @@ class MatchManager
         return $layers;
     }
 
-    public function getMatches(TournamentModel $tournament)
+    public function getMatches(TournamentModel $tournament, ?int $participantId = null)
     {
         /** @var \App\DAL\Repository\TournamentMatchRepository */
         $matchesRepo = $this->entityManager->getRepository(\App\DAL\Entity\TournamentMatch::class);
-        $entities = $matchesRepo->findAllWithParticipants($tournament->getId());
+        $entities = $matchesRepo->findAllWithParticipants($tournament->getId(), $participantId);
         /** @var array<MatchModel> */
         $matches = [];
         $matchIndex = 0;
@@ -246,18 +246,37 @@ class MatchManager
         }
 
         if ($tournament->getMatchingType(false) === MatchingType::AllVsAll){
-
+            /** For round robin all results have to be set in db */
+            $this->entityManager->flush();
+            $this->checkRoundRobinWinCondition($tournament);
         }
         elseif ($tournament->getMatchingType(false) === MatchingType::Elimination){
-            $this->checkSingleEliminationWinConditionAndSetResult($match, $tournament, $participant1?->getId(), $participant2?->getId());
+            $this->checkSingleEliminationWinConditionAndSetResult($match, $tournament);
         }
 
         $this->entityManager->flush();
     }
 
-    private function checkRoundRobinWinCondition()
+    private function checkRoundRobinWinCondition(TournamentModel $tournament)
     {
-        
+        /** @var \App\DAL\Repository\TournamentMatchRepository */
+        $repo = $this->entityManager->getRepository(TournamentMatch::class);
+
+        $matchesWithoutResult = $repo->findMatchesWithoutResult($tournament->getId(), 2);
+        if (!empty($matchesWithoutResult)){
+            /** we need all result to determinate winner */
+            return;
+        }
+        $winCond = $tournament->getWinCondition(false);
+        $pointsGrater = $winCond === WinCondition::MaxPoints || $winCond === WinCondition::MinPoints ? $winCond === WinCondition::MaxPoints : null; 
+        $durationGrater = $winCond === WinCondition::MaxTime || $winCond === WinCondition::MinTime ? $winCond === WinCondition::MaxTime : null;
+        $tournamentWinners = $repo->findTournamentWinner($tournament->getId(), $pointsGrater, $durationGrater);
+        if (empty($matchesWithoutResult)){
+            /** Invalid tournaments data */
+            return;
+        }
+        /** if multiple participants have same result, first one is taken */
+        $this->tournamentManager->setWinner($tournament, $tournamentWinners[array_key_first($tournamentWinners)]->getId(), false);
     }
 
     private function participant1Win(MatchModel $match, WinCondition $cond): bool
@@ -282,16 +301,19 @@ class MatchManager
         }
     }
 
-    private function checkSingleEliminationWinConditionAndSetResult(MatchModel $match, TournamentModel $tournament, ?int $matchParticipant1Id, ?int $matchParticipant2Id)
+    private function checkSingleEliminationWinConditionAndSetResult(MatchModel $match, TournamentModel $tournament)
     {
         $firstWin = $this->participant1Win($match, $tournament->getWinCondition(false));
 
-        if (($firstWin && $matchParticipant1Id === null) || (!$firstWin && $matchParticipant2Id === null)){
+        $tournamentPart1Id = $match->getParticipant1()?->getTournamentPartId();
+        $tournamentPart2Id = $match->getParticipant2()?->getTournamentPartId();
+
+        if (($firstWin && $tournamentPart1Id === null) || (!$firstWin && $tournamentPart2Id === null)){
             return;
         }
         
         if ($match->getChild()?->getId() === null){
-            $this->tournamentManager->setWinner($tournament, $firstWin ? $matchParticipant1Id : $matchParticipant2Id);
+            $this->tournamentManager->setWinner($tournament, $firstWin ? $tournamentPart1Id : $tournamentPart2Id);
             return;
         }
         

@@ -103,6 +103,9 @@
                         <span title="Matches were not generated yet">
                     {% endif %}
                         <a href="{{ path('matches', redirectParam) }}" type="button" class="btn btn-primary{% if matchesGenerated %}" {% else %} disabled" aria-disabled="true" {% endif %}>Matches info</a>
+                        {% if isRegistered %}
+                            <a href="{{ path('user_matches', redirectParam) }}" type="button" class="btn btn-primary{% if matchesGenerated %}" {% else %} disabled" aria-disabled="true" {% endif %}>My matches info</a>
+                        {% endif %}
                     {% if not matchesGenerated %}
                         </span>
                     {% endif %}

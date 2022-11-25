@@ -55,7 +55,7 @@ class MatchTable extends BaseTable
                 'result' => !$match->hasStarted() ?
                     'Not finished' :
                     ($match->getParticipant1()?->getResult() ?? 'Participant not entered') .
-                    ':' .
+                    ' - ' .
                     ($match->getParticipant2()?->getResult() ?? 'Participant not entered')
             ];
 
