@@ -28,7 +28,7 @@ class MembersTable extends BaseTable
         $this
             ->addColumn('nickname', 'Nickname', true)
             ->addColumn('email', 'Email')
-            ->addColumn('isLeader', 'Is leader?', true);
+            ->addColumn('isLeader', 'Is Leader', true);
         
         if ($this->options['canModify']){
             $this->addColumn('action', 'Action', true);
@@ -57,7 +57,7 @@ class MembersTable extends BaseTable
                         'url' => $this->router->generate('user_info', ['id' => $member->getId()]),
                         'nickname' => $member->getNickname()
                     ]),
-                'isLeader' => $member->isLeader() ? '<i class="bi bi-check-lg"/>' : '<i class="bi bi-x-lg"/>'
+                'isLeader' => $member->isLeader() ? '<i class="bi bi-check-lg" title="Leader"/>' : '<i class="bi bi-x-lg" title="Not Leader"/>'
             ];
 
             if ($this->options['canModify']){

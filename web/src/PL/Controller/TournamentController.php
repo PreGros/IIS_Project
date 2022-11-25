@@ -122,7 +122,8 @@ class TournamentController extends AbstractController
         }
 
 
-        $table = $dataTable->create($id, $this->isGranted('ROLE_ADMIN'), $approvedParticipantCnt >= $tournamentModel->getMaxParticipantCount())->handleRequest($request);
+        $matchesGenerated = $tournamentManager->areTournamentMatchesGenerated($id);
+        $table = $dataTable->create($id, $this->isGranted('ROLE_ADMIN'), $approvedParticipantCnt >= $tournamentModel->getMaxParticipantCount(), $matchesGenerated)->handleRequest($request);
 
         if ($table->isCallback()){
             return $table->getResponse();
@@ -149,7 +150,7 @@ class TournamentController extends AbstractController
             'participantName' => $participantName,
             'canUnregister' => (($isLeader !== false) && $tournamentModel->canRegistrate() ),
             'registrationEnded' => $tournamentModel->registrationEnded(),
-            'matchesGenerated' => $tournamentManager->areTournamentMatchesGenerated($id),
+            'matchesGenerated' => $matchesGenerated,
             'canGenerateMatches' => ($tournamentModel->getCreatedById() === $user?->getId() || $this->isGranted('ROLE_ADMIN'))
         ]);
     }

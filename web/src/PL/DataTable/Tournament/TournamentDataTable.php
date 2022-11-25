@@ -58,11 +58,11 @@ class TournamentDataTable
                 'orderable' => true
             ])
             ->add('isApproved', TwigStringColumn::class, [
-                'label' => 'Is Approved?',
+                'label' => 'Is Approved',
                 'searchable' => true,
                 'orderable' => true,
                 'template' =>
-                    '<i class="bi {% if row.isApproved %} bi-check-lg {% else %} bi-x-lg {% endif %}"></i>'.
+                    '<i class="bi {% if row.isApproved %} bi-check-lg {% else %} bi-x-lg {% endif %}" title="{% if row.isApproved %}Approved{% else %}Not Approved{% endif %}"></i>'.
                     ' ' .
                     ($isAdmin ? '<a href="{% if row.isApproved %}{{ row.disapproveURL }}{% else %}{{ row.approveURL }}{% endif %}" class="btn btn-secondary">{% if row.isApproved %}Disapprove{% else %}Approve{% endif %}</a>' : '')
             ])
@@ -73,11 +73,11 @@ class TournamentDataTable
                 'orderable' => true
             ])
             ->add('isCurrRegistered', TwigStringColumn::class, [
-                'label' => 'Is registred?',
+                'label' => 'Is registred',
                 'searchable' => false,
                 'orderable' => true,
                 'template' =>
-                    '<i class="bi {% if row.participantIsApproved %} bi-check-all {% elseif not row.participantIsApproved is null %} bi-check-lg {% else %} bi-x-lg {% endif %}"></i>'
+                    '<i class="bi {% if row.participantIsApproved %} bi-check-all {% elseif not row.participantIsApproved is null %} bi-check-lg {% else %} bi-x-lg {% endif %}" title="{% if row.participantIsApproved %}Registered and Approved{% elseif not row.participantIsApproved is null %}Registered but Not Approved{% else %}Not Registered{% endif %}"></i>'
             ])
             ->add('action', TwigStringColumn::class, [
                 'label' => 'Action',
