@@ -73,6 +73,8 @@ class TournamentMatchRepository extends ServiceEntityRepository
             ->leftJoin(Team::class, 'tm', Join::WITH, 'tp.signedUpTeam = tm')
             ->leftJoin(TournamentMatch::class, 'pm', Join::WITH, 'pm.childMatch = m')
             ->where('m.id = :p_match_id')
+            ->orderBy('m.id')
+            ->addOrderBy('p.id')
             ->setParameter('p_match_id', $matchId)
             ->getQuery()
             ->getResult();

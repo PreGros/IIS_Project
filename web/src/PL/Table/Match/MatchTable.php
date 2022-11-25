@@ -59,15 +59,18 @@ class MatchTable extends BaseTable
                     ($match->getParticipant2()?->getResult() ?? 'Participant not entered')
             ];
 
+            $previousMatchCount = $match->getPreviousMatchesCount();
             $data['participants'] = $this->renderTwigStringColumn(
                 (
-                    '{% if not (row.participant1 is null) %}<a href="{{ row.participant1Url }}">{{ row.participant1 }}</a>{% else %}From previous match{% endif %}' .
+                    '{% if not (row.participant1 is null) %}<a href="{{ row.participant1Url }}">{{ row.participant1 }}</a>{% elseif row.part1HavePrevMatch %}From previous match{% else %}Was not entered{% endif %}' .
                     ' vs ' .
-                    '{% if not (row.participant2 is null) %}<a href="{{ row.participant2Url }}">{{ row.participant2 }}</a>{% else %}From previous match{% endif %}'
+                    '{% if not (row.participant2 is null) %}<a href="{{ row.participant2Url }}">{{ row.participant2 }}</a>{% elseif row.part2HavePrevMatch %}From previous match{% else %}Was not entered{% endif %}'
                 ),
                 [
                     'participant1' => $match->getParticipant1()?->getParticipantName(),
                     'participant2' => $match->getParticipant2()?->getParticipantName(),
+                    'part1HavePrevMatch' => $previousMatchCount === 2 || ($previousMatchCount === 1 && $match->getParticipant1() === null),
+                    'part2HavePrevMatch' => $previousMatchCount === 2 || ($previousMatchCount === 1 && $match->getParticipant1() !== null),
                     'participant1Url' => $this->router->generate($match->getParticipant1()?->isParticipantTeam() ? 'team_info' : 'user_info', ['id' => $match->getParticipant1()?->getParticipantId() ?? 0]),
                     'participant2Url' => $this->router->generate($match->getParticipant2()?->isParticipantTeam() ? 'team_info' : 'user_info', ['id' => $match->getParticipant2()?->getParticipantId() ?? 0]),
                 ]

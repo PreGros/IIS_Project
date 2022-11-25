@@ -7,11 +7,24 @@ use App\BL\User\UserModel;
 
 class MatchParticipantModel
 {
+    private ?int $tournamentPartId;
+
     private null|UserModel|TeamModel $participant;
 
     private ?float $points;
 
     private ?\DateInterval $completionTime;
+
+    public function getTournamentPartId(): ?int
+    {
+        return $this->tournamentPartId;
+    }
+
+    public function setTournamentPartId(?int $val): self
+    {
+        $this->tournamentPartId = $val;
+        return $this;
+    }
 
     public function getParticipant(): null|UserModel|TeamModel
     {
