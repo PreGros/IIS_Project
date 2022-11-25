@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html>
 <head>
-<meta http-equiv="content-type" content="text/html; charset=iso-8859-2"/>
+<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
 <title>Projekt IIS</title>
 <style type="text/css">
 	table { border-collapse: collapse; }
@@ -74,21 +74,21 @@
 				<ul>
 					<li>zadává parametry turnaje</li> - TournamentController a funkce v souboru TournamentManager + TournamentRespository
 					<li>schvaluje hráče turnaje (jednotlivce/týmy dle typu turnaje)</li> - TournamentController a funkce v souboru TournamentManager + TournamentRespository
-					<li>spouští turnaj, generuje harmonogram turnaje (ručně nebo automaticky - rozlosování)</li>
-					<li>zadává výsledky zápasů (výsledek zápasu uvažujte jako dvojici (počet bodů týmu/hráče 1, počet bodů týmu/hráče 2))</li>
+					<li>spouští turnaj, generuje harmonogram turnaje (ručně nebo automaticky - rozlosování)</li> - TournamentController a funkce v souboru MatchManager + MatchGenerator + TournamentMatchRespository
+					<li>zadává výsledky zápasů (výsledek zápasu uvažujte jako dvojici (počet bodů týmu/hráče 1, počet bodů týmu/hráče 2))</li> - MatchController a funkce v souboru MatchManager + TournamentMatchRespository
 				</ul>
 			</li>
-			<li>účastní se turnaje (registruje se jako jednotlivec nebo je členem registrovaného týmu) - stává se <b>hráčem turnaje</b>
+			<li>účastní se turnaje (registruje se jako jednotlivec nebo je členem registrovaného týmu) - stává se <b>hráčem turnaje</b> - TournamentController a funkce v souboru TournamentManager + TournamentRespository
 				<ul>
-					<li>vidí svůj program (harmonogram zápasů)</li>
-					<li>přednostně vidí výsledky svých zápasů</li>
+					<li>vidí svůj program (harmonogram zápasů)</li>  - MatchController a funkce v souboru MatchManager + TournamentMatchRespository
+					<li>přednostně vidí výsledky svých zápasů</li>  - MatchController a funkce v souboru MatchManager + TournamentMatchRespository
 				</ul>
 			</li>
 		</ul>
 	</li>
 	<li><b>neregistrovaný:</b>
 		<ul>
-			<li>prochází profily a statistiky hráčů, týmů a turnajů s výsledky</li>
+			<li>prochází profily a statistiky hráčů, týmů a turnajů s výsledky</li>  - UserController, TeamController, TournamentController, MatchController + jejich soubory Manager a Repository
 		</ul>
 	</li>
 </ul>
@@ -103,9 +103,19 @@ Zde vložte grafické schéma relační databáze (tabulek v databázi).
 
 Stručně popište: 
 <ul>
-<li>postup instalace na server,</li>
-<li>softwarové požadavky (verze PHP apod.),</li>
-<li>jak rozbalit, konfigurovat, inicializovat databázi, ...</li>
+	<li>softwarové požadavky (verze PHP apod.),</li>
+	<li>PHP 8.1, MySQL, composer, npm - jednotlivé balíčky doinstaluje a zkontroluje composer a npm</li>
+	<li>postup instalace na server,</li>
+	<li>na serveru je nutné přetáhnout soubory projektu a provést následující příkazy (v adresáři web)</li>
+	<li>jak rozbalit, konfigurovat, inicializovat databázi, ...</li>
+	<ol>
+		<li>composer install</li>
+		<li>npm install</li>
+		<li>npm run dev</li>
+		<li>php bin/console doctrine:database:create</li>
+		<li>php bin/console make:migration</li>
+		<li>php bin/console doctrine:migrations:migrate</li>
+	</ol>
 </ul>
 
 <h2>Známé problémy</h2>
