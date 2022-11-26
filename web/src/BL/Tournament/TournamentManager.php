@@ -443,7 +443,6 @@ class TournamentManager
         /** @var Tournament */
         $tournamentEntity = AutoMapper::map($tournament, \App\DAL\Entity\Tournament::class, trackEntity: false);
         $tournamentEntity->setWinner($this->entityManager->getReference(TournamentParticipant::class, $participantId));
-
         $this->entityManager->persist($tournamentEntity);
         if ($flush){
             $this->entityManager->flush();
