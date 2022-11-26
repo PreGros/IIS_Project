@@ -18,6 +18,18 @@
                 <a href="{{ path('tournament_edit', {'id': tournament.id }) }}" type="button" class="btn btn-primary{% if not tournament.approved %}" {% else %} disabled" aria-disabled="true" {% endif %}>Edit tournament</a>
             {% endif %}
 
+
+            <hr>
+
+            <h3>Tournament's winner</h3>
+            
+            {% if tournament.winnerId != null %}
+                <a href="{{ path(participantIsTeam ? 'team_info' : 'user_info', {'id': tournament.winnerId ?? 0}) }}">{{ tournament.winnerName }}</a>
+            {% else %}
+                Winner was not yet determined
+            {% endif %}
+
+
             <hr>
 
             <h3>Description</h3>
