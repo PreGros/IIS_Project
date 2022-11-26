@@ -32,7 +32,12 @@ class MatchController extends AbstractController
             $tables[] = (clone $matchTable)->init(['matches' => $matchLevel, 'tournamentId' => $tournament->getId(), 'allModifiable' => $allModifiable, 'showRefs' => true]);
         }
 
-        return $this->render('match/index.html.twig', ['tables' => $tables]);
+        return $this->render('match/index.html.twig', [
+            'tables' => $tables,
+            'participantIsTeam' => ($tournament->getParticipantType(false) == ParticipantType::Teams),
+            'tournament' => $tournament,
+            'currUserMatches' => false
+        ]);
     }
 
     #[Route('/tournaments/{id<\d+>}/my/matches', name: 'user_matches')]
@@ -69,7 +74,12 @@ class MatchController extends AbstractController
             $tables[] = (clone $matchTable)->init(['matches' => $matchLevel, 'tournamentId' => $tournamentModel->getId(), 'allModifiable' => false]);
         }
 
-        return $this->render('match/index.html.twig', ['tables' => $tables]);
+        return $this->render('match/index.html.twig', [
+            'tables' => $tables,
+            'participantIsTeam' => ($tournamentModel->getParticipantType(false) == ParticipantType::Teams),
+            'tournament' => $tournamentModel,
+            'currUserMatches' => true
+        ]);
     }
 
     // #[Route('/tournaments/{id<\d+>}/generate-matches/{setParticipants<0|1>}', name: 'generate_matches')]
