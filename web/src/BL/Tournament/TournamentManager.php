@@ -16,6 +16,7 @@ use App\DAL\Entity\Tournament;
 use App\DAL\Entity\TournamentMatch;
 use App\DAL\Entity\TournamentParticipant;
 use App\DAL\Entity\TournamentType;
+use App\DAL\Entity\User;
 use DateTime;
 use Symfony\Component\Form\Test\FormInterface;
 
@@ -46,11 +47,7 @@ class TournamentManager
         );
 
         $tournament->setTournamentType(
-            AutoMapper::map(
-                $tournamentModel->getTournamentTypeModel(),
-                \App\DAL\Entity\TournamentType::class,
-                trackEntity: false
-            )
+            $this->entityManager->getReference(TournamentType::class,$tournamentModel->getTournamentTypeId())
         );
 
         $this->entityManager->persist($tournament);
@@ -95,6 +92,12 @@ class TournamentManager
     {
         /** @var \App\DAL\Repository\TournamentRepository */
         $repo = $this->entityManager->getRepository(Tournament::class);
+
+        /** @var \App\DAL\Repository\TournamentParticipantRepository */
+        $repoParticipant = $this->entityManager->getRepository(TournamentParticipant::class);
+
+        /** @var \App\DAL\Repository\UserRepository */
+        $repoUser = $this->entityManager->getRepository(User::class);
         
         /** @var \App\BL\User\UserModel */
         $user = $this->security->getUser();
@@ -104,12 +107,19 @@ class TournamentManager
             return null;
         }
 
+        /** @var \App\DAL\Entity\Tournament */
+        $tournamentEntity = $tournament['tournament'];
         /** @var \App\BL\Tournament\TournamentModel */
-        $tournamentModel = AutoMapper::map($tournament['tournament'], \App\BL\Tournament\TournamentModel::class, trackEntity: true);
-        $tournamentModel->setCreatedByNickName($tournament['tournament']->getCreatedBy()->getNickname());
-        $tournamentModel->setCreatedById($tournament['tournament']->getCreatedBy()->getId());
-        $tournamentModel->setApproved($tournament['tournament']->getApprovedBy() !== null);
+        $tournamentModel = AutoMapper::map($tournamentEntity, \App\BL\Tournament\TournamentModel::class, trackEntity: true);
+        $tournamentModel->setCreatedByNickName($tournamentEntity->getCreatedBy()->getNickname());
+        $tournamentModel->setCreatedById($tournamentEntity->getCreatedBy()->getId());
+        $tournamentModel->setApproved($tournamentEntity->getApprovedBy() !== null);
         $tournamentModel->setCurrentUserRegistrationState($tournament['approved_participant']);
+        $tournamentModel->setTournamentTypeId($tournamentEntity->getTournamentType()->getId());
+        //$tournamentModel->setWinnerModel($repoParticipant->find($tournamentEntity->getWinner()?->getId()));
+        $win = $repoParticipant->findParticipant($tournamentEntity->getWinner()?->getId());
+        dump($win);
+        dump($repoUser->find(2));
         return $tournamentModel;
     }
 
@@ -133,6 +143,9 @@ class TournamentManager
     {
         /** @var Tournament */
         $tournament = AutoMapper::map($tournamentModel, Tournament::class, trackEntity: false);
+        $tournament->setTournamentType(
+            $this->entityManager->getReference(TournamentType::class,$tournamentModel->getTournamentTypeId())
+        );
         
         $this->entityManager->persist($tournament);
         $this->entityManager->flush();
@@ -243,6 +256,7 @@ class TournamentManager
 
         /** +1 because of a leader */
         $teamMembers = $entity['memberCount'] + 1;
+        dump($teamMembers);
         if (($teamMembers > $tournamentMaxCount) || ($teamMembers < $tournamentMinCount)){
             return false;
         }
@@ -416,7 +430,7 @@ class TournamentManager
     {
         $typesFormated = [];
         foreach ($this->getTournamentTypes(true) as $type){
-            $typesFormated[$type->getName()] = $type;
+            $typesFormated[$type->getName()] = $type->getId();
         }
         return $typesFormated;
     }

@@ -19,6 +19,8 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class TournamentEditFormType extends AbstractType
 {
+    private TournamentManager $tournamentManager;
+
     public function __construct(
         TournamentManager $tournamentManager
     )
@@ -76,7 +78,7 @@ class TournamentEditFormType extends AbstractType
             ->add('submit', SubmitType::class, [
                 'attr' => ['class' => 'w-50 btn-primary']
             ])
-            ->add('tournamentTypeModel', ChoiceType::class, [
+            ->add('tournamentTypeId', ChoiceType::class, [
                 'choices' => $this->tournamentManager->getFormTournamentType(),
                 'label' => 'Tournament type'
             ])

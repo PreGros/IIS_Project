@@ -42,7 +42,11 @@ class TournamentModel
 
     private ?int $currentUserRegistrationState;
 
-    private TournamentTypeModel $tournamentTypeModel;
+    private int $tournamentTypeId;
+
+    private ?int $winnerId = null;
+
+    private ?string $winnerName = null;
 
     // public function __construct()
     // {
@@ -241,20 +245,40 @@ class TournamentModel
         return $this->currentUserRegistrationState;
     }
 
-    public function setTournamentTypeModel(?TournamentTypeModel $val): self
+    public function setTournamentTypeId(?int $val): self
     {
-        $this->tournamentTypeModel = $val;
+        $this->tournamentTypeId = $val;
         return $this;
     }
 
-    public function getTournamentTypeModel(): ?TournamentTypeModel
+    public function getTournamentTypeId(): ?int
     {
-        return $this->tournamentTypeModel;
+        return $this->tournamentTypeId;
     }
 
     public function registrationEnded(): bool
     {
         $now = new \DateTime;
         return $now >= $this->registrationDateEnd;
+    }
+
+    public function getWinnerId(): ?int
+    {
+        return $this->winnerId;
+    }
+
+    public function setWinnerId(?int $val)
+    {
+        $this->winnerId = $val;
+    }
+
+    public function getWinnerName(): ?string
+    {
+        return $this->winnerName;
+    }
+
+    public function setWinnerName(?string $val)
+    {
+        $this->winnerName = $val;
     }
 }

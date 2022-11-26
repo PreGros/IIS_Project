@@ -2,6 +2,7 @@
 
 namespace App\DAL\Repository;
 
+use App\DAL\Entity\Team;
 use App\DAL\Entity\Tournament;
 use App\DAL\Entity\TournamentParticipant;
 use App\DAL\Entity\TournamentType;
@@ -126,6 +127,7 @@ class TournamentRepository extends ServiceEntityRepository
             ->addSelect('tp.approved as approved_participant')
             ->from(Tournament::class, 't')
             ->leftJoin(User::class, 'c', Join::WITH, 't.createdBy = c')
+            ->innerJoin(TournamentType::class, 'tt', Join::WITH, 't.tournamentType = tt')
             ->leftJoin(TournamentParticipant::class, 'tp', Join::WITH,
                 $this->getEntityManager()->createQueryBuilder()->expr()->andX(
                     'IDENTITY(tp.tournament) = t.id',
