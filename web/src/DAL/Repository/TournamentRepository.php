@@ -124,10 +124,10 @@ class TournamentRepository extends ServiceEntityRepository
     {
         return $this->getEntityManager()->createQueryBuilder()
             ->select('t tournament')
-            ->addSelect('tp.approved as approved_participant')
+            ->addSelect('tp.approved approved')
             ->from(Tournament::class, 't')
-            ->leftJoin(User::class, 'c', Join::WITH, 't.createdBy = c')
             ->innerJoin(TournamentType::class, 'tt', Join::WITH, 't.tournamentType = tt')
+            ->leftJoin(User::class, 'c', Join::WITH, 't.createdBy = c')
             ->leftJoin(TournamentParticipant::class, 'tp', Join::WITH,
                 $this->getEntityManager()->createQueryBuilder()->expr()->andX(
                     'IDENTITY(tp.tournament) = t.id',

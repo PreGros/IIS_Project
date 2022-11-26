@@ -92,34 +92,27 @@ class TournamentManager
     {
         /** @var \App\DAL\Repository\TournamentRepository */
         $repo = $this->entityManager->getRepository(Tournament::class);
-
-        /** @var \App\DAL\Repository\TournamentParticipantRepository */
-        $repoParticipant = $this->entityManager->getRepository(TournamentParticipant::class);
-
-        /** @var \App\DAL\Repository\UserRepository */
-        $repoUser = $this->entityManager->getRepository(User::class);
         
         /** @var \App\BL\User\UserModel */
         $user = $this->security->getUser();
         $tournament = $repo->findInfo($id, $user?->getId());
-
         if ($tournament === null){
             return null;
         }
 
         /** @var \App\DAL\Entity\Tournament */
         $tournamentEntity = $tournament['tournament'];
+        /** @var \App\DAL\Entity\TournamentParticipant */
+        $winnerParticipant = $tournamentEntity->getWinner();
         /** @var \App\BL\Tournament\TournamentModel */
         $tournamentModel = AutoMapper::map($tournamentEntity, \App\BL\Tournament\TournamentModel::class, trackEntity: true);
         $tournamentModel->setCreatedByNickName($tournamentEntity->getCreatedBy()->getNickname());
         $tournamentModel->setCreatedById($tournamentEntity->getCreatedBy()->getId());
         $tournamentModel->setApproved($tournamentEntity->getApprovedBy() !== null);
-        $tournamentModel->setCurrentUserRegistrationState($tournament['approved_participant']);
+        $tournamentModel->setCurrentUserRegistrationState($tournament['approved']);
         $tournamentModel->setTournamentTypeId($tournamentEntity->getTournamentType()->getId());
-        //$tournamentModel->setWinnerModel($repoParticipant->find($tournamentEntity->getWinner()?->getId()));
-        $win = $repoParticipant->findParticipant($tournamentEntity->getWinner()?->getId());
-        dump($win);
-        dump($repoUser->find(2));
+        $tournamentModel->setWinnerId($winnerParticipant?->getSignedUpUser()?->getId() ?? $winnerParticipant?->getSignedUpTeam()?->getId());
+        $tournamentModel->setWinnerName($winnerParticipant?->getSignedUpUser()?->getNickname() ?? $winnerParticipant?->getSignedUpTeam()?->getName());
         return $tournamentModel;
     }
 
