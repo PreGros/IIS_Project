@@ -12,7 +12,7 @@
 
             {% if deactivated %}
                 <h2 style="font-size:30px;color:red;">DEACTIVATED</h2>
-            {% else %}
+            {% elseif canModify %}
                 <a href="{{ path('team_edit', { 'id': id }) }}" class="btn btn-primary">Edit team informations</a>
             {% endif %}
         </div>
