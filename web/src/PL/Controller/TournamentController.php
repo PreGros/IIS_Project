@@ -14,11 +14,10 @@ use App\PL\Form\Tournament\TournamentCreateFormType;
 use App\BL\Tournament\TournamentManager;
 use App\BL\Tournament\TournamentModel;
 use App\BL\Tournament\TournamentTypeModel;
-use App\BL\Util\DateTimeUtil;
 use App\PL\DataTable\Tournament\TournamentDataTable;
 use App\PL\DataTable\Tournament\TournamentParticipantDataTable;
 use App\PL\Form\Tournament\TournamentEditFormType;
-use App\PL\Form\Tournament\TournamentMatchGenerationFormType;
+use App\PL\Form\Tournament\TournamentMatchGenerateFormType;
 use App\PL\Form\Tournament\TournamentRegistrationFormType;
 use App\PL\Form\Tournament\TournamentTypeCreateFormType;
 use App\PL\Form\Tournament\TournamentTypeEditFormType;
@@ -110,7 +109,7 @@ class TournamentController extends AbstractController
 
         // GENERATE MATCHES
         $approvedParticipantCnt = $tournamentManager->getApprovedCountOfParticipantsInTournament($id);
-        $matchForm = $this->createForm(TournamentMatchGenerationFormType::class, options: [
+        $matchForm = $this->createForm(TournamentMatchGenerateFormType::class, options: [
             'disabled' => (!$tournamentModel->getApproved()) || ($approvedParticipantCnt < $tournamentModel->getMinParticipantCount() ) ,
             'titleDisabled' => $tournamentModel->getApproved() ? ($approvedParticipantCnt < $tournamentModel->getMinParticipantCount() ? "Must have at least {$tournamentModel->getMinParticipantCount()} approved participants" : "") : "This tournament is not approved"
         ]);
