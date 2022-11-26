@@ -117,9 +117,12 @@ class TournamentManager
         $tournamentModel->setCurrentUserRegistrationState($tournament['approved_participant']);
         $tournamentModel->setTournamentTypeId($tournamentEntity->getTournamentType()->getId());
         //$tournamentModel->setWinnerModel($repoParticipant->find($tournamentEntity->getWinner()?->getId()));
-        $win = $repoParticipant->findParticipant($tournamentEntity->getWinner()?->getId());
+        $id = $tournamentEntity->getWinner()?->getId();
+        if ($id !== null){
+        $win = $repoParticipant->findParticipant($id);
         dump($win);
-        dump($repoUser->find(2));
+        }
+        //dump($repoUser->find(2));
         return $tournamentModel;
     }
 
@@ -450,7 +453,6 @@ class TournamentManager
         /** @var Tournament */
         $tournamentEntity = AutoMapper::map($tournament, \App\DAL\Entity\Tournament::class, trackEntity: false);
         $tournamentEntity->setWinner($this->entityManager->getReference(TournamentParticipant::class, $participantId));
-
         $this->entityManager->persist($tournamentEntity);
         if ($flush){
             $this->entityManager->flush();

@@ -271,7 +271,7 @@ class MatchManager
         $pointsGrater = $winCond === WinCondition::MaxPoints || $winCond === WinCondition::MinPoints ? $winCond === WinCondition::MaxPoints : null; 
         $durationGrater = $winCond === WinCondition::MaxTime || $winCond === WinCondition::MinTime ? $winCond === WinCondition::MaxTime : null;
         $tournamentWinners = $repo->findTournamentWinner($tournament->getId(), $pointsGrater, $durationGrater);
-        if (empty($matchesWithoutResult)){
+        if (empty($tournamentWinners)){
             /** Invalid tournaments data */
             return;
         }
