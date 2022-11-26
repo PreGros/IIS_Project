@@ -161,6 +161,36 @@ class TournamentRepository extends ServiceEntityRepository
             ->getOneOrNullResult();
     }
 
+    public function findByUserParticipant(int $userId)
+    {
+        $queryBuilder = $this->getEntityManager()->createQueryBuilder();
+
+        return $queryBuilder
+            ->select('t tournament')
+            ->addSelect('tp.approved approved')
+            ->addSelect('CASE WHEN t.winner = tp THEN 1 WHEN t.winner IS NOT NULL THEN 0 ELSE NULLIF(1, 1) END isWinner')
+            ->from(Tournament::class, 't')
+            ->innerJoin(TournamentParticipant::class, 'tp', Join::WITH, 'tp.tournament = t')
+            ->leftJoin(Team::class, 'tm', Join::WITH, $queryBuilder->expr()->andX(
+                    'tp.signedUpTeam = tm',
+                    $queryBuilder->expr()->orX(
+                        'IDENTITY(tm.leader) = :p_userId',
+                        'EXISTS (' .
+                            $this->getEntityManager()->createQueryBuilder()
+                                ->select('m')
+                                ->from(\App\DAL\Entity\Member::class, 'm')
+                                ->where('IDENTITY(m.team) = tm.id')
+                                ->andWhere('IDENTITY(m.user) = :p_userId')
+                                ->getDQL()
+                        . ')'
+                    )
+                )
+            )
+            ->setParameter('p_userId', $userId)
+            ->getQuery()
+            ->getResult();;
+    }
+
 //    /**
 //     * @return Tournament[] Returns an array of Tournament objects
 //     */

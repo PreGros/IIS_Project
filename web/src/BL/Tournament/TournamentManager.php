@@ -475,4 +475,23 @@ class TournamentManager
         
         return $repo->findParticipantCount($tournamentId);
     }
+
+    /**
+     * @return \Traversable<TournamentBasicTableModel>
+     */
+    public function getTournamentsByUserParticipant(int $userId): \Traversable
+    {
+        /** @var \App\DAL\Repository\TournamentRepository */
+        $repo = $this->entityManager->getRepository(Tournament::class);
+
+        $tournaments = $repo->findByUserParticipant($userId);
+
+        foreach ($tournaments as $tournament){
+            /** @var TournamentBasicTableModel */
+            $tournamentModel = AutoMapper::map($tournament['tournament'], TournamentBasicTableModel::class, trackEntity: false);
+            $tournamentModel->setApproved($tournament['approved']);
+            $tournamentModel->setIsUserWinner($tournament['isWinner']);
+            yield $tournamentModel;
+        }
+    }
 }

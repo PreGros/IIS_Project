@@ -3,10 +3,13 @@
 namespace App\PL\Controller;
 
 use App\BL\Security\UserProvider;
+use App\BL\Tournament\TournamentTableModel;
 use App\PL\Form\User\EditFormType;
 use App\BL\User\UserManager;
 use App\PL\DataTable\User\UserDataTable;
 use App\PL\Form\User\ChangePwdFormType;
+use App\PL\Table\Team\TeamTable;
+use App\PL\Table\Tournament\TournamentUserTable;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -54,7 +57,7 @@ class UserController extends AbstractController
     }
 
     #[Route('/users/{id<\d+>}', name: 'user_info')]
-    public function getUserInfo(int $id, UserManager $userManager): Response
+    public function getUserInfo(int $id, UserManager $userManager, TeamTable $teamTable, TournamentUserTable $tournamentTable): Response
     {
         $userModel = $userManager->getUser($id);
 
@@ -66,7 +69,9 @@ class UserController extends AbstractController
             'deactivated' => $userModel->getIsDeactivated(),
             'user' => $userModel,
             'userStatistics' => $userManager->getUsersStatistics($id),
-            'id' => $id
+            'id' => $id,
+            'teamTable' => $teamTable->init(['userId' => $id]),
+            'tournamentTable' => $tournamentTable->init(['userId' => $id])
         ]);
     }
 

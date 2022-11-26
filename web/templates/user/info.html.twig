@@ -36,7 +36,17 @@
         <h2 style="font-size:30px;color:red;">DEACTIVATED</h2>
     {% endif %}
 
-    <br></br>
+    <hr>
+
+    <h3>User's teams</h3>
+
+    {{ table_render(teamTable) }}
+
+    <hr>
+
+    <h3>Participating tournaments</h3>
+
+    {{ table_render(tournamentTable) }}
 
     <hr>
     <h3>Statistics</h3>

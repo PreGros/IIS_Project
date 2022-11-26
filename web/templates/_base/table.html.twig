@@ -8,6 +8,9 @@
             <tr>
         </thead>
         <tbody>
+            {% if data|length == 0 %}
+                <td colspan="{{ header|length }}" class="text-center">No data were found</td>
+            {% endif %}
             {% for row in data %}
                 <tr>
                     {% for name, column in header %}
