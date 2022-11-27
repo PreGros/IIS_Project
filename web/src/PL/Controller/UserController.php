@@ -83,6 +83,7 @@ class UserController extends AbstractController
     {
         /** @var \App\BL\User\UserModel */
         $userModel = $this->getUser();
+        $errMessage = "";
 
         if (!$this->isGranted('ROLE_ADMIN') && !$userModel->isCurrentUser($id)){
             $this->addFlash('danger', 'Insufficient rights to edit user');
@@ -100,10 +101,13 @@ class UserController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $userManager->editUser($userModel);
-            
-            $this->addFlash('success', 'Your informations have been changed.');
-            return $this->redirectToRoute('user_info', ['id' => $userModel->getId()]);
+            if ($userManager->checkOnCreateValidity($userModel, $errMessage)){
+                $userManager->editUser($userModel);
+                
+                $this->addFlash('success', 'Your informations have been changed.');
+                return $this->redirectToRoute('user_info', ['id' => $userModel->getId()]);
+            }
+            $this->addFlash('danger', $errMessage);
         }
 
         return $this->renderForm('user/edit.html.twig', [

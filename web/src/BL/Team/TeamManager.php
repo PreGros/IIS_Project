@@ -301,24 +301,25 @@ class TeamManager
 
     public function checkOnCreateValidity(TeamModel $teamModel, string &$errMessage) : bool
     {
-        if (!$this->checkUniqueName($errMessage, $teamModel->getName())){
+        if (!$this->checkUniqueName($errMessage, $teamModel->getName(), $teamModel->getId())){
             return false;
         }
 
         return true;
     }
 
-    public function checkUniqueName(string &$errMessage, string $teamName) : bool
+    public function checkUniqueName(string &$errMessage, string $teamName, ?int $id) : bool
     {
         /** @var \App\DAL\Repository\TeamRepository */
         $repo = $this->entityManager->getRepository(\App\DAL\Entity\Team::class);
-        $team = new \App\DAL\Entity\Team();
         /** cannot get member by reference, so find by ids is performed */
-        $member = $repo->findOneBy(['name' => $teamName]);
+        $team = $repo->findOneBy(['name' => $teamName]);
 
-        if ($member !== NULL){
-            $errMessage = "Name is already used by another team!";
-            return false;
+        if ($team !== NULL){
+            if (($id === NULL) || ($team->getId() !== $id)){
+                $errMessage = "Name is already used by another team";
+                return false;
+            }
         }
 
         return true;

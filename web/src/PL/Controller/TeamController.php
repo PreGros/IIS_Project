@@ -68,11 +68,15 @@ class TeamController extends AbstractController
 
         $form = $this->createForm(TeamEditFormType::class, $team);
         $form->handleRequest($request);
+        $errMessage = "";
 
         if ($form->isSubmitted() && $form->isValid()){
-            $teamManager->updateTeam($team);
+            if ($teamManager->checkOnCreateValidity($team, $errMessage)){
+                $teamManager->updateTeam($team);
 
-            return $this->redirectToRoute('teams');
+                return $this->redirectToRoute('teams');
+            }
+            $this->addFlash('danger', $errMessage);
         }
 
         return $this->renderForm('team/edit.html.twig', ['teamForm' => $form, 'team' => $team]);

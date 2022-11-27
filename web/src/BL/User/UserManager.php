@@ -191,32 +191,35 @@ class UserManager
 
     public function checkOnCreateValidity(UserModel $userModel, string &$errMessage) : bool
     {
-        if (!$this->checkUniqueNickname($errMessage, $userModel->getNickname())){
+        if (!$this->checkUniqueNickname($errMessage, $userModel->getNickname(), $userModel->getId())){
             return false;
         }
-        if (!$this->checkUniqueEmail($errMessage, $userModel->getEmail())){
+        if (!$this->checkUniqueEmail($errMessage, $userModel->getEmail(), $userModel->getId())){
             return false;
         }
 
         return true;
     }
 
-    public function checkUniqueNickname(string &$errMessage, string $userNickname) : bool
+    public function checkUniqueNickname(string &$errMessage, string $userNickname, ?int $id) : bool
     {
         /** @var \App\DAL\Repository\UserRepository */
         $repo = $this->entityManager->getRepository(\App\DAL\Entity\User::class);
         /** cannot get member by reference, so find by ids is performed */
         $user = $repo->findOneBy(['nickname' => $userNickname]);
-    
+        dump($user->getId());
+        dump($id);
         if ($user !== NULL){
-            $errMessage = "User with given nickname already exists";
-            return false;
+            if (($id === NULL) || ($user->getId() !== $id)){
+                $errMessage = "User with given nickname already exists";
+                return false;
+            }
         }
 
         return true;
     }
 
-    public function checkUniqueEmail(string &$errMessage, string $userEmail) : bool
+    public function checkUniqueEmail(string &$errMessage, string $userEmail, ?int $id) : bool
     {
         /** @var \App\DAL\Repository\UserRepository */
         $repo = $this->entityManager->getRepository(\App\DAL\Entity\User::class);
@@ -224,8 +227,10 @@ class UserManager
         $user = $repo->findOneBy(['email' => $userEmail]);
     
         if ($user !== NULL){
-            $errMessage = "User with given email already exists";
-            return false;
+            if (($id === NULL) || ($user->getId() !== $id)){
+                $errMessage = "User with given email already exists";
+                return false;
+            }
         }
 
         return true;
