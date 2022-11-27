@@ -1,18 +1,23 @@
-<table class="table table-striped table-responsive">
-    <thead>
-        <tr>
-            {% for column in header %}
-                <th>{{ column.label }}</th>
-            {% endfor %}
-        <tr>
-    </thead>
-    <tbody>
-        {% for row in data %}
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
             <tr>
-                {% for name, column in header %}
-                    <td>{{ column.raw ? row[name]|raw : row[name]|escape }}</td>
+                {% for column in header %}
+                    <th>{{ column.label }}</th>
                 {% endfor %}
-            </tr>
-        {% endfor %}
-    </tbody>
-</table>
+            <tr>
+        </thead>
+        <tbody>
+            {% if data|length == 0 %}
+                <td colspan="{{ header|length }}" class="text-center">No data were found</td>
+            {% endif %}
+            {% for row in data %}
+                <tr>
+                    {% for name, column in header %}
+                        <td>{{ column.raw ? row[name]|raw : row[name]|escape }}</td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

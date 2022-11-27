@@ -87,7 +87,7 @@ class TournamentCreateFormType extends AbstractType
             ->add('submit', SubmitType::class, [
                 'attr' => ['class' => 'w-50 btn-primary']
             ])
-            ->add('tournamentTypeModel', ChoiceType::class, [
+            ->add('tournamentTypeId', ChoiceType::class, [
                 'choices' => $this->tournamentManager->getFormTournamentType(),
                 'label' => 'Tournament type'
             ])

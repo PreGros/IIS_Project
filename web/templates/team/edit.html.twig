@@ -11,7 +11,7 @@
         {{ form_row(teamForm.name) }}
         <label class="form-label">Current image</label>
         <div class="mb-3">
-            <img src="{{ asset('uploads/teams/images/' ~ team.imagePath) }}" alt="Team image" class="img-thumbnail col-sm-8 col-lg-7 col-xl-6">
+            <img src="{{ asset('uploads/teams/images/' ~ team.imagePath) }}" alt="Team image" class="img-thumbnail col-8 col-sm-6 col-md-4 col-lg-3">
         </div>
         {{ form_row(teamForm.image) }}
         {{ form_row(teamForm.submit, {

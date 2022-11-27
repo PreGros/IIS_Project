@@ -5,9 +5,27 @@
 {% block body %}
     {{ render_flash_messages() }}
 
-    <h1>Tournament matches</h1>
+    {% if currUserMatches %}
+        <h1>Tournament {{ tournament.name }}: My matches info</h1>
+    
+        <br>
+    {% else %}
+        <h1>Tournament {{ tournament.name }}: Matches info</h1>
+    
+        <br>
+        <h3>Tournament's winner</h3>
+                
+        {% if tournament.winnerId != null %}
+            <a href="{{ path(participantIsTeam ? 'team_info' : 'user_info', {'id': tournament.winnerId ?? 0}) }}">{{ tournament.winnerName }}</a>
+        {% else %}
+            Winner was not yet determined
+        {% endif %}
+        
+        <hr>
+    {% endif %}
 
-    <br>
+    <h3>Matches</h3>
+
 
     {% set count = tables|length %}
     {% for key, table in tables %}

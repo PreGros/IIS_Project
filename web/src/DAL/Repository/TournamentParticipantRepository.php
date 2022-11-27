@@ -69,8 +69,6 @@ class TournamentParticipantRepository extends ServiceEntityRepository
 
         $queryBuilder
             ->select('p participant')
-            //->addSelect('SUM(p.approved) as approvedCount')
-            //->addSelect('t.maxTeamMemberCount as maxTeamMemberCount')
             ->addSelect('CASE WHEN (u.id IS NOT NULL) THEN u.isDeactivated ELSE tm.isDeactivated END as deactivatedP')
             ->addSelect('CASE WHEN (IDENTITY(t.createdBy) = :p_user_id ) THEN 1 ELSE 0 END as createdByCurrUser')
             ->from(TournamentParticipant::class, 'p')
@@ -162,6 +160,21 @@ class TournamentParticipantRepository extends ServiceEntityRepository
             ->setParameter('p_tournament_id', $tournamentId)
             ->getQuery()
             ->getSingleScalarResult();
+    }
+
+    public function findParticipant(int $participantId): TournamentParticipant
+    {
+        $queryBuilder = $this->getEntityManager()->createQueryBuilder();
+
+        return $queryBuilder
+            ->select('tp')
+            ->from(TournamentParticipant::class, 'tp')
+            ->leftJoin(User::class, 'u', Join::WITH, 'tp.signedUpUser = u')
+            ->leftJoin(Team::class, 't', Join::WITH, 'tp.signedUpTeam = t')
+            ->where('tp.id = :p_participant_id')
+            ->setParameter('p_participant_id', $participantId)
+            ->getQuery()
+            ->getOneOrNullResult();
     }
 
 //    /**

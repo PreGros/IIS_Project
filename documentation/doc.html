@@ -16,21 +16,21 @@
 <!-- Zkontrolujte prosím nastavení kódování v hlavičce dokumentu 
  podle použitého editoru -->
 
-<h1>Název zadání Studentské turnaje</h1> <!-- Nahradte názvem svého zadání -->
+<h1>Studentské turnaje</h1> <!-- Nahradte názvem svého zadání -->
 
 <dl>
 <dt>Autoři</dt>
 <dd>Michaela Macková <!-- Nahraďte skutečným jménem a e-mailem autora a popisem činnosti -->
 	<a href="mailto:xmacko13@stud.fit.vutbr.cz">xmacko13@stud.fit.vutbr.cz</a> -
-	popis činnosti v týmu
+	vytvoření entit, správa turnajů, registrace do turnajů, testovací data
 </dd>
 <dd>Ivan Mudrák <!-- Nahraďte skutečným jménem a e-mailem autora a popisem činnosti -->
 	<a href="mailto:xautor02@stud.fit.vutbr.cz">xmudra03@stud.fit.vutbr.cz</a> - 
-	popis činnosti v týmu
+	založení projektu a základní struktura, JS, generování zápasů, autentifikace uživatele
 </dd>
 <dd>Tomáš Zaviačič <!-- Nahraďte skutečným jménem a e-mailem autora a popisem činnosti -->
 	<a href="mailto:xzavia00@stud.fit.vutbr.cz">xzavia00@stud.fit.vutbr.cz</a> - 
-	popis činnosti v týmu
+	kontrola validity formulářů, kontrola unikátnosti dat
 </dd>
 <dt>URL aplikace</dt>
 <dd><a href="http://www.stud.fit.vutbr.cz/~xautor01/IIS">http://www.stud.fit.vutbr.cz/~xautor01/IIS</a></dd>
@@ -103,11 +103,14 @@ Zde vložte grafické schéma relační databáze (tabulek v databázi).
 
 Stručně popište: 
 <ul>
-	<li>softwarové požadavky (verze PHP apod.),</li>
-	<li>PHP 8.1, MySQL, composer, npm - jednotlivé balíčky doinstaluje a zkontroluje composer a npm</li>
-	<li>postup instalace na server,</li>
+	<li>softwarové požadavky:</li>
+	<ul>
+		<li>PHP 8.1</li>
+		<li>MySQL</li>
+		<li>composer - doinstaluje potřebné php balíčky (hlavně symfony 6.1.7)</li>
+		<li>npm - doinstaluje a zkontroluje js a css balíčky</li>
+	</ul>
 	<li>na serveru je nutné přetáhnout soubory projektu a provést následující příkazy (v adresáři web)</li>
-	<li>jak rozbalit, konfigurovat, inicializovat databázi, ...</li>
 	<ol>
 		<li>composer install</li>
 		<li>npm install</li>
@@ -116,6 +119,11 @@ Stručně popište:
 		<li>php bin/console make:migration</li>
 		<li>php bin/console doctrine:migrations:migrate</li>
 	</ol>
+	<li>pro naplnění databáze testovacími daty je nutné spustit jeden z následujících příkazů:</li>
+	<ul>
+		<li>php bin/console doctrine:fixtures:load - přepíše aktuální data v db</li>
+		<li>php bin/console doctrine:fixtures:load --append - přidá data do db (bez přepsání stávajících)</li>
+	</ul>
 </ul>
 
 <h2>Známé problémy</h2>

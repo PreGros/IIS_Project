@@ -14,6 +14,7 @@ use App\PL\Form\Team\TeamAddMemberType;
 use App\PL\DataTable\Team\TeamDataTable;
 use App\PL\Form\Team\TeamEditFormType;
 use App\PL\Table\Team\MembersTable;
+use App\PL\Table\Tournament\InInfoTournamentTable;
 
 class TeamController extends AbstractController
 {
@@ -111,7 +112,7 @@ class TeamController extends AbstractController
     }
 
     #[Route('/teams/{id<\d+>}/info', name: 'team_info')]
-    public function teamInfoAction(int $id, Request $request, TeamManager $teamManager, MembersTable $table): Response
+    public function teamInfoAction(int $id, Request $request, TeamManager $teamManager, MembersTable $table, InInfoTournamentTable $tournamentTable): Response
     {
         $canModify = $this->isGranted('ROLE_ADMIN') || $teamManager->isCurrentUserLeader($id);
 
@@ -132,7 +133,8 @@ class TeamController extends AbstractController
             'canModify' => $canModify,
             'deactivated' => $teamModel->getIsDeactivated(),
             'statistics' => $teamManager->getTeamStatistics($id),
-            'table' => $table->init(['teamId' => $id, 'canModify' => $canModify])
+            'table' => $table->init(['teamId' => $id, 'canModify' => $canModify]),
+            'tournamentTable' => $tournamentTable->init(['id' => $id, 'isTeam' => true])
         ]);
     }
 }

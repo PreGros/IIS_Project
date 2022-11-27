@@ -5,38 +5,66 @@
 {% block body %}
     {{ render_flash_messages() }}
 
-    <h1>{{ user.nickname }}'s user profile</h1>
-
-    <dl class="row">
-        <dt class="col-sm-3 h5 vert-center">Name</dt>
-        <dd class="col-sm-9 vert-center">{{ user.firstname }}</dd>
-
-        <div class="padding"></div>
-        <dt class="col-sm-3 h5 vert-center">Surname</dt>
-        <dd class="col-sm-9 vert-center">{{ user.surname }}</dd>
-    </dl>
-
+    <div class="row">
+        <h1 class="col-md-6">{{ user.nickname }}'s user profile</h1>
+        <div class="col-md-6 text-md-end">
+            {% if canEdit and not deactivated %}
+                <a href="{{ path('user_edit', { 'id': id }) }}" class="btn btn-primary">Edit informations</a>
+                <a href="{{ path('user_change_pwd', { 'id': id }) }}" class="btn btn-primary">Change password</a>
+            {% endif %}
+            {% if deactivated %}
+                <h2 style="font-size:30px;color:red;">DEACTIVATED</h2>
+            {% endif %}
+        </div>
+    </div>
 
     <hr>
-    <h3>Contacts</h3>
-    <dl class="row">
-        <dt class="col-sm-3 h5 vert-center">E-mail</dt>
-        <dd class="col-sm-9 vert-center">{{ user.email }}</dd>
 
-        <div class="padding"></div>
-        <dt class="col-sm-3 h5 vert-center">Telephone number</dt>
-        <dd class="col-sm-9 vert-center">{{ user.phoneNumber }}</dd>
-    </dl>
+    <div class="row">
+        <div class="col-md-6">
+            <br>
+            <h3>Informations</h3>
+            <dl class="row">
+                <dt class="col-sm-5 h5 vert-center">Name</dt>
+                <dd class="col-sm-7 vert-center">{{ user.firstname }}</dd>
 
-    {% if canEdit and not deactivated %}
-        <a href="{{ path('user_edit', { 'id': id }) }}" class="btn btn-primary">Edit informations</a>
-        <a href="{{ path('user_change_pwd', { 'id': id }) }}" class="btn btn-primary">Change password</a>
-    {% endif %}
-    {% if deactivated %}
-        <h2 style="font-size:30px;color:red;">DEACTIVATED</h2>
-    {% endif %}
+                <div class="padding"></div>
+                <dt class="col-sm-5 h5 vert-center">Surname</dt>
+                <dd class="col-sm-7 vert-center">{{ user.surname }}</dd>
+            </dl>
+        </div>
 
-    <br></br>
+        <div class="col-md-6">
+            <hr class="d-md-none">
+            <h3>Contacts</h3>
+            <dl class="row">
+                <dt class="col-sm-5 h5 vert-center">E-mail</dt>
+                <dd class="col-sm-7 vert-center">{{ user.email }}</dd>
+
+                <div class="padding"></div>
+                <dt class="col-sm-5 h5 vert-center">Telephone number</dt>
+                <dd class="col-sm-7 vert-center">{{ user.phoneNumber }}</dd>
+            </dl>
+        </div>
+    </div>
+
+    <hr>    
+
+    <div class="row">
+        <div class="col-md-6">
+            <h3>User's teams</h3>
+
+            {{ table_render(teamTable) }}
+        </div>
+
+        <hr class="d-md-none">
+
+        <div class="col-md-6">
+            <h3>Participating tournaments</h3>
+
+            {{ table_render(tournamentTable) }}
+        </div>
+    </div>
 
     <hr>
     <h3>Statistics</h3>
@@ -47,7 +75,7 @@
         <div class="padding"></div>
         <dt class="col-sm-3 h5 vert-center">Won tournaments:</dt>
         <dd class="col-sm-9 vert-center">{{ userStatistics.wonTournaments }}</dd>
-    </d>
+    </dl>
 
 {# <div name="user-table" data-settings='{{ datatable_settings(datatable) }}'>Loading...</div> #}
     

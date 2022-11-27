@@ -2,6 +2,7 @@
 
 namespace App\DAL\Repository;
 
+use App\DAL\Entity\Team;
 use App\DAL\Entity\Tournament;
 use App\DAL\Entity\TournamentParticipant;
 use App\DAL\Entity\TournamentType;
@@ -123,8 +124,9 @@ class TournamentRepository extends ServiceEntityRepository
     {
         return $this->getEntityManager()->createQueryBuilder()
             ->select('t tournament')
-            ->addSelect('tp.approved as approved_participant')
+            ->addSelect('tp.approved approved')
             ->from(Tournament::class, 't')
+            ->innerJoin(TournamentType::class, 'tt', Join::WITH, 't.tournamentType = tt')
             ->leftJoin(User::class, 'c', Join::WITH, 't.createdBy = c')
             ->leftJoin(TournamentParticipant::class, 'tp', Join::WITH,
                 $this->getEntityManager()->createQueryBuilder()->expr()->andX(
@@ -157,6 +159,54 @@ class TournamentRepository extends ServiceEntityRepository
             ->setParameter('p_user_id', $userId)
             ->getQuery()
             ->getOneOrNullResult();
+    }
+
+    public function findByUserParticipant(int $userId)
+    {
+        $queryBuilder = $this->getEntityManager()->createQueryBuilder();
+
+        return $queryBuilder
+            ->select('t tournament')
+            ->addSelect('tp.approved approved')
+            ->addSelect('CASE WHEN t.winner = tp THEN 1 WHEN t.winner IS NOT NULL THEN 0 ELSE NULLIF(1, 1) END isWinner')
+            ->from(Tournament::class, 't')
+            ->innerJoin(TournamentParticipant::class, 'tp', Join::WITH, 'tp.tournament = t')
+            ->leftJoin(Team::class, 'tm', Join::WITH, $queryBuilder->expr()->andX(
+                    'tp.signedUpTeam = tm',
+                    $queryBuilder->expr()->orX(
+                        'IDENTITY(tm.leader) = :p_userId',
+                        'EXISTS (' .
+                            $this->getEntityManager()->createQueryBuilder()
+                                ->select('m')
+                                ->from(\App\DAL\Entity\Member::class, 'm')
+                                ->where('IDENTITY(m.team) = tm.id')
+                                ->andWhere('IDENTITY(m.user) = :p_userId')
+                                ->getDQL()
+                        . ')'
+                    )
+                )
+            )
+            ->where('tm IS NOT NULL')
+            ->orWhere('IDENTITY(tp.signedUpUser) = :p_userId')
+            ->setParameter('p_userId', $userId)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findByTeamParticipant(int $teamId)
+    {
+        $queryBuilder = $this->getEntityManager()->createQueryBuilder();
+
+        return $queryBuilder
+            ->select('t tournament')
+            ->addSelect('tp.approved approved')
+            ->addSelect('CASE WHEN t.winner = tp THEN 1 WHEN t.winner IS NOT NULL THEN 0 ELSE NULLIF(1, 1) END isWinner')
+            ->from(Tournament::class, 't')
+            ->innerJoin(TournamentParticipant::class, 'tp', Join::WITH, 'tp.tournament = t')
+            ->orWhere('IDENTITY(tp.signedUpTeam) = :p_teamId')
+            ->setParameter('p_teamId', $teamId)
+            ->getQuery()
+            ->getResult();
     }
 
 //    /**

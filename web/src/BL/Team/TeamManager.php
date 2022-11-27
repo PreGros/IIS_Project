@@ -162,6 +162,23 @@ class TeamManager
         }
     }
 
+    /**
+     * @return \Traversable<TeamBasicTableModel>
+     */
+    public function getTeamsByUser(int $userId): \Traversable
+    {
+        /** @var \App\DAL\Repository\TeamRepository */
+        $repo = $this->entityManager->getRepository(Team::class);
+        $teams = $repo->findTeamsByMember($userId);
+
+        foreach ($teams as $team){
+            /** @var TeamBasicTableModel */
+            $teamModel = AutoMapper::map($team['team'], TeamBasicTableModel::class, trackEntity: false);
+            $teamModel->setIsUserLeader($team['isLeader']);
+            yield $teamModel;
+        }
+    }
+
     public function deleteTeam(int $id)
     {
         /** @var \App\DAL\Repository\TeamRepository */

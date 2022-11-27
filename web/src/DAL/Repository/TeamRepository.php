@@ -98,31 +98,27 @@ class TeamRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    // /**
-    //  * @return array<array<bool|\App\DAL\Entity\Team>>
-    //  */
-    // public function findTeamParticipant(int $tournamentId, int $userId)
-    // {
-    //     $queryBuilder = $this->getEntityManager()->createQueryBuilder();
+    public function findTeamsByMember(int $userId)
+    {   
+        $queryBuilder = $this->getEntityManager()->createQueryBuilder();
 
-    //     return $queryBuilder
-    //         ->select('t as team')
-    //         ->addSelect('CASE WHEN t.id IS NOT NULL THEN 1 ELSE 0 END as isLeader')
-    //         ->from(\App\DAL\Entity\Tournament::class, 'tr')
-    //         ->innerJoin(\App\DAL\Entity\Team::class, 't', Expr\Join::WITH, $queryBuilder->expr()->andX(
-    //             'tr.id = :p_tournamentId',
-    //             'IDENTITY(t.leader) = u.id'
-    //         ))
-    //         ->leftJoin(\App\DAL\Entity\Member::class, 'm', Expr\Join::WITH, $queryBuilder->expr()->andX(
-    //             'IDENTITY(m.team) = :teamId',
-    //             'IDENTITY(m.user) = u.id'
-    //         ))
-    //         ->where('tr.id = :p_tournamentId')
-    //         ->orWhere('IDENTITY(m) IS NOT NULL')
-    //         ->setParameter('p_tournamentId', $tournamentId)
-    //         ->getQuery()
-    //         ->getResult();
-    // }
+        return $queryBuilder
+            ->select('t team')
+            ->addSelect('CASE WHEN (IDENTITY(t.leader) = :p_userId) THEN 1 ELSE 0 END isLeader')
+            ->from(Team::class, 't')
+            ->leftJoin(\App\DAL\Entity\Member::class, 'm', Expr\Join::WITH, $queryBuilder->expr()->andX(
+                'm.team = t',
+                'IDENTITY(m.user) = :p_userId'
+            ))
+            ->where('t.isDeactivated = 0')
+            ->andWhere($queryBuilder->expr()->orX(
+                'IDENTITY(t.leader) = :p_userId',
+                'm IS NOT NULL'
+            ))
+            ->setParameter('p_userId', $userId)
+            ->getQuery()
+            ->getResult();
+    }
 
     /**
      * @return Paginator<array<Team|int>>

@@ -7,46 +7,66 @@
 
     <div class="row">
         <div class="col-md-6">
-            <h1>Team detail</h1>
-            <h3>Team name: {{ team.name }}</h3>
-
+            <h1>{{ team.name }}'s team info</h1>
+        </div>
+        <div class="col-md-6 text-md-end">
             {% if deactivated %}
                 <h2 style="font-size:30px;color:red;">DEACTIVATED</h2>
-            {% else %}
+            {% elseif canModify %}
                 <a href="{{ path('team_edit', { 'id': id }) }}" class="btn btn-primary">Edit team informations</a>
             {% endif %}
         </div>
+    </div>
+    
+    <hr>
+
+    <div class="row">
         <div class="col-md-6">
             <h3>Team image</h3>
             <div class="mb-3">
                 <img src="{{ asset('uploads/teams/images/' ~ team.imagePath) }}" alt="Team image" class="img-thumbnail col-sm-8 col-lg-7 col-xl-6">
             </div>
         </div>
+
+        <hr class="d-md-none">
+
+        <div class="col-md-6">
+            <h3>Members</h3>
+
+            {% if canModify and not deactivated %}
+                <h4>Add member</h4>
+
+                {{ form_start(membersForm) }}
+                    {{ form_row(membersForm.members) }}
+                    {{ form_row(membersForm.submit) }}
+                {{ form_end(membersForm) }}
+            {% endif %}
+
+            {{ table_render(table) }} 
+        </div>
     </div>
 
-    <br></br>
+    <hr>
 
-    <h1>Members</h1>
+    <div class="row">
+        <div class="col-md-6">
+            <h3>Participating tournaments</h3>
 
-    {% if canModify and not deactivated %}
-        <h3>Add member</h3>
+            {{ table_render(tournamentTable) }}
+        </div>
+        <div class="col-md-6">
+            <h3>Statistics</h3>
+            <dl class="row">
+                <dt class="col-sm-5 h5 vert-center">Attended tournaments:</dt>
+                <dd class="col-sm-7 vert-center">{{ statistics.tournamentCount }}</dd>
 
-        {{ form_start(membersForm) }}
-            {{ form_row(membersForm.members) }}
-            {{ form_row(membersForm.submit) }}
-        {{ form_end(membersForm) }}
-    {% endif %}
+                <div class="padding"></div>
+                <dt class="col-sm-5 h5 vert-center">Won tournaments:</dt>
+                <dd class="col-sm-7 vert-center">{{ statistics.wonTournaments }}</dd>
+            </dl>
+        </div>
+    </div>
 
-    {{ table_render(table) }}
-
-    <h3>Statistics</h3>
-    <dl class="row">
-        <dt class="col-sm-3 h5 vert-center">Attended tournaments:</dt>
-        <dd class="col-sm-9 vert-center">{{ statistics.tournamentCount }}</dd>
-
-        <div class="padding"></div>
-        <dt class="col-sm-3 h5 vert-center">Won tournaments:</dt>
-        <dd class="col-sm-9 vert-center">{{ statistics.wonTournaments }}</dd>
-    </d>    
+    
 
 {% endblock %}
