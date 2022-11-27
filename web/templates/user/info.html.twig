@@ -5,7 +5,20 @@
 {% block body %}
     {{ render_flash_messages() }}
 
-    <h1>{{ user.nickname }}'s user profile</h1>
+    <div class="row">
+        <h1 class="col-md-6">{{ user.nickname }}'s user profile</h1>
+        <div class="col-md-6 text-md-end">
+            {% if canEdit and not deactivated %}
+                <a href="{{ path('user_edit', { 'id': id }) }}" class="btn btn-primary">Edit informations</a>
+                <a href="{{ path('user_change_pwd', { 'id': id }) }}" class="btn btn-primary">Change password</a>
+            {% endif %}
+            {% if deactivated %}
+                <h2 style="font-size:30px;color:red;">DEACTIVATED</h2>
+            {% endif %}
+        </div>
+    </div>
+
+    <hr>
 
     <div class="row">
         <div class="col-md-6">
@@ -22,7 +35,7 @@
         </div>
 
         <div class="col-md-6">
-            <hr>
+            <hr class="d-md-none">
             <h3>Contacts</h3>
             <dl class="row">
                 <dt class="col-sm-5 h5 vert-center">E-mail</dt>
@@ -35,27 +48,18 @@
         </div>
     </div>
 
-
-    
-    {% if canEdit and not deactivated %}
-        <a href="{{ path('user_edit', { 'id': id }) }}" class="btn btn-primary">Edit informations</a>
-        <a href="{{ path('user_change_pwd', { 'id': id }) }}" class="btn btn-primary">Change password</a>
-    {% endif %}
-    {% if deactivated %}
-        <h2 style="font-size:30px;color:red;">DEACTIVATED</h2>
-    {% endif %}
-
-    
+    <hr>    
 
     <div class="row">
         <div class="col-md-6">
-            <hr>
             <h3>User's teams</h3>
 
             {{ table_render(teamTable) }}
         </div>
+
+        <hr class="d-md-none">
+
         <div class="col-md-6">
-            <hr>
             <h3>Participating tournaments</h3>
 
             {{ table_render(tournamentTable) }}
