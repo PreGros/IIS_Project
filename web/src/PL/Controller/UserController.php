@@ -43,7 +43,10 @@ class UserController extends AbstractController
     #[Route('/users/{id<\d+>}/deactivate', name: 'user_deactivate')]
     public function deleteUser(int $id, UserManager $userManager): Response
     {
-        if (!$this->isGranted('ROLE_ADMIN')){
+        /** @var \App\BL\User\UserModel */
+        $userModel = $this->getUser();
+
+        if (!$this->isGranted('ROLE_ADMIN') && !$userModel->isCurrentUser($id)){
             $this->addFlash('danger', 'Insufficient rights to deactivate user');
             return $this->redirectToRoute('users');
         }

@@ -85,10 +85,10 @@ class TeamController extends AbstractController
     }
 
     #[Route('/teams/{id<\d+>}/deactivate', name: 'team_deactivate')]
-    public function deleteAction(int $id, TeamManager $teamManager): Response
+    public function deactivateAction(int $id, TeamManager $teamManager): Response
     {
         if (!$this->isGranted('ROLE_ADMIN') && !$teamManager->isCurrentUserLeader($id)){
-            $this->addFlash('danger', 'Insufficient rights to delete team');
+            $this->addFlash('danger', 'Insufficient rights to deactivate team');
             return $this->redirectToRoute('teams');
         }
 

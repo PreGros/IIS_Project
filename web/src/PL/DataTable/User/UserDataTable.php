@@ -56,9 +56,9 @@ class UserDataTable
             'template' => 
                 '{% if row.canEdit %} <a href="{{ row.editUser }}" class="btn btn-primary">Edit</a>' .
                 ' {% endif %}' .
-                '{% if row.canModerate %}<a href="{% if row.isAdmin %} {{ row.demoteURL }} {% else %} {{ row.promoteURL }} {% endif %}" class="btn btn-secondary">{% if row.isAdmin %} Demote {% else %} Promote {% endif %}</a>' .
+                '{% if row.canModerate %}<a href="{% if row.isAdmin %} {{ row.demoteURL }} {% else %} {{ row.promoteURL }} {% endif %}" class="btn btn-secondary">{% if row.isAdmin %} Demote {% else %} Promote {% endif %}</a>{% endif %}' .
                 ' ' .
-                '<a href="{{ row.deactivateURL }}" class="btn btn-danger" onclick="return confirm(\'Are you sure?\')">Deactivate</a>{% endif %}'
+                '{% if row.canEdit %} <a href="{{ row.deactivateURL }}" class="btn btn-danger" onclick="return confirm(\'Are you sure?\')">Deactivate</a>{% endif %}'
         ]);
             
         return $dataTable->createAdapter(DataTableAdapter::class, [
