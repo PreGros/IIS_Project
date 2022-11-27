@@ -186,9 +186,11 @@ class TournamentRepository extends ServiceEntityRepository
                     )
                 )
             )
+            ->where('tm IS NOT NULL')
+            ->orWhere('IDENTITY(tp.signedUpUser) = :p_userId')
             ->setParameter('p_userId', $userId)
             ->getQuery()
-            ->getResult();;
+            ->getResult();
     }
 
 //    /**
