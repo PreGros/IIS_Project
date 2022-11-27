@@ -52,7 +52,7 @@ class TournamentParticipantRepository extends ServiceEntityRepository
         return $queryBuilder
             ->select('p')
             ->from(TournamentParticipant::class, 'p')
-            ->innerJoin(Team::class,'t',Join::WITH, 'IDENTITY(t.leader) = :p_currUserId')
+            ->innerJoin(Team::class,'t',Join::WITH, 'IDENTITY(t.leader) = :p_currUserId AND t = p.signedUpTeam')
             ->where('IDENTITY(p.tournament) = :p_tournamentId')
             ->setParameter('p_tournamentId', $tournamentId)
             ->setParameter('p_currUserId', $currUserId)
