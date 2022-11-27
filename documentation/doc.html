@@ -22,28 +22,27 @@
 <dt>Autoři</dt>
 <dd>Michaela Macková <!-- Nahraďte skutečným jménem a e-mailem autora a popisem činnosti -->
 	<a href="mailto:xmacko13@stud.fit.vutbr.cz">xmacko13@stud.fit.vutbr.cz</a> -
-	vytvoření entit, správa turnajů, registrace do turnajů, testovací data
+	vytvoření entit, správa turnajů, registrace do turnajů, testovací data, testování
 </dd>
 <dd>Ivan Mudrák <!-- Nahraďte skutečným jménem a e-mailem autora a popisem činnosti -->
 	<a href="mailto:xautor02@stud.fit.vutbr.cz">xmudra03@stud.fit.vutbr.cz</a> - 
-	založení projektu a základní struktura, JS, generování zápasů, autentifikace uživatele
+	založení projektu a základní struktura, JS, generování zápasů, autentifikace uživatele, design stránek
 </dd>
 <dd>Tomáš Zaviačič <!-- Nahraďte skutečným jménem a e-mailem autora a popisem činnosti -->
 	<a href="mailto:xzavia00@stud.fit.vutbr.cz">xzavia00@stud.fit.vutbr.cz</a> - 
-	kontrola validity formulářů, kontrola unikátnosti dat
+	kontrola validity formulářů, kontrola unikátnosti dat, statistiky, deaktivace týmů a účtů
 </dd>
 <dt>URL aplikace</dt>
-<dd><a href="http://www.stud.fit.vutbr.cz/~xautor01/IIS">http://www.stud.fit.vutbr.cz/~xautor01/IIS</a></dd>
-<dd>(pokud má aplikace více vstupních stránek, napište obdobně další URL)</dd>
+<dd><a href="https://www.stud.fit.vutbr.cz/~xmudra03/iis/public/index.php">https://www.stud.fit.vutbr.cz/~xmudra03/iis/public/index.php</a></dd>
 </dl>
 
 <h2>Uživatelé systému pro testování</h2>
 <p>Uveďte prosím existující zástupce <strong>všech rolí uživatelů</strong>.</p>
 <table>
-<tr><th>Login</th><th>Heslo</th><th>Role</th></tr>
-<tr><td>admin</td><td>admin</td><td>Administrátor</td></tr>
-<tr><td>prodavac</td><td>prodavac</td><td>Registovaný uživatel</td></tr>
-<tr><td>-</td><td>-</td><td>Neregistrovaný uživatel</td></tr>
+<tr><th>Login</th><th>Heslo</th><th>Role</th><th>Upřesnění</th></tr>
+<tr><td>admin</td><td>admin</td><td>Administrátor</td><td></td></tr>
+<tr><td></td><td></td><td>Registovaný uživatel</td><td></td></tr>
+<tr><td>-</td><td>-</td><td>Neregistrovaný uživatel</td><td></td></tr>
 </table>
 
 <p>(Diagram případů užití není nutné vkládat, pokud IS implementuje role a případy užití definované zadáním.)</p> 
@@ -86,7 +85,7 @@
 			</li>
 		</ul>
 	</li>
-	<li><b>neregistrovaný:</b>
+	<li><b>Neregistrovaný uživatel:</b>
 		<ul>
 			<li>prochází profily a statistiky hráčů, týmů a turnajů s výsledky</li>  - UserController, TeamController, TournamentController, MatchController + jejich soubory Manager a Repository
 		</ul>
@@ -98,6 +97,8 @@
 <h3>Databáze</h3>
 
 Zde vložte grafické schéma relační databáze (tabulek v databázi).
+<br>
+<img src="erd.png" alt="ERD" height="600">
 
 <h2>Instalace</h2>
 
@@ -107,22 +108,22 @@ Stručně popište:
 	<ul>
 		<li>PHP 8.1</li>
 		<li>MySQL</li>
-		<li>composer - doinstaluje potřebné php balíčky (hlavně symfony 6.1.7)</li>
-		<li>npm - doinstaluje a zkontroluje js a css balíčky</li>
+		<li>composer - doinstaluje potřebné php balíčky (hlavně Symfony 6.1.7)</li>
+		<li>npm - doinstaluje a zkontroluje JS a CSS balíčky</li>
 	</ul>
-	<li>na serveru je nutné přetáhnout soubory projektu a provést následující příkazy (v adresáři web)</li>
+	<li>na serveru je nutné přetáhnout soubory projektu a provést následující příkazy (v hlavním Symfony adresáři)</li>
 	<ol>
-		<li>composer install</li>
-		<li>npm install</li>
-		<li>npm run dev</li>
-		<li>php bin/console doctrine:database:create</li>
-		<li>php bin/console make:migration</li>
-		<li>php bin/console doctrine:migrations:migrate</li>
+		<li><code>composer install</code></li>
+		<li><code>npm install</code></li>
+		<li><code>npm run dev</code></li>
+		<li><code>php bin/console doctrine:database:create</code></li>
+		<li><code>php bin/console make:migration</code></li>
+		<li><code>php bin/console doctrine:migrations:migrate</code></li>
 	</ol>
 	<li>pro naplnění databáze testovacími daty je nutné spustit jeden z následujících příkazů:</li>
 	<ul>
-		<li>php bin/console doctrine:fixtures:load - přepíše aktuální data v db</li>
-		<li>php bin/console doctrine:fixtures:load --append - přidá data do db (bez přepsání stávajících)</li>
+		<li><code>php bin/console doctrine:fixtures:load</code> - přepíše aktuální data v db</li>
+		<li><code>php bin/console doctrine:fixtures:load --append</code>  - přidá data do db (bez přepsání stávajících)</li>
 	</ul>
 </ul>
 
