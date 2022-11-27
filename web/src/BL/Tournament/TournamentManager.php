@@ -490,8 +490,28 @@ class TournamentManager
             /** @var TournamentBasicTableModel */
             $tournamentModel = AutoMapper::map($tournament['tournament'], TournamentBasicTableModel::class, trackEntity: false);
             $tournamentModel->setApproved($tournament['approved']);
-            $tournamentModel->setIsUserWinner($tournament['isWinner']);
+            $tournamentModel->setIsWinner($tournament['isWinner']);
             yield $tournamentModel;
         }
     }
+
+    /**
+     * @return \Traversable<TournamentBasicTableModel>
+     */
+    public function getTournamentsByTeamParticipant(int $teamId): \Traversable
+    {
+        /** @var \App\DAL\Repository\TournamentRepository */
+        $repo = $this->entityManager->getRepository(Tournament::class);
+
+        $tournaments = $repo->findByTeamParticipant($teamId);
+
+        foreach ($tournaments as $tournament){
+            /** @var TournamentBasicTableModel */
+            $tournamentModel = AutoMapper::map($tournament['tournament'], TournamentBasicTableModel::class, trackEntity: false);
+            $tournamentModel->setApproved($tournament['approved']);
+            $tournamentModel->setIsWinner($tournament['isWinner']);
+            yield $tournamentModel;
+        }
+    }
+
 }

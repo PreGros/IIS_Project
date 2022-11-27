@@ -11,7 +11,7 @@ class TournamentBasicTableModel
 
     private bool $approved;
 
-    private ?bool $isUserWinner;
+    private ?bool $isWinner;
 
     public function getId(): int
     {
@@ -43,13 +43,13 @@ class TournamentBasicTableModel
         $this->approved = $val;
     }
 
-    public function isUserWinner(): ?bool
+    public function isWinner(): ?bool
     {
-        return $this->isUserWinner;
+        return $this->isWinner;
     }
 
-    public function setIsUserWinner(?bool $val)
+    public function setIsWinner(?bool $val)
     {
-        $this->isUserWinner = $val;
+        $this->isWinner = $val;
     }
 }

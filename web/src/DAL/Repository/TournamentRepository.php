@@ -186,9 +186,27 @@ class TournamentRepository extends ServiceEntityRepository
                     )
                 )
             )
+            ->where('tm IS NOT NULL')
+            ->orWhere('IDENTITY(tp.signedUpUser) = :p_userId')
             ->setParameter('p_userId', $userId)
             ->getQuery()
-            ->getResult();;
+            ->getResult();
+    }
+
+    public function findByTeamParticipant(int $teamId)
+    {
+        $queryBuilder = $this->getEntityManager()->createQueryBuilder();
+
+        return $queryBuilder
+            ->select('t tournament')
+            ->addSelect('tp.approved approved')
+            ->addSelect('CASE WHEN t.winner = tp THEN 1 WHEN t.winner IS NOT NULL THEN 0 ELSE NULLIF(1, 1) END isWinner')
+            ->from(Tournament::class, 't')
+            ->innerJoin(TournamentParticipant::class, 'tp', Join::WITH, 'tp.tournament = t')
+            ->orWhere('IDENTITY(tp.signedUpTeam) = :p_teamId')
+            ->setParameter('p_teamId', $teamId)
+            ->getQuery()
+            ->getResult();
     }
 
 //    /**

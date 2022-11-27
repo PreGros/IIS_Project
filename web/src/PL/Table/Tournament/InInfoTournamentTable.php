@@ -8,7 +8,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Twig\Environment;
 
-class TournamentUserTable extends BaseTable
+class InInfoTournamentTable extends BaseTable
 {
     private UrlGeneratorInterface $router;
 
@@ -36,13 +36,15 @@ class TournamentUserTable extends BaseTable
     protected function configureOptions(OptionsResolver $resolver)
     {
         $resolver
-            ->setDefault('userId', null)
-            ->setAllowedTypes('userId', 'int');
+            ->setDefault('id', null)
+            ->setAllowedTypes('id', 'int')
+            ->setDefault('isTeam', false)
+            ->setAllowedTypes('isTeam', 'bool');
     }
 
     protected function setData(): \Traversable
     {
-        foreach ($this->tournamentManager->getTournamentsByUserParticipant($this->options['userId']) as $tournament){
+        foreach (($this->options['isTeam']) ? $this->tournamentManager->getTournamentsByTeamParticipant($this->options['id']) : $this->tournamentManager->getTournamentsByUserParticipant($this->options['id']) as $tournament){
             yield [
                 'name' => 
                     $this->renderTwigStringColumn('<a href="{{ row.url }}">{{ row.name }}</a>', [
@@ -50,8 +52,8 @@ class TournamentUserTable extends BaseTable
                         'name' => $tournament->getName()
                     ]),
                 'approved' => $tournament->getApproved() ? '<i class="bi bi-check-lg" title="Approved"/>' : '<i class="bi bi-x-lg" title="Not approved"/>',
-                'winner' => $tournament->isUserWinner() === null ? '<i class="bi bi-dash-lg" title="Tournament not finished"/>' :
-                    ($tournament->isUserWinner() ? '<i class="bi bi-check-lg" title="Winner"/>' : '<i class="bi bi-x-lg" title="Not winner"/>')
+                'winner' => $tournament->isWinner() === null ? '<i class="bi bi-dash-lg" title="Tournament not finished"/>' :
+                    ($tournament->isWinner() ? '<i class="bi bi-check-lg" title="Winner"/>' : '<i class="bi bi-x-lg" title="Not winner"/>')
             ];;
         }
     }
