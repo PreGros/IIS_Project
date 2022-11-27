@@ -8,6 +8,8 @@ class UserStatisticsModel
 
     private int $wonTournaments;
 
+    private int $attendedTournamentCount;
+
     public function getTournamentCount(): int
     {
         return $this->tournamentCount;
@@ -26,5 +28,15 @@ class UserStatisticsModel
     public function setWonTournaments(?int $wonTournaments)
     {
         $this->wonTournaments = $wonTournaments ?? 0;
+    }
+
+    public function getAttendedTournamentCount(): int
+    {
+        return $this->attendedTournamentCount;
+    }
+
+    public function setAttendedTournamentCount(?int $attendedTournamentCount)
+    {
+        $this->attendedTournamentCount = $attendedTournamentCount ?? 0;
     }
 }

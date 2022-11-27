@@ -174,8 +174,7 @@ class TeamRepository extends ServiceEntityRepository
             ->from(Team::class, 't')
             ->leftJoin(\App\DAL\Entity\Member::class, 'm', Expr\Join::WITH, 'm.team = t')
             ->groupBy('t')
-            ->Having('t.isDeactivated = 0')
-            ->andHaving('t.id = :p_team_id')
+            ->having('t.id = :p_team_id')
             ->setParameter('p_team_id', $idTeam)
             ->getQuery()
             ->getOneOrNullResult();
@@ -187,6 +186,7 @@ class TeamRepository extends ServiceEntityRepository
 
         return $queryBuilder
             ->select('COUNT(t.id) as tournamentCount, SUM(case WHEN t.winner = tp THEN 1 ELSE 0 END) as wonTournaments')
+            ->addSelect('SUM(case WHEN tp.approved = 1 THEN 1 ELSE 0 END) attendedTournamentCount')
             ->from(Tournament::class, 't')
             ->innerJoin(TournamentParticipant::class, 'tp', Expr\Join::WITH, 'tp.tournament = t AND tp.signedUpTeam = :id')
             ->setParameter('id', $id)
