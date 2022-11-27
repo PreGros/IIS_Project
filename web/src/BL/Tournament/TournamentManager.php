@@ -249,7 +249,7 @@ class TournamentManager
 
         /** +1 because of a leader */
         $teamMembers = $entity['memberCount'] + 1;
-        dump($teamMembers);
+        
         if (($teamMembers > $tournamentMaxCount) || ($teamMembers < $tournamentMinCount)){
             return false;
         }

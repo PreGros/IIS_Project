@@ -5,6 +5,7 @@ namespace App\DataFixtures;
 use App\BL\Tournament\TournamentTypeModel;
 use App\BL\User\UserModel;
 use App\BL\Util\AutoMapper;
+use App\DAL\Entity\TournamentType;
 use App\DAL\Entity\User;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
