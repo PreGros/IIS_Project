@@ -2,6 +2,7 @@
 
 namespace App\DAL\Repository;
 
+use App\DAL\Entity\Team;
 use App\DAL\Entity\Tournament;
 use App\DAL\Entity\TournamentParticipant;
 use App\DAL\Entity\User;
@@ -96,9 +97,27 @@ class UserRepository extends ServiceEntityRepository
 
         return $queryBuilder
             ->select('COUNT(t.id) as tournamentCount, SUM(case WHEN t.winner = tp THEN 1 ELSE 0 END) as wonTournaments')
+            ->addSelect('SUM(case WHEN tp.approved = 1 THEN 1 ELSE 0 END) attendedTournamentCount')
             ->from(Tournament::class, 't')
-            ->innerJoin(TournamentParticipant::class, 'tp', Join::WITH, 'tp.tournament = t AND tp.signedUpUser = :id')
-            ->setParameter('id', $id)
+            ->innerJoin(TournamentParticipant::class, 'tp', Join::WITH, 'tp.tournament = t')
+            ->leftJoin(Team::class, 'tm', Join::WITH, $queryBuilder->expr()->andX(
+                    'tp.signedUpTeam = tm',
+                    $queryBuilder->expr()->orX(
+                        'IDENTITY(tm.leader) = :p_userId',
+                        'EXISTS (' .
+                            $this->getEntityManager()->createQueryBuilder()
+                                ->select('m')
+                                ->from(\App\DAL\Entity\Member::class, 'm')
+                                ->where('IDENTITY(m.team) = tm.id')
+                                ->andWhere('IDENTITY(m.user) = :p_userId')
+                                ->getDQL()
+                        . ')'
+                    )
+                )
+            )
+            ->where('tm IS NOT NULL')
+            ->orWhere('IDENTITY(tp.signedUpUser) = :p_userId')
+            ->setParameter('p_userId', $id)
             ->getQuery()
             ->getSingleResult();
 
