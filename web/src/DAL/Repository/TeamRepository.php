@@ -165,7 +165,7 @@ class TeamRepository extends ServiceEntityRepository
         return new Paginator($query, false);
     }
 
-    public function findTeamWithCount(int $idTeam)
+    public function findTeamWithCount(int $idTeam): ?array
     {
         $queryBuilder = $this->getEntityManager()->createQueryBuilder();
 

@@ -16,6 +16,7 @@ use App\BL\Team\TeamModel;
 use App\BL\Team\TeamTableModel;
 use App\DAL\Entity\Member;
 use App\DAL\Entity\Team;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class TeamManager
 {
@@ -93,6 +94,9 @@ class TeamManager
         /** @var \App\DAL\Repository\TeamRepository */
         $repo = $this->entityManager->getRepository(Team::class);
         $entity = $repo->findTeamWithCount($id);
+        if ($entity === null || empty($entity)){
+            throw new NotFoundHttpException('Resource not found');
+        }
         /** @var TeamModel */
         $teamModel = AutoMapper::map($entity['team'], TeamModel::class);
         /** memberCount == members + leader (1) */
@@ -240,6 +244,9 @@ class TeamManager
         $repo = $this->entityManager->getRepository(Team::class);
 
         $team = $repo->find($teamId);
+        if ($team === null){
+            throw new NotFoundHttpException('Resource not found');
+        }
         /** @var \App\BL\User\UserModel */
         $leader = AutoMapper::map($team->getLeader(), \App\BL\User\UserModel::class, trackEntity: false);
 
