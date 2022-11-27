@@ -207,8 +207,7 @@ class UserManager
         $repo = $this->entityManager->getRepository(\App\DAL\Entity\User::class);
         /** cannot get member by reference, so find by ids is performed */
         $user = $repo->findOneBy(['nickname' => $userNickname]);
-        dump($user->getId());
-        dump($id);
+        
         if ($user !== NULL){
             if (($id === NULL) || ($user->getId() !== $id)){
                 $errMessage = "User with given nickname already exists";
