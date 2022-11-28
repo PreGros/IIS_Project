@@ -63,7 +63,6 @@ class MatchEditFormType extends AbstractType
                 },
                 'widget' => 'integer',
                 'attr' => ['class' => 'date-interval row'],
-                'data' => new \DateInterval('PT30M'),
                 'with_minutes'  => true,
                 'with_seconds'  => true,
                 'with_hours' => true,

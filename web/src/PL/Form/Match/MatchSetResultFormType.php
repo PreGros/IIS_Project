@@ -39,13 +39,12 @@ class MatchSetResultFormType extends AbstractType
             $builder
                 ->add('duration_first', DateIntervalType::class, [
                     'label' => 'Points for ' . $match->getParticipant1()?->getParticipantName() ?? 'Participant was not entered',
-                    'getter' => fn (MatchModel $match, FormInterface $form): ?\DateInterval => $match->getParticipant1()?->getCompletionTime(),
+                    'getter' => fn (MatchModel $match, FormInterface $form): \DateInterval => $match->getParticipant1()?->getCompletionTime() ?? new \DateInterval('PT0S'),
                     'setter' => function (MatchModel $match, \DateInterval $duration_first, FormInterface $form): void {
                         $match->getParticipant1()?->setCompletionTime($duration_first);
                     },
                     'widget' => 'integer',
                     'attr' => ['class' => 'date-interval row'],
-                    'data' => new \DateInterval('PT0S'),
                     'with_minutes'  => true,
                     'with_seconds'  => true,
                     'with_hours' => true,
@@ -56,13 +55,12 @@ class MatchSetResultFormType extends AbstractType
                 ])
                 ->add('duration_second', DateIntervalType::class, [
                     'label' => 'Points for ' . $match->getParticipant2()?->getParticipantName() ?? 'Participant was not entered',
-                    'getter' => fn (MatchModel $match, FormInterface $form): ?\DateInterval => $match->getParticipant2()?->getCompletionTime(),
+                    'getter' => fn (MatchModel $match, FormInterface $form): \DateInterval => $match->getParticipant2()?->getCompletionTime() ?? new \DateInterval('PT0S'),
                     'setter' => function (MatchModel $match, \DateInterval $duration_second, FormInterface $form): void {
                         $match->getParticipant2()?->setCompletionTime($duration_second);
                     },
                     'widget' => 'integer',
                     'attr' => ['class' => 'date-interval row'],
-                    'data' => new \DateInterval('PT0S'),
                     'with_minutes'  => true,
                     'with_seconds'  => true,
                     'with_hours' => true,

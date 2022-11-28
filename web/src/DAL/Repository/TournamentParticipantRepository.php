@@ -136,7 +136,7 @@ class TournamentParticipantRepository extends ServiceEntityRepository
             ->leftJoin(User::class, 'u', Join::WITH, 'tp.signedUpUser = u')
             ->leftJoin(Team::class, 't', Join::WITH, 'tp.signedUpTeam = t')
             ->where($queryBuilder->expr()->orX(
-                'p_oneMultipleTimes = 1',
+                ':p_oneMultipleTimes = 1',
                 'NOT EXISTS(' . 
                     $this->createQueryBuilder('p')
                         ->innerJoin(MatchParticipant::class, 'mp', Join::WITH, 'mp.tournamentParticipant = p')
