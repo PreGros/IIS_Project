@@ -155,8 +155,10 @@
 <h4>Specifikace instalace na server Eva</h4>
 <p>
 	<span style="color: red">Na serveru Eva nefunguje validace přípon obrázků, jelikož není nainstalovaná/povolená knihovna <code>
-	<a href="https://www.php.net/manual/en/book.fileinfo.php">php_fileinfo</a></code>. Kvůli právům je též možné, že se nezobrazí nově přidané obrázky
-	k týmům (program se pokusí nastavit novému obrázku práva (<code>chmod 666 image</code>)).</span>
+	<a href="https://www.php.net/manual/en/book.fileinfo.php">php_fileinfo</a></code>. Kvůli přístupovým právům na serveru Eva, je před ukládáním
+	obrázků nastavena <code>umask</code> na 0023 a poté zpět na starou, aby bylo možné nastavit k obrázku přísupová práva <a href="https://www.php.net/manual/en/function.umask.php">viz</a>.</span>
+</p>
+<p>
 	Narozdíl od odevzdaných souborů je připojovací řetežec v databázi v souboru <code>config/packages/doctrine.yaml</code> kvůli specifikaci portu.
 	Dále je upraveno umístění pro generování javascriptových souborů (v souboru <code>webpack.config.js</code>). Jelikož jsou tyto soubory automaticky
 	generované musí se jim přiřadit přístupová práva. K jednotlivým stránkám se musí přistupovat přes soubor index.php jelikož server Eva neumožňuje
