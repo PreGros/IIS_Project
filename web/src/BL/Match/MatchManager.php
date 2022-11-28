@@ -357,12 +357,12 @@ class MatchManager
     /**
      * @return \Traversable<TournamentParticipantModel>
      */
-    public function getTournamentParticipants(int $tournamentId, int $includeParticipantId = 0)
+    public function getTournamentParticipants(int $tournamentId, int $includeParticipantId = 0, bool $oneMultipleTimes = false)
     {   
         /** @var \App\DAL\Repository\TournamentParticipantRepository */
         $repo = $this->entityManager->getRepository(\App\DAL\Entity\TournamentParticipant::class);
 
-        $entities = $repo->findNonAssignParticipants($tournamentId, $includeParticipantId);
+        $entities = $repo->findNonAssignParticipants($tournamentId, $includeParticipantId, $oneMultipleTimes);
 
         for ($i = 0; $i < count($entities); $i++){
             /** @var TournamentParticipantModel $model */
@@ -379,10 +379,10 @@ class MatchManager
     /**
      * @return array<TournamentParticipantModel>
      */
-    public function getFormatedTournamentParticipants(int $tournamentId, ?int $includeParticipantId = null): array
+    public function getFormatedTournamentParticipants(int $tournamentId, ?int $includeParticipantId = null, bool $oneMultipleTimes = false): array
     {
         $participants = [];
-        foreach ($this->getTournamentParticipants($tournamentId, $includeParticipantId ?? 0) as $participant){
+        foreach ($this->getTournamentParticipants($tournamentId, $includeParticipantId ?? 0, $oneMultipleTimes) as $participant){
             if (($name = $participant->getParticipantName()) !== ''){
                 $participants[$name] = $participant->getId();
             }

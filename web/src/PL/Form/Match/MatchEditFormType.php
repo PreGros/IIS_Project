@@ -33,7 +33,7 @@ class MatchEditFormType extends AbstractType
         $firstDisabled = $disableEnable && $match->getParticipant1() === null;
         $builder
             ->add('first_participant', ChoiceType::class, [
-                'choices' => $this->matchManager->getFormatedTournamentParticipants($options['tournament_id'], $match->getParticipant1()?->getTournamentPartId()),
+                'choices' => $this->matchManager->getFormatedTournamentParticipants($options['tournament_id'], $match->getParticipant1()?->getTournamentPartId(), $options['one_multiple']),
                 'data' => $match->getParticipant1()?->getTournamentPartId(),
                 'mapped' => false,
                 'required' => false,
@@ -41,7 +41,7 @@ class MatchEditFormType extends AbstractType
                 'placeholder' => $disableEnable && ($bothDisabled || $firstDisabled) ? 'From previous match' : 'Participant not chosen'
             ])
             ->add('second_participant', ChoiceType::class, [
-                'choices' => $this->matchManager->getFormatedTournamentParticipants($options['tournament_id'], $match->getParticipant2()?->getTournamentPartId()),
+                'choices' => $this->matchManager->getFormatedTournamentParticipants($options['tournament_id'], $match->getParticipant2()?->getTournamentPartId(), $options['one_multiple']),
                 'data' => $match->getParticipant2()?->getTournamentPartId(),
                 'mapped' => false,
                 'required' => false,
@@ -82,7 +82,8 @@ class MatchEditFormType extends AbstractType
         $resolver->setDefaults([
             'data_class' => MatchModel::class,
             'match' => null,
-            'tournament_id' => 0
+            'tournament_id' => 0,
+            'one_multiple' => false
         ]);
     }
 }

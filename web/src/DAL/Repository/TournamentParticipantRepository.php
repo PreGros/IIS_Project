@@ -126,23 +126,29 @@ class TournamentParticipantRepository extends ServiceEntityRepository
     /**
      * @return array<TournamentParticipant|User|Team>
      */
-    public function findNonAssignParticipants(int $tournamentId, int $includeParticipantId = 0): array
+    public function findNonAssignParticipants(int $tournamentId, int $includeParticipantId = 0, bool $oneMultipleTimes = false): array
     {
-        return $this->getEntityManager()->createQueryBuilder()
+        $queryBuilder = $this->getEntityManager()->createQueryBuilder();
+
+        return $queryBuilder
             ->select('tp, u, t')
             ->from(TournamentParticipant::class, 'tp')
             ->leftJoin(User::class, 'u', Join::WITH, 'tp.signedUpUser = u')
             ->leftJoin(Team::class, 't', Join::WITH, 'tp.signedUpTeam = t')
-            ->where('NOT EXISTS(' . 
-                $this->createQueryBuilder('p')
-                    ->innerJoin(MatchParticipant::class, 'mp', Join::WITH, 'mp.tournamentParticipant = p')
-                    ->where('p.id = tp.id')
-                    ->andWhere('p.id != :p_includeParticipantId')
-                    ->getDQL()
-            . ')')
+            ->where($queryBuilder->expr()->orX(
+                'p_oneMultipleTimes = 1',
+                'NOT EXISTS(' . 
+                    $this->createQueryBuilder('p')
+                        ->innerJoin(MatchParticipant::class, 'mp', Join::WITH, 'mp.tournamentParticipant = p')
+                        ->where('p.id = tp.id')
+                        ->andWhere('p.id != :p_includeParticipantId')
+                        ->getDQL()
+                . ')')
+            )
             ->andWhere('IDENTITY(tp.tournament) = :p_tournamentId')
             ->setParameter('p_includeParticipantId', $includeParticipantId)
             ->setParameter('p_tournamentId', $tournamentId)
+            ->setParameter('p_oneMultipleTimes', (int)$oneMultipleTimes)
             ->getQuery()
             ->getResult();
     }

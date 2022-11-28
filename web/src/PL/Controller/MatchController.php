@@ -9,6 +9,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 use App\BL\Match\MatchManager;
 use App\BL\Team\TeamManager;
+use App\BL\Tournament\MatchingType;
 use App\BL\Tournament\ParticipantType;
 use App\BL\Tournament\TournamentManager;
 use App\BL\Tournament\WinCondition;
@@ -117,7 +118,10 @@ class MatchController extends AbstractController
         }
 
         $match = $matchManager->getMatch($matchId);
-        $form = $this->createForm(MatchEditFormType::class, $match, ['match' => $match, 'tournament_id' => $tournament->getId()]);
+        $form = $this->createForm(MatchEditFormType::class, $match, [
+            'match' => $match,
+            'tournament_id' => $tournament->getId(),
+            'one_multiple' => $tournament->getMatchingType(false) === MatchingType::AllVsAll]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()){
