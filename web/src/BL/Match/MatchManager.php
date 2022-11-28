@@ -18,6 +18,7 @@ use App\BL\Util\DateTimeUtil;
 use App\DAL\Entity\MatchParticipant;
 use App\DAL\Entity\TournamentMatch;
 use App\DAL\Entity\TournamentParticipant;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class MatchManager
 {
@@ -140,6 +141,9 @@ class MatchManager
         /** @var \App\DAL\Repository\TournamentMatchRepository */
         $matchesRepo = $this->entityManager->getRepository(\App\DAL\Entity\TournamentMatch::class);
         $entities = $matchesRepo->findWithParticipants($id);
+        if ($entities === null || empty($entities)){
+            throw new NotFoundHttpException('Resource not found');
+        }
         /** @var MatchModel $match */
         $match = AutoMapper::map($entities[0], MatchModel::class);
         $match->setChild($entities[0]->getChildMatch() !== null ? AutoMapper::map($entities[0]->getChildMatch(), MatchModel::class, trackEntity: false) : null);

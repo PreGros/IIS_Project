@@ -8,7 +8,7 @@ class AutoMapper{
     private static array $entities = [];
     
     /**
-     * @param object|array $srcObject object or array to be mapped to destination object
+     * @param null|object|array $srcObject object or array to be mapped to destination object
      * @param string|object $dst
      * when string, class of dst object
      *  - try to retrieve object, that was used for $srcObject mapping
@@ -16,10 +16,18 @@ class AutoMapper{
      * when object, this object will be modified
      * @param ?array $mapIgnore if set, those properties will be ignored
      * @param bool $trackEntity if true, srcObject will be saved for remapping
-     * @return object mapped object
+     * @param bool $throwOnNull if true, throws NotFoundHttpException when $srcObject is null, if not returns null
+     * @return ?object mapped object
      */
-    public static function map(object|array $srcObject, string|object $dst, ?array $mapIgnore = null, bool $trackEntity = true): object
+    public static function map(null|object|array $srcObject, string|object $dst, ?array $mapIgnore = null, bool $trackEntity = true, bool $throwOnNull = true): ?object
     {
+        if ($srcObject === null){
+            if ($throwOnNull){
+                throw new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException('Resource not found');
+            }
+            return null;
+        }
+
         if (is_string($dst)){
             if (!class_exists($dst)){
                 throw new \InvalidArgumentException("Invalid class name");

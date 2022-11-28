@@ -19,6 +19,7 @@ use App\DAL\Entity\TournamentType;
 use App\DAL\Entity\User;
 use DateTime;
 use Symfony\Component\Form\Test\FormInterface;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class TournamentManager
 {
@@ -96,8 +97,8 @@ class TournamentManager
         /** @var \App\BL\User\UserModel */
         $user = $this->security->getUser();
         $tournament = $repo->findInfo($id, $user?->getId());
-        if ($tournament === null){
-            return null;
+        if ($tournament === null || empty($tournament)){
+            throw new NotFoundHttpException('Resource not found');
         }
 
         /** @var \App\DAL\Entity\Tournament */

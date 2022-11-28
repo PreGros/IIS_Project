@@ -86,7 +86,7 @@ class TournamentMatchRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function findWithParticipants(int $matchId): array
+    public function findWithParticipants(int $matchId): ?array
     {
         return $this->getEntityManager()->createQueryBuilder()
             ->select('m, p, tp, u, tm, pm')

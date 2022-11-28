@@ -73,7 +73,7 @@ class TeamController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()){
             if ($teamManager->checkOnCreateValidity($team, $errMessage)){
                 $teamManager->updateTeam($team);
-
+                $this->addFlash('success', "Profile has beed changed");
                 return $this->redirectToRoute('teams');
             }
             $this->addFlash('danger', $errMessage);
