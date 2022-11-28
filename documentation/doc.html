@@ -30,7 +30,7 @@
 </dd>
 <dd>Tomáš Zaviačič <!-- Nahraďte skutečným jménem a e-mailem autora a popisem činnosti -->
 	<a href="mailto:xzavia00@stud.fit.vutbr.cz">xzavia00@stud.fit.vutbr.cz</a> - 
-	kontrola validity formulářů, kontrola unikátnosti dat, statistiky, deaktivace týmů a účtů
+	kontrola validity formulářů, kontrola unikátnosti dat, statistiky, deaktivace týmů a účtů, komentované video
 </dd>
 <dt>URL aplikace</dt>
 <dd><a href="https://www.stud.fit.vutbr.cz/~xmudra03/IIS/public/index.php">https://www.stud.fit.vutbr.cz/~xmudra03/IIS/public/index.php</a></dd>
@@ -39,8 +39,8 @@
 <h2>Uživatelé systému pro testování</h2>
 <p>Uveďte prosím existující zástupce <strong>všech rolí uživatelů</strong>.</p>
 <table>
-<tr><th>Login</th><th>Heslo</th><th>Role</th><th>Upřesnění</th></tr>
-<tr><td>admin</td><td>admin</td><td>Administrátor</td><td></td></tr>
+<tr><th>Email</th><th>Heslo</th><th>Role</th><th>Upřesnění</th></tr>
+<tr><td>admin@admin.com</td><td>admin</td><td>Administrátor</td><td></td></tr>
 <tr><td></td><td></td><td>Registovaný uživatel</td><td></td></tr>
 <tr><td>-</td><td>-</td><td>Neregistrovaný uživatel</td><td></td></tr>
 </table>
@@ -49,42 +49,54 @@
 
 <h3>Video</h3>
 
+<a href="https://drive.google.com/file/d/1hCrM4-xojfBnlBW85mVXQ4S_dlY3Y-pO/view?usp=share_link">https://drive.google.com/file/d/1hCrM4-xojfBnlBW85mVXQ4S_dlY3Y-pO/view?usp=share_link</a>
+<p>Video je přístupné všem uživatelům VUT Brno.</p>
+
 <p>Přiložte odkaz na komentované video demostrující použití informačního systému. Zaměřte se na případy užití definované zadáním (např. registrace uživatele, správa uživatelů a činnosti jednotlivých rolí). Video nahrajte například na VUT Google Drive, kde ho bude možné přímo spustit z odkazu.</p> 
+
+
+<h2>Rozšíření</h2>
+<p>Zde popište, rozšíření.</p>
+
 
 <h2>Implementace</h2>
 
 <ul>
 	<li><b>Administrátor:</b>
 		<ul>
-			<li>Spravuje uživatele - UserController a funkce v souboru UserManager + UserRespository</li>
-			<li>Schvaluje turnaje - TournamentController a funkce v souboru TournamentManager + TournamentRespository</li>
+			<li>Spravuje uživatele</li> - UserController a funkce v souboru UserManager + UserRespository
+			<li>Schvaluje turnaje</li> - TournamentController a funkce v souboru TournamentManager + TournamentRespository
+			<li>Vytváří a edituje typy turnajů</li> -
+			<li>Spravuje role uživatelů</li> -
+			<li>Edituje a deaktivuje uživatele</li> -
+			<li>Edituje a deaktivuje týmy</li> -
+			<li>Edituje a odstraňuje turnamenty</li> -
 		</ul>
 	</li>
+	<br/>
 	<li><b>Registrovaný uživatel:</b>
 		<ul>
-			<li>Edituje svůj profil - UserController a funkce v souboru UserManager + UserRespository</li>
-			<li>Zakládá týmy - stává se <b>správcem týmu</b> - TeamController a funkce v souboru TeamManager + TeamRespository
+			<li>Edituje svůj profil</li> - UserController a funkce v souboru UserManager + UserRespository
+			<li>Zakládá týmy - stává se <b>správcem týmu</b> (může editovat a deaktivovat tým)</li> - TeamController a funkce v souboru TeamManager + TeamRespository
 				<ul>
-					<li>přidává uživatele do týmu, kteří stávají se <b>členy týmu</b> - TeamController a funkce v souboru TeamManager + TeamRespository</li>
-					<li>registruje svůj tým na turnaj - TournamentController a funkce v souboru TournamentManager + TournamentRespository</li>
+					<li>přidává uživatele do týmu, kteří stávají se <b>členy týmu</b></li> - TeamController a funkce v souboru TeamManager + TeamRespository
+					<li>registruje svůj tým na turnaj</li> - TournamentController a funkce v souboru TournamentManager + TournamentRespository
 				</ul>
-			</li>
-			<li>zakládá turnaj - stává se <b>správcem turnaje</b> - TournamentController a funkce v souboru TournamentManager + TournamentRespository
+			<li>zakládá turnaj - stává se <b>správcem turnaje</b> (může editovat a mazat turnaj)</li> - TournamentController a funkce v souboru TournamentManager + TournamentRespository
 				<ul>
 					<li>zadává parametry turnaje</li> - TournamentController a funkce v souboru TournamentManager + TournamentRespository
 					<li>schvaluje hráče turnaje (jednotlivce/týmy dle typu turnaje)</li> - TournamentController a funkce v souboru TournamentManager + TournamentRespository
 					<li>spouští turnaj, generuje harmonogram turnaje (ručně nebo automaticky - rozlosování)</li> - TournamentController a funkce v souboru MatchManager + MatchGenerator + TournamentMatchRespository
-					<li>zadává výsledky zápasů (výsledek zápasu uvažujte jako dvojici (počet bodů týmu/hráče 1, počet bodů týmu/hráče 2))</li> - MatchController a funkce v souboru MatchManager + TournamentMatchRespository
+					<li>zadává výsledky zápasů (výsledek zápasu se uvažuje jako dvojice (počet bodů týmu/hráče 1, počet bodů týmu/hráče 2))</li> - MatchController a funkce v souboru MatchManager + TournamentMatchRespository
 				</ul>
-			</li>
-			<li>účastní se turnaje (registruje se jako jednotlivec nebo je členem registrovaného týmu) - stává se <b>hráčem turnaje</b> - TournamentController a funkce v souboru TournamentManager + TournamentRespository
+			<li>účastní se turnaje (registruje se jako jednotlivec nebo je členem registrovaného týmu) - stává se <b>hráčem turnaje</b></li> - TournamentController a funkce v souboru TournamentManager + TournamentRespository
 				<ul>
 					<li>vidí svůj program (harmonogram zápasů)</li>  - MatchController a funkce v souboru MatchManager + TournamentMatchRespository
 					<li>přednostně vidí výsledky svých zápasů</li>  - MatchController a funkce v souboru MatchManager + TournamentMatchRespository
 				</ul>
-			</li>
 		</ul>
 	</li>
+	<br/>
 	<li><b>Neregistrovaný uživatel:</b>
 		<ul>
 			<li>prochází profily a statistiky hráčů, týmů a turnajů s výsledky</li>  - UserController, TeamController, TournamentController, MatchController + jejich soubory Manager a Repository
@@ -98,7 +110,7 @@
 
 Zde vložte grafické schéma relační databáze (tabulek v databázi).
 <br>
-<img src="erd.png" alt="ERD" height="600">
+<img src="erd.svg" alt="ERD" height="600">
 
 <h2>Instalace</h2>
 
@@ -127,8 +139,6 @@ Stručně popište:
 	</ul>
 </ul>
 
-<h2>Známé problémy</h2>
-<p>Zde popište, které body zadání nejsou implementovány a z jakého důvodu. Např. &bdquo;Z časových důvodů nebyla implementována správa uživatelů.&rdquo; Pomůžete tím zrychlit hodnocení, když neimplementované funkce nebudeme muset dlouze hledat.</p>
 
 </body>
 </html>

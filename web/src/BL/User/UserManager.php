@@ -12,6 +12,7 @@ use App\BL\Security\EmailVerifier;
 use App\BL\Security\UserProvider;
 use App\BL\Util\DataTableState;
 use App\DAL\Entity\User;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class UserManager
 {
@@ -113,6 +114,9 @@ class UserManager
         $repo = $this->entityManager->getRepository(User::class);
         
         $user = $repo->find($id);
+        if ($user === null){
+            throw new NotFoundHttpException('Resource not found');
+        }
 
         /** @var \App\BL\User\UserModel */
         return AutoMapper::map($user, \App\BL\User\UserModel::class, trackEntity: true);
