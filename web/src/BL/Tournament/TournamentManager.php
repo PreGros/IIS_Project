@@ -112,6 +112,7 @@ class TournamentManager
         $tournamentModel->setApproved($tournamentEntity->getApprovedBy() !== null);
         $tournamentModel->setCurrentUserRegistrationState($tournament['approved']);
         $tournamentModel->setTournamentTypeId($tournamentEntity->getTournamentType()->getId());
+        $tournamentModel->setTournamentTypeName($tournamentEntity->getTournamentType()->getName());
         $tournamentModel->setWinnerId($winnerParticipant?->getSignedUpUser()?->getId() ?? $winnerParticipant?->getSignedUpTeam()?->getId());
         $tournamentModel->setWinnerName($winnerParticipant?->getSignedUpUser()?->getNickname() ?? $winnerParticipant?->getSignedUpTeam()?->getName());
         return $tournamentModel;

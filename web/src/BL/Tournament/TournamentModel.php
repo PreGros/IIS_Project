@@ -44,6 +44,8 @@ class TournamentModel
 
     private int $tournamentTypeId;
 
+    private string $tournamentTypeName;
+
     private ?int $winnerId = null;
 
     private ?string $winnerName = null;
@@ -254,6 +256,16 @@ class TournamentModel
     public function getTournamentTypeId(): ?int
     {
         return $this->tournamentTypeId;
+    }
+
+    public function getTournamentTypeName(): string
+    {
+        return $this->tournamentTypeName;
+    }
+
+    public function setTournamentTypeName(string $val)
+    {
+        $this->tournamentTypeName = $val;
     }
 
     public function registrationEnded(): bool
