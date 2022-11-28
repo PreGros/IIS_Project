@@ -41,15 +41,23 @@
 <table>
 <tr><th>Login</th><th>Email</th><th>Heslo</th><th>Role</th><th>Upřesnění</th></tr>
 <tr><td>admin</td><td>admin@admin.com</td><td>admin</td><td>Administrátor</td><td></td></tr>
-<tr><td>Morael</td><td>dusan78@atlas.cz</td><td>DuskoJede</td><td>Registovaný uživatel</td><td></td></tr>
-<tr><td>Miyoshi</td><td>hanus_souckova@atlas.cz</td><td>Hana96</td><td>Registovaný uživatel</td><td></td></tr>
-<tr><td>Fred</td><td>ales_rysavy97@centrum.cz</td><td>9Zrzek7</td><td>Registovaný uživatel</td><td></td></tr>
-<tr><td>Merlin</td><td>lukas31@gmail.com</td><td>BringWISBack</td><td>Registovaný uživatel</td><td></td></tr>
-<tr><td>Snowflake</td><td>nora20@atlas.cz</td><td>evaisbad</td><td>Registovaný uživatel</td><td></td></tr>
+<tr><td>Morael</td><td>dusan78@atlas.cz</td><td>DuskoJede</td><td>Registovaný uživatel</td><td>vlastník schváleného (typ všichni proti všem) a neschváleného (typ pavouk) turnaje, vedoucí týmu</td></tr>
+<tr><td>Miyoshi</td><td>hanus_souckova@atlas.cz</td><td>Hana96</td><td>Registovaný uživatel</td><td>vítěz turnaje, člen týmu</td></tr>
+<tr><td>Fred</td><td>ales_rysavy97@centrum.cz</td><td>9Zrzek7</td><td>Registovaný uživatel</td><td>vlastník schváleného turnaje (typu pavouk)</td></tr>
+<tr><td>Merlin</td><td>lukas31@gmail.com</td><td>BringWISBack</td><td>Registovaný uživatel</td><td>člen týmu</td></tr>
+<tr><td>Snowflake</td><td>nora20@atlas.cz</td><td>evaisbad</td><td>Registovaný uživatel</td><td>vlastník schváleného turnaje, kde probíhají registrace, vedoucí týmu</td></tr>
 <tr><td>-</td><td>-</td><td>-</td><td>Neregistrovaný uživatel</td><td></td></tr>
 </table>
 
-<p>V prohlížeči chrome se objeví po přihlášení na účet admin@admin.com varování o prozrazeném hesle.</p>
+<p>
+	V prohlížeči chrome se objeví po přihlášení na účet admin@admin.com varování o prozrazeném hesle. Toto varování však nemá s naší aplikací nic společného,
+	ukazuje se právě kvůli heslu <i>admin</i>.
+</p>
+
+<p>
+	Existuje i deaktivovaný tým, který je přístupný na adrese
+	<a href="https://www.stud.fit.vutbr.cz/~xmudra03/IIS/public/index.php/teams/5/info">https://www.stud.fit.vutbr.cz/~xmudra03/IIS/public/index.php/teams/5/info</a>.
+</p>
 
 <!-- <p>(Diagram případů užití není nutné vkládat, pokud IS implementuje role a případy užití definované zadáním.)</p>  -->
 
@@ -73,6 +81,8 @@
 
 
 <h2>Implementace</h2>
+
+Aplikace je postavená na frameworku Symfony a pro práci s databází využívá framework Doctrine.
 
 <ul>
 	<li><b>Administrátor:</b>
@@ -122,8 +132,10 @@
 <h3>Databáze</h3>
 
 <!-- Zde vložte grafické schéma relační databáze (tabulek v databázi). -->
-<br>
+<p>ER-diagram, podle kterého se databáze vytvářela:</p>
 <img src="erd.svg" alt="ERD" height="600">
+<p>Vygenerované schéma vytvořené databáze:</p>
+<img src="db_scheme.svg" alt="DB-scheme" width="700">
 
 <h2>Instalace</h2>
 
@@ -162,7 +174,7 @@
 	Narozdíl od odevzdaných souborů je připojovací řetežec v databázi v souboru <code>config/packages/doctrine.yaml</code> kvůli specifikaci portu.
 	Dále je upraveno umístění pro generování javascriptových souborů (v souboru <code>webpack.config.js</code>). Jelikož jsou tyto soubory automaticky
 	generované musí se jim přiřadit přístupová práva. K jednotlivým stránkám se musí přistupovat přes soubor index.php jelikož server Eva neumožňuje
-	upravit soubor <code>htaccess</code>.
+	upravit soubor <code>.htaccess</code>.
 </p>
 
 
